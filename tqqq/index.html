@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>트레이딩 랩 TQQQ v1.8</title>
+<title>트레이딩 랩 TQQQ v1.9</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -107,7 +107,7 @@ input.wr{flex:1;min-width:0;height:16px;accent-color:#5AA9FF;margin:0;cursor:poi
 .mbox{background:var(--bg2,#101a2e);border:1px solid #2a3a55;border-radius:10px;padding:10px 13px;max-width:calc(100vw - 16px);box-shadow:0 10px 40px rgba(0,0,0,.5)}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v1.8</span></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v1.9</span></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1176,7 +1176,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v1.8';
+const APP_VER = 'v1.9';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -1363,8 +1363,8 @@ function computePortfolio(slots, cap, baseFy, endYmd, capture, opts) {
   else D = plain(opts.rebal || 'none');
   const days = [], years = {}; const so = opts.stop && opts.stop.on ? Math.abs(+opts.stop.pct || 20) : 0;
   fyList.forEach(f => { const o = D[f]; if (!o || !o.days.length) return; let ds = o.days, stopAt = null; if (so) { const r = applyStop(ds, so); ds = r.days; stopAt = r.stopAt; }
-    let peak = 1, mdd = 0, minC = 1, hi = 1, lo = 1, hiY = ds[0].ymd, loY = ds[0].ymd; ds.forEach(p => { if (p.actual > hi) { hi = p.actual; hiY = p.ymd; } if (p.actual < lo) { lo = p.actual; loY = p.ymd; } if (p.actual > peak) peak = p.actual; const dd = (p.actual / peak - 1) * 100; if (dd < mdd) mdd = dd; const c = p.cashPct / 100; if (c < minC) minC = c; days.push({ ymd: p.ymd, y: f, v: p.actual, cash: c, dd }); });
-    years[f] = { ret: (ds[ds.length - 1].actual - 1) * 100, mdd, minCash: minC, maxRet: (hi - 1) * 100, minRet: (lo - 1) * 100, hiY, loY, n: ds.length, first: ds[0].ymd, last: ds[ds.length - 1].ymd, resets: (o.sells || []).filter(z => !stopAt || z <= stopAt), maSells: o.maSells || [], maRes: o.maRes || [], stopDay: stopAt }; });
+    let peak = 1, mdd = 0, ad = 0, adY = ds[0].ymd, minC = 1, hi = 1, lo = 1, hiY = ds[0].ymd, loY = ds[0].ymd; ds.forEach(p => { if (p.actual > hi) { hi = p.actual; hiY = p.ymd; } if (p.actual < lo) { lo = p.actual; loY = p.ymd; } if (p.actual > peak) peak = p.actual; if (peak - p.actual > ad) { ad = peak - p.actual; adY = p.ymd; } const dd = (p.actual / peak - 1) * 100; if (dd < mdd) mdd = dd; const c = p.cashPct / 100; if (c < minC) minC = c; days.push({ ymd: p.ymd, y: f, v: p.actual, cash: c, dd }); });
+    years[f] = { ret: (ds[ds.length - 1].actual - 1) * 100, mdd, ad, adY, minCash: minC, maxRet: (hi - 1) * 100, minRet: (lo - 1) * 100, hiY, loY, n: ds.length, first: ds[0].ymd, last: ds[ds.length - 1].ymd, resets: (o.sells || []).filter(z => !stopAt || z <= stopAt), maSells: o.maSells || [], maRes: o.maRes || [], stopDay: stopAt }; });
   let baseYears = null; if (act.length && act.reduce((a, s) => a + +s.w, 0) > 0 && (optsOn(opts) || hasCash)) { baseYears = {}; const sw = act.reduce((a, s) => a + +s.w, 0); const P0 = (() => { const Wk = W; W = act.map(s => s.w / sw); try { return plainNoCash('none'); } finally { W = Wk; } })(); fyList.forEach(f => { const ds = P0[f].days; let pk = 1, m = 0; ds.forEach(p => { if (p.actual > pk) pk = p.actual; m = Math.min(m, (p.actual / pk - 1) * 100); }); baseYears[f] = { ret: (ds[ds.length - 1].actual - 1) * 100, mdd: m }; }); }
   return { res, trRes, D, breaks, days, years, baseYears, cashW, wsum, W, opts, doTR };
 }
@@ -1465,20 +1465,21 @@ function renderBacktest() {
 }
 function btResults() {
   if (!BT.R) computeBT(); const set = curSet(), R = BT.R, Y = BT.Y; if (!Y.full.length && !Y.inRange.length) return '<div class="sec">연도 범위를 확인하세요</div>';
-  const K = kpiAll(R.years, Y); const cy = R.years[Y.cur]; const yEnd = Y.inRange.length ? Y.inRange[Y.inRange.length - 1] : Y.cur;
+  const K = kpiAll(R.years, Y); const cy = R.years[Y.cur]; const AMT = ST.page === 'bt2', cap = +set.cap || 30000; const yEnd = Y.inRange.length ? Y.inRange[Y.inRange.length - 1] : Y.cur;
   const wsTot = effSlots(set.slots.filter(s => !s.off)).reduce((a, s) => a + (+s.w || 0), 0);
-  let h = (wsTot > 100.05 ? `<div class="sec" style="border-color:var(--rd2);background:#2A1620"><b class="neg">비중 합 ${+wsTot.toFixed(1)}% — 100%를 넘어서 결과가 부풀려져 있어요 (${+wsTot.toFixed(1)}% 투자한 것처럼 계산). 비중을 100%로 맞춰주세요.</b></div>` : '') + `<div class="sec"><div class="kpis">
+  let h = (wsTot > 100.05 ? `<div class="sec" style="border-color:var(--rd2);background:#2A1620"><b class="neg">비중 합 ${+wsTot.toFixed(1)}% — 100%를 넘어서 결과가 부풀려져 있어요 (${+wsTot.toFixed(1)}% 투자한 것처럼 계산). 비중을 100%로 맞춰주세요.</b></div>` : '') + `<div class="sec"><div class="kpis${AMT ? ' k8' : ''}">
     <div class="kpi"><div class="k">CAGR ${Y.full[0] % 100}–${Y.full[Y.full.length - 1] % 100}</div><div class="v ${cls(K && K.cagr)}">${K ? pct(K.cagr) : '—'}</div>${R.baseYears && K ? `<div class="s">기본 ${pct(kpiOf(R.baseYears, Y.full).cagr)} · MDD ${pct(kpiAll(R.baseYears, Y).mdd)}</div>` : ''}</div>
     <div class="kpi"><div class="k">최악 MDD ${Y.inRange.length ? Y.inRange[0] % 100 + '–' + yEnd % 100 : ''}</div><div class="v neg">${K ? pct(K.mdd) : '—'}</div>${K && K.mddY ? `<div class="s">${K.mddY} 진행 중 연도</div>` : ''}</div>
     <div class="kpi"><div class="k">Calmar</div><div class="v">${K ? K.calmar.toFixed(2) : '—'}</div></div>
     <div class="kpi"><div class="k">최악 연도</div><div class="v ${cls(K && K.worst)}">${K ? pct(K.worst) : '—'}</div><div class="s">${K ? K.worstY : ''}</div></div>
     <div class="kpi"><div class="k">${Y.cur} (${ymdFmt(lastYmd(), true)}까지)</div><div class="v ${cls(cy && cy.ret)}">${cy ? pct(cy.ret) : '—'}</div><div class="s">MDD ${cy ? pct(cy.mdd) : ''}</div></div>
+    ${AMT ? (() => { const ys = Y.inRange.filter(y => R.years[y]); const wy = ys.reduce((a, y) => R.years[y].ad > (R.years[a] ? R.years[a].ad : -1) ? y : a, null); const fy = Y.full.filter(y => R.years[y]); const avg = fy.length ? fy.reduce((a, y) => a + R.years[y].ret, 0) / fy.length : null; return `<div class="kpi"><div class="k">최고 하락금액 ${Y.inRange.length ? Y.inRange[0] % 100 + '–' + yEnd % 100 : ''}</div><div class="v neg">${wy ? money(cap * R.years[wy].ad) : '—'}</div><div class="s">${wy ? wy + ' · 원금의 ' + (R.years[wy].ad * 100).toFixed(1) + '%' : ''}</div></div><div class="kpi"><div class="k">연평균 수익금</div><div class="v ${cls(avg)}">${avg != null ? money(cap * avg / 100) : '—'}</div><div class="s">${avg != null ? '단순평균 ' + pct(avg) : ''}</div></div>`; })() : ''}
     <div class="kpi"><div class="k">비중 합 / 현금</div><div class="v">${+R.wsum.toFixed(1)}%</div><div class="s">현금 ${+R.cashW.toFixed(1)}%</div></div></div></div>`;
   const yrs = Y.inRange; const maxS = R.res.length;
   h += `<div class="sec"><h3>연도별 수익률<span class="small muted">막대·줄을 누르면 그해 일별 그래프와 주차별 모드</span></h3>${barChart({ items: yrs.map(y => ({ label: y === Y.cur ? y % 100 + '*' : String(y % 100), v: R.years[y].ret, op: y === Y.cur ? 0.55 : 1, color: y === BT.selY ? (R.years[y].ret < 0 ? '#FF8A7A' : '#7CC4FF') : null })), h: 96, fmt: v => pc0(v) })}
-    <div class="tw"><table class="t" style="margin-top:3px"><tr><th class="l">연도</th><th>수익</th><th>MDD</th><th title="그해 중 가장 높았던 수익률">최고</th><th title="그해 중 가장 낮았던 수익률">최저</th><th>최소현금</th>${R.res.map((x, i) => `<th style="color:${COLORS[i % COLORS.length]}">${esc(slotName(x.slot))}</th>`).join('')}</tr>
+    <div class="tw"><table class="t" style="margin-top:3px"><tr><th class="l">연도</th><th>수익</th><th>MDD</th>${AMT ? '<th>수익금</th><th title="그해 고점 자산에서 가장 많이 줄어든 금액 (괄호 = 원금 대비)">최고 하락금액</th>' : ''}<th title="그해 중 가장 높았던 수익률">최고</th><th title="그해 중 가장 낮았던 수익률">최저</th><th>최소현금</th>${R.res.map((x, i) => `<th style="color:${COLORS[i % COLORS.length]}">${esc(slotName(x.slot))}</th>`).join('')}</tr>
     ${yrs.slice().reverse().map(y => { const Yr = R.years[y], B = R.baseYears && R.baseYears[y]; const bdg = (Yr.resets || []).map(z => `<span class="chip" style="background:#3A2A12;color:#F2B866;min-height:15px;padding:0 4px;font-size:10px" title="익절 리셋">💰${ymdFmt(z, true)}</span>`).join('') + (Yr.maSells || []).map(z => `<span class="chip" style="background:#2A1620;color:#FFB4A8;min-height:15px;padding:0 4px;font-size:10px" title="이평 하회 매도">📉${ymdFmt(z, true)}</span>`).join('') + (Yr.maRes || []).map(z => `<span class="chip" style="background:#14301F;color:#86E0A4;min-height:15px;padding:0 4px;font-size:10px" title="이평 돌파 재시작">↗${ymdFmt(z, true)}</span>`).join('') + (Yr.stopDay ? `<span class="chip" style="background:#3A1A1A;color:#FF9C8F;min-height:15px;padding:0 4px;font-size:10px" title="MDD 손절">🛑${ymdFmt(Yr.stopDay, true)}</span>` : '');
-      return `<tr class="click ${y === BT.selY ? 'sel' : ''} ${y === Y.cur ? 'ytd' : ''}" data-act="bt-year" data-y="${y}"><td class="l">${y}${y === Y.cur ? '*' : ''}${set.sm > 1 ? `<span class="dim small"> ${String(y % 100).padStart(2, '0')}.${set.sm}~</span>` : ''} ${bdg}</td><td class="${cls(Yr.ret)}"><b>${pct(Yr.ret)}</b>${B ? ` <span class="dim small">(${pc0(B.ret)})</span>` : ''}</td><td class="neg">${pct(Yr.mdd)}${B ? ` <span class="dim small">(${pc0(B.mdd)})</span>` : ''}</td><td class="pos" title="${ymdFmt(Yr.hiY)}">${pc0(Yr.maxRet)}</td><td class="${cls(Yr.minRet)}" title="${ymdFmt(Yr.loY)}">${pc0(Yr.minRet)}</td><td class="muted">${(Yr.minCash * 100).toFixed(0)}%</td>
+      return `<tr class="click ${y === BT.selY ? 'sel' : ''} ${y === Y.cur ? 'ytd' : ''}" data-act="bt-year" data-y="${y}"><td class="l">${y}${y === Y.cur ? '*' : ''}${set.sm > 1 ? `<span class="dim small"> ${String(y % 100).padStart(2, '0')}.${set.sm}~</span>` : ''} ${bdg}</td><td class="${cls(Yr.ret)}"><b>${pct(Yr.ret)}</b>${B ? ` <span class="dim small">(${pc0(B.ret)})</span>` : ''}</td><td class="neg">${pct(Yr.mdd)}${B ? ` <span class="dim small">(${pc0(B.mdd)})</span>` : ''}</td>${AMT ? `<td class="${cls(Yr.ret)}">${money(cap * Yr.ret / 100)}</td><td class="neg" title="${ymdFmt(Yr.adY)}"><b>${money(-cap * Yr.ad)}</b> <span class="dim small">(${(Yr.ad * 100).toFixed(1)}% · ${ymdFmt(Yr.adY, true)})</span></td>` : ''}<td class="pos" title="${ymdFmt(Yr.hiY)}">${pc0(Yr.maxRet)}</td><td class="${cls(Yr.minRet)}" title="${ymdFmt(Yr.loY)}">${pc0(Yr.minRet)}</td><td class="muted">${(Yr.minCash * 100).toFixed(0)}%</td>
       ${R.res.map(x => { const a = x.r.yearly[y]; return `<td>${a ? `<span class="${cls(a.ret)}">${pc0(a.ret)}</span> <span class="dim">${pc0(a.mdd)}</span>` : '—'}</td>`; }).join('')}</tr>`; }).join('')}</table></div>
     <div class="small dim">* 진행 중인 해 (CAGR에서 제외) · 슬롯 칸 = 수익 / MDD (옵션 적용 전 단독 결과)${R.baseYears ? ' · 괄호 = 현금·옵션 없이 매매법만 (비중은 서로의 비율대로 100%)' : ''}</div></div>`;
   h += btYearDetail();
