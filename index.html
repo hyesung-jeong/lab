@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>트레이딩 랩 v1.9</title>
+<title>트레이딩 랩 v2.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -107,7 +107,7 @@ input.wr{flex:1;min-width:0;height:16px;accent-color:#5AA9FF;margin:0;cursor:poi
 .mbox{background:var(--bg2,#101a2e);border:1px solid #2a3a55;border-radius:10px;padding:10px 13px;max-width:calc(100vw - 16px);box-shadow:0 10px 40px rgba(0,0,0,.5)}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v1.9</span></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v2.0</span></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -136,7 +136,7 @@ function fDongpa(p, cap, fee, out) {
       const price = close[i], dret = dr[i], md = mode[i], dn = day + 1;
       if (dn > 10 && (dn - 1) % cycle === 0) { ib += pp; ps = ib / nPos; pp = 0; }
       if (day === 0 && !prevc) prev = price;
-      const before = np; let sold = false;
+      const before = np, c0 = cash; let sold = false;
       for (let t = 1; t <= nPos; t++) { if (!act[t]) continue; const hd = dn - bd[t], pr = (price - bp[t]) / bp[t] * 100;
         const ss = bm[t] === 0 ? (pr >= sProf || hd >= sHold) : (pr >= aProf || hd >= aHold);
         if (ss) { const amt = sh[t] * price * (1 - fee); cash += amt; pp += amt - inv[t]; sold = true; act[t] = 0; np--; } }
@@ -144,7 +144,7 @@ function fDongpa(p, cap, fee, out) {
         let av = -1; for (let t = 1; t <= nPos; t++) if (!act[t]) { av = t; break; }
         if (av > 0) { const mbp = (day === 0 && !prevc) ? price : prev * (1 + (md === 0 ? sBuy : aBuy) / 100);
           let cur = 0; for (let t = 1; t <= nPos; t++) if (act[t]) cur += inv[t];
-          const rem = ib - cur, ba = rem < ps ? rem : ps, shs = Math.floor(ba / mbp);
+          const rem = ib - cur, ba = Math.min(rem < ps ? rem : ps, c0 / (1 + fee)), shs = Math.floor(ba / mbp);
           if (shs > 0) { const ai = shs * price, bc = ai * (1 + fee); if (cash >= bc && bc <= ba) { act[av] = 1; bp[av] = price; sh[av] = shs; bd[av] = dn; inv[av] = ai; bm[av] = md; cash -= bc; np++; } } }
       }
       let hv = 0; for (let t = 1; t <= nPos; t++) if (act[t]) hv += sh[t] * price;
@@ -332,7 +332,7 @@ function backtestYear(items,P,tlog,prevYearClose){
     const price=closes[day], dret=drets[day], mode=dmodes[day], dayNum=day+1;
     if(dayNum>10 && (dayNum-1)%P.cycle===0){ investBase+=periodPnl; posSize=investBase/P.nPos; periodPnl=0; }
     if(day===0 && !prevYearClose) prevClose=price;
-    const posBeforeSell=Object.keys(positions).length;
+    const posBeforeSell=Object.keys(positions).length; const cash0=cash; // 매수 예산은 전날 예수금 한도 (당일 매도대금은 못 씀 — 실전 시트와 동일)
     let soldToday=false; const toRemove=[];
     // ★시가+종가 이중매도: dblSell ON이면 시가에서 먼저 익절/보유한계 판정, 안되면 종가 판정
     const _openp=(P.dblSell && typeof OPENS!=='undefined')? (function(){ var ii=dateIdxMap?dateIdxMap[items[day].r[0]]:-1; return (ii!=null&&ii>=0&&OPENS[ii]!=null)?OPENS[ii]:price; })() : price;
@@ -364,7 +364,7 @@ function backtestYear(items,P,tlog,prevYearClose){
             const remBudget=investBase-curInv;
             // 티어 비중(P.tierW)이 있으면 그 비중만큼, 없으면 균등(posSize)
             const tierBudget=(P.tierW&&P.tierW[availTier-1]!=null)?investBase*(P.tierW[availTier-1]/100):posSize;
-            const buyAmount=remBudget<tierBudget?remBudget:tierBudget;
+            let buyAmount=remBudget<tierBudget?remBudget:tierBudget; if(buyAmount>cash0/(1+fee)) buyAmount=cash0/(1+fee);
             const shares=Math.floor(buyAmount/maxBuyPrice);
             if(shares>0){ const actualInv=shares*price; const buyCost=actualInv*(1+fee);
               if(cash>=buyCost && buyCost<=buyAmount){
@@ -797,7 +797,7 @@ function ordersDongpa(P, cap, nm) {
   const buys = [];
   if (tiers.length < P.nPos && e.cash > 0) { let tier = -1; for (let t = 1; t <= P.nPos; t++) if (!(t in pos)) { tier = t; break; }
     const rate = nm === 0 ? P.safeBuy : P.aggBuy, mbp = lc * (1 + rate / 100); let cur = 0; tiers.forEach(t => cur += pos[t].inv);
-    const tb = (P.tierW && P.tierW[tier - 1] != null) ? ib * (P.tierW[tier - 1] / 100) : ps; const amt = Math.min(ib - cur, tb), q = Math.floor(amt / mbp);
+    const tb = (P.tierW && P.tierW[tier - 1] != null) ? ib * (P.tierW[tier - 1] / 100) : ps; const amt = Math.min(ib - cur, tb, e.cash / (1 + (P.fee || 0))), q = Math.floor(amt / mbp);
     const fee = P.fee || 0; let lim = belowC(mbp); if (q > 0) lim = Math.min(lim, floorC(Math.min(amt, e.cash) / (q * (1 + fee))));
     if (q > 0) buys.push({ tier: 'T' + tier, qty: q, type: 'LOC', price: lim, note: (nm === 0 ? '안전' : '공세') + ' 종가<' + rate + '%' + (lim < belowC(mbp) ? ' · 예산/수수료 한도' : '') }); }
   const hv = tiers.reduce((s, t) => s + pos[t].sh * lc, 0);
@@ -1021,7 +1021,7 @@ function fDongpa(p, cap, fee, out) {
       const price = close[i], dret = dr[i], md = mode[i], dn = day + 1;
       if (dn > 10 && (dn - 1) % cycle === 0) { ib += pp; ps = ib / nPos; pp = 0; }
       if (day === 0 && !prevc) prev = price;
-      const before = np; let sold = false;
+      const before = np, c0 = cash; let sold = false;
       for (let t = 1; t <= nPos; t++) { if (!act[t]) continue; const hd = dn - bd[t], pr = (price - bp[t]) / bp[t] * 100;
         const ss = bm[t] === 0 ? (pr >= sProf || hd >= sHold) : (pr >= aProf || hd >= aHold);
         if (ss) { const amt = sh[t] * price * (1 - fee); cash += amt; pp += amt - inv[t]; sold = true; act[t] = 0; np--; } }
@@ -1029,7 +1029,7 @@ function fDongpa(p, cap, fee, out) {
         let av = -1; for (let t = 1; t <= nPos; t++) if (!act[t]) { av = t; break; }
         if (av > 0) { const mbp = (day === 0 && !prevc) ? price : prev * (1 + (md === 0 ? sBuy : aBuy) / 100);
           let cur = 0; for (let t = 1; t <= nPos; t++) if (act[t]) cur += inv[t];
-          const rem = ib - cur, ba = rem < ps ? rem : ps, shs = Math.floor(ba / mbp);
+          const rem = ib - cur, ba = Math.min(rem < ps ? rem : ps, c0 / (1 + fee)), shs = Math.floor(ba / mbp);
           if (shs > 0) { const ai = shs * price, bc = ai * (1 + fee); if (cash >= bc && bc <= ba) { act[av] = 1; bp[av] = price; sh[av] = shs; bd[av] = dn; inv[av] = ai; bm[av] = md; cash -= bc; np++; } } }
       }
       let hv = 0; for (let t = 1; t <= nPos; t++) if (act[t]) hv += sh[t] * price;
@@ -1176,7 +1176,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v1.9';
+const APP_VER = 'v2.0';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
