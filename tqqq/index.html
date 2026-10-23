@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>트레이딩 랩 TQQQ v1.7</title>
+<title>트레이딩 랩 TQQQ v1.8</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -107,7 +107,7 @@ input.wr{flex:1;min-width:0;height:16px;accent-color:#5AA9FF;margin:0;cursor:poi
 .mbox{background:var(--bg2,#101a2e);border:1px solid #2a3a55;border-radius:10px;padding:10px 13px;max-width:calc(100vw - 16px);box-shadow:0 10px 40px rgba(0,0,0,.5)}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v1.7</span></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v1.8</span></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -950,6 +950,13 @@ const BUILTIN = [
   { id: 'b_l1', tk: 'SOXL', type: 'three', name: 'L15-A(11~25)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 50, rsiMax: 61, comp: 80, loss: 50, SF: {n: 5, buy: [3.5, 4.3, 4.3, 4.3, 4.3], sell: [-1, 1, 1, 1, 1], hold: [22, 35, 35, 35, 35], weight: [3, 6.5, 13, 26, 51.5]}, Middle: {n: 9, buy: [-1.5, 5, 5, 5, 5, 5, 5, 5, 5], sell: [-2.5, 7, 7, 7, 7, 7, 7, 7, 7], hold: [38, 5, 5, 5, 5, 5, 5, 5, 5], weight: [0.5, 0.5, 1, 1.5, 3, 6.5, 12.5, 25, 49.5]}, AG: {n: 5, buy: [7, -2, -2, -2, -2], sell: [-1.5, 0, 0, 0, 0], hold: [60, 7, 7, 7, 7], weight: [33.5, 26.5, 20, 13.5, 6.5]}} },
   { id: 'b_l2', tk: 'SOXL', type: 'three', name: 'L15-B(11~25)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 33, rsiMax: 55, comp: 55, loss: 20, SF: {n: 4, buy: [7, 11, 11, 11], sell: [9, 9.5, 9.5, 9.5], hold: [25, 5, 5, 5], weight: [40, 30, 20, 10]}, Middle: {n: 4, buy: [4.3, 2.5, 2.5, 2.5], sell: [0, 2.5, 2.5, 2.5], hold: [17, 3, 3, 3], weight: [1, 33, 33, 33]}, AG: {n: 4, buy: [5.5, 6.5, 6.5, 6.5], sell: [4, -2, -2, -2], hold: [8, 5, 5, 5], weight: [6, 7, 8, 29]}} },
   { id: 'b_l3', tk: 'SOXL', type: 'three', name: 'L15-C(11~25)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 33, rsiMax: 56, comp: 40, loss: 90, SF: {n: 4, buy: [-2, 12, 12, 12], sell: [10, 0.5, 0.5, 0.5], hold: [22, 3, 3, 3], weight: [40, 30, 20, 10]}, Middle: {n: 4, buy: [1, 2.5, 2.5, 2.5], sell: [9.5, 2.5, 2.5, 2.5], hold: [12, 2, 2, 2], weight: [1, 33, 33, 33]}, AG: {n: 5, buy: [4.5, 5.5, 5.5, 5.5, 5.5], sell: [9.5, -0.5, -0.5, -0.5, -0.5], hold: [10, 5, 5, 5, 5], weight: [6, 7, 8, 29, 25]}} },
+  // 연중 금액하락 20% (연도별 독립·원금 25만 기준: 매년 연중 꼭지→바닥이 원금의 20% 이하, 연평균 수익 최대, 현금 비중 포함)
+  { id: 'b_m1', tk: 'SOXL', type: 'three', name: '금액20(11~25)-A', p: {modeMethod: 'rsi', maN: 120, rsiMin: 50, rsiMax: 61, comp: 55, loss: 10, SF: {n: 5, buy: [9, 3.5, 3.5, 3.5, 3.5], sell: [-1, 1, 1, 1, 1], hold: [25, 35, 35, 35, 35], weight: [3, 6.5, 13, 26, 51.5]}, Middle: {n: 9, buy: [-1.5, 3, 3, 3, 3, 3, 3, 3, 3], sell: [7, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5], hold: [5, 6, 6, 6, 6, 6, 6, 6, 6], weight: [0.5, 0.5, 1, 1.5, 3, 6.5, 12.5, 25, 49.5]}, AG: {n: 4, buy: [7, -2, -2, -2], sell: [-1.5, 0, 0, 0], hold: [60, 7, 7, 7], weight: [40, 30, 20, 10]}} },
+  { id: 'b_m2', tk: 'SOXL', type: 'three', name: '금액20(11~25)-B', p: {modeMethod: 'rsi', maN: 120, rsiMin: 33, rsiMax: 55, comp: 70, loss: 45, SF: {n: 4, buy: [7, 9.5, 9.5, 9.5], sell: [9, 9.5, 9.5, 9.5], hold: [22, 5, 5, 5], weight: [40, 30, 20, 10]}, Middle: {n: 4, buy: [4.3, 2.5, 2.5, 2.5], sell: [0, 2.4, 2.4, 2.4], hold: [17, 3, 3, 3], weight: [1, 33, 33, 33]}, AG: {n: 4, buy: [11.5, 6.5, 6.5, 6.5], sell: [10, 0, 0, 0], hold: [14, 5, 5, 5], weight: [6, 7, 8, 29]}} },
+  { id: 'b_m3', tk: 'SOXL', type: 'three', name: '금액20(11~25)-C', p: {modeMethod: 'rsi', maN: 120, rsiMin: 33, rsiMax: 56, comp: 40, loss: 90, SF: {n: 4, buy: [-1.5, 9.5, 9.5, 9.5], sell: [10, -5.5, -5.5, -5.5], hold: [14, 6, 6, 6], weight: [40, 30, 20, 10]}, Middle: {n: 4, buy: [3, 3.5, 3.5, 3.5], sell: [5.5, 3, 3, 3], hold: [12, 2, 2, 2], weight: [1, 33, 33, 33]}, AG: {n: 5, buy: [3.5, 5.5, 5.5, 5.5, 5.5], sell: [8, -0.5, -0.5, -0.5, -0.5], hold: [8, 5, 5, 5, 5], weight: [6, 7, 8, 29, 25]}} },
+  { id: 'b_m4', tk: 'SOXL', type: 'three', name: '금액20(11~26)-A', p: {modeMethod: 'rsi', maN: 120, rsiMin: 50, rsiMax: 63, comp: 60, loss: 10, SF: {n: 5, buy: [6, 3.5, 3.5, 3.5, 3.5], sell: [-1, 1, 1, 1, 1], hold: [25, 35, 35, 35, 35], weight: [3, 6.5, 13, 26, 51.5]}, Middle: {n: 8, buy: [8, 3, 3, 3, 3, 3, 3, 3], sell: [4, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5], hold: [4, 5, 5, 5, 5, 5, 5, 5], weight: [0.5, 1, 1.5, 3, 6.5, 12.5, 25, 50]}, AG: {n: 4, buy: [7, -2, -2, -2], sell: [-1.5, 0, 0, 0], hold: [60, 7, 7, 7], weight: [40, 30, 20, 10]}} },
+  { id: 'b_m5', tk: 'SOXL', type: 'three', name: '금액20(11~26)-B', p: {modeMethod: 'rsi', maN: 120, rsiMin: 33, rsiMax: 55, comp: 45, loss: 20, SF: {n: 4, buy: [9.5, 9.5, 9.5, 9.5], sell: [10, 9.5, 9.5, 9.5], hold: [12, 5, 5, 5], weight: [40, 30, 20, 10]}, Middle: {n: 4, buy: [1, 2.5, 2.5, 2.5], sell: [1.5, 2.5, 2.5, 2.5], hold: [17, 3, 3, 3], weight: [1, 33, 33, 33]}, AG: {n: 4, buy: [7, 6.5, 6.5, 6.5], sell: [10, -0.5, -0.5, -0.5], hold: [12, 5, 5, 5], weight: [6, 7, 8, 29]}} },
+  { id: 'b_m6', tk: 'SOXL', type: 'three', name: '금액20(11~26)-C', p: {modeMethod: 'rsi', maN: 120, rsiMin: 33, rsiMax: 56, comp: 40, loss: 90, SF: {n: 4, buy: [-2, 12, 12, 12], sell: [10, 1.7, 1.7, 1.7], hold: [22, 3, 3, 3], weight: [25, 25, 25, 25]}, Middle: {n: 4, buy: [0.5, 6, 6, 6], sell: [5.5, 3.5, 3.5, 3.5], hold: [12, 2, 2, 2], weight: [1, 33, 33, 33]}, AG: {n: 5, buy: [3.5, 5.5, 5.5, 5.5, 5.5], sell: [8, -0.5, -0.5, -0.5, -0.5], hold: [8, 5, 5, 5, 5], weight: [6, 7, 8, 29, 25]}} },
 ];
 const TK_SETS = [["TQQQ 3모드 MDD20", [["b_q1", 63.5], ["b_q2", 15.5], ["b_q3", 21]]], ["TQQQ 3모드 MDD30 (참고)", [["b_q4", 31.5], ["b_q5", 33.5], ["b_q6", 35]]]];
 // 슬롯 파라미터 → 엔진 P
@@ -1169,7 +1176,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v1.7';
+const APP_VER = 'v1.8';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -1203,11 +1210,14 @@ function defaultSlots() { return [
   { id: uid('s'), type: 'three', presetId: 'b_t3', w: 19 }, { id: uid('s'), type: 'dongpa', presetId: 'b_dp1', w: 10 }].map(s => Object.assign(s, { p: clone(BUILTIN.find(b => b.id === s.presetId).p) })); }
 function defaultState() {
   const set = { id: uid('bt'), name: '전체매매', cap: 450000, sm: 1, y0: 2016, y1: 2026, slots: defaultSlots(), opts: null };
-  return { ver: 1, page: 'dash', fee: 0, presets: [], bt: { cur: set.id, sets: [set] },
+  return { ver: 1, page: 'dash', fee: 0, presets: [], bt: { cur: set.id, sets: [set] }, bt2: { cur: null, sets: [] },
     live: { cur: null, tabs: [] }, opt: { strat: 'dongpa', judge: 'rsi', cfg: {}, history: [] }, manual: [], snapAt: 0, savedAt: 0 };
 }
 let ST = null;
-function loadState() { try { const s = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); if (s && s.ver === 1) return Object.assign(defaultState(), s); } catch (e) { } return defaultState(); }
+function loadState() { try { const s = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); if (s && s.ver === 1) { if (s.btSwap) { const t = s.bt; s.bt = s.bt2; s.bt2 = t; s.btSwap = false; } return Object.assign(defaultState(), s); } } catch (e) { } return defaultState(); }
+function btSwapTo(p) { // 백테스트2 탭: 화면에 있는 동안만 ST.bt 자리에 bt2 세트를 놓음
+  const want = p === 'bt2'; if (!ST.bt2) ST.bt2 = { cur: null, sets: [] }; if (!!ST.btSwap === want) return; if (want && !ST.bt2.sets.length) return;
+  const t = ST.bt; ST.bt = ST.bt2; ST.bt2 = t; ST.btSwap = want; if (typeof BT !== 'undefined') { BT.R = null; BT.selY = null; } }
 let _saveT = 0;
 function saveLocal() { ST.savedAt = Date.now(); clearTimeout(_saveT); _saveT = setTimeout(() => { try { localStorage.setItem(LS_KEY, JSON.stringify(ST)); } catch (e) { } }, 200); }
 function saveNow() { try { ST.savedAt = Date.now(); localStorage.setItem(LS_KEY, JSON.stringify(ST)); } catch (e) { } }
@@ -1220,7 +1230,7 @@ function cloudHeaders() { return { apikey: SUPABASE_ANON_KEY, Authorization: 'Be
 async function cloudGet(id) { const r = await fetch(SUPABASE_URL + '/rest/v1/configs?id=eq.' + id + '&select=data', { cache: 'no-store', headers: cloudHeaders() }); if (!r.ok) throw new Error('불러오기 ' + r.status); const j = await r.json(); return j.length ? j[0].data : null; }
 async function cloudPut(id, data) { const r = await fetch(SUPABASE_URL + '/rest/v1/configs', { method: 'POST', headers: Object.assign(cloudHeaders(), { Prefer: 'resolution=merge-duplicates' }), body: JSON.stringify([{ id, data, updated_at: new Date().toISOString() }]) }); if (!r.ok) { let t = ''; try { t = await r.text(); } catch (e) { } throw new Error('저장 ' + r.status + ' ' + t.slice(0, 60)); } }
 function setSync(t, bad) { const e = $('#sync'); if (e) { e.textContent = t; e.style.color = bad ? 'var(--rd)' : 'var(--t3)'; } }
-function stateForCloud() { const s = clone(ST); delete s.page; s.opt = Object.assign({}, s.opt, { history: (s.opt.history || []).slice(0, 30) }); return s; }
+function stateForCloud() { const s = clone(ST); delete s.page; if (s.btSwap) { const t = s.bt; s.bt = s.bt2; s.bt2 = t; } delete s.btSwap; s.opt = Object.assign({}, s.opt, { history: (s.opt.history || []).slice(0, 30) }); return s; }
 async function cloudSaveAll() {
   setSync('☁ 저장 중…'); ST.snapAt = Date.now(); saveNow();
   try { await cloudPut(CLOUD_ID, stateForCloud()); setSync('☁ 저장됨 ' + new Date().toTimeString().slice(0, 5)); toast('전체 저장 완료 — 다른 기기는 새로고침하면 이 상태로 열려요'); }
@@ -1228,7 +1238,7 @@ async function cloudSaveAll() {
 }
 async function cloudInit() {
   try { const c = await cloudGet(CLOUD_ID);
-    if (c && c.ver === 1 && (c.snapAt || 0) > (ST.snapAt || 0)) { const page = ST.page; const man = ST.manual; ST = Object.assign(defaultState(), c); ST.page = page; ST.manual = mergeManual(man, c.manual || []); if (typeof seedSets === 'function') { seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedLw(); } saveNow(); setSync('☁ 최신본 불러옴'); return true; }
+    if (c && c.ver === 1 && (c.snapAt || 0) > (ST.snapAt || 0)) { const page = ST.page; const man = ST.manual; ST = Object.assign(defaultState(), c); ST.page = page; ST.manual = mergeManual(man, c.manual || []); if (typeof seedSets === 'function') { seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedLw(); if (typeof seedBt2 === 'function') seedBt2(); } saveNow(); setSync('☁ 최신본 불러옴'); return true; }
     setSync(c ? '☁ 준비됨' : '☁ 클라우드 비어 있음 · 저장으로 올리기'); } catch (e) { setSync('☁ 오프라인 (' + e.message + ')', true); }
   return false;
 }
@@ -1264,7 +1274,7 @@ function initInputs() {
 }
 
 // ===== 간단 SVG 차트 =====
-function CW(frac) { const w = Math.min(document.documentElement.clientWidth || window.innerWidth, 1500); const side = w > 900 ? (ST.page === 'opt' ? 346 : ST.page === 'bt' ? 426 : 0) : 0; const main = w - (w > 900 ? 40 : 28) - side; return Math.max(260, Math.round(main * (frac || 1))); }
+function CW(frac) { const w = Math.min(document.documentElement.clientWidth || window.innerWidth, 1500); const side = w > 900 ? (ST.page === 'opt' ? 346 : (ST.page === 'bt' || ST.page === 'bt2') ? 426 : 0) : 0; const main = w - (w > 900 ? 40 : 28) - side; return Math.max(260, Math.round(main * (frac || 1))); }
 function lineChart(o) { // o:{w,h,series:[{pts:[[x,y]],color,dash,fill}],ymin,ymax,ylab:fn,xlab:[[x,label]],zero}
   const W = o.w || CW(), H = o.h || 140, L = 42, R = 6, T = 6, B = 16;
   let ymin = o.ymin, ymax = o.ymax; if (ymin == null || ymax == null) { let a = Infinity, b = -Infinity; o.series.forEach(s => s.pts.forEach(p => { if (p[1] < a) a = p[1]; if (p[1] > b) b = p[1]; })); if (ymin == null) ymin = a; if (ymax == null) ymax = b; }
@@ -2068,9 +2078,9 @@ function narrowRanges() { const R = RUN; if (!R) return; const L = R.recs.filter
   saveLocal(); toast('상위 ' + top.length + '개가 쓰는 값으로 범위를 좁혔어요'); }
 
 // ===== 라우터·이벤트·시작 =====
-const PAGES = [['dash', '대시보드'], ['bt', '백테스트'], ['opt', '최적화'], ['live', '실전현황'], ['sig', '폭락신호'], ['price', '주가 데이터']];
+const PAGES = [['dash', '대시보드'], ['bt', '백테스트']].concat(TK === 'SOXL' ? [['bt2', '백테스트2']] : []).concat([ ['opt', '최적화'], ['live', '실전현황'], ['sig', '폭락신호'], ['price', '주가 데이터']]);
 function invalidate() { BT.R = null; LIVE.cache = {}; WEEKS = null; }
-function pageHtml() { const p = ST.page; try { return p === 'bt' ? renderBacktest() : p === 'opt' ? renderOpt() : p === 'live' ? renderLive() : p === 'price' ? renderPrice() : p === 'sig' ? renderSig() : renderDash(); } catch (e) { console.error(e); return `<div class="sec neg">화면 오류: ${esc(e.message)}</div>`; } }
+function pageHtml() { const p = ST.page; try { return (p === 'bt' || p === 'bt2') ? renderBacktest() : p === 'opt' ? renderOpt() : p === 'live' ? renderLive() : p === 'price' ? renderPrice() : p === 'sig' ? renderSig() : renderDash(); } catch (e) { console.error(e); return `<div class="sec neg">화면 오류: ${esc(e.message)}</div>`; } }
 function render() {
   $('#nav').innerHTML = PAGES.map(([k, l]) => `<button class="${ST.page === k ? 'on' : ''}" data-act="nav" data-p="${k}">${l}</button>`).join('');
   $('#datadate').textContent = '데이터 ' + ymdFmt(lastYmd()).replace(/-/g, '.');
@@ -2078,7 +2088,7 @@ function render() {
 }
 let _deb = {}; function debounce(k, fn, ms) { clearTimeout(_deb[k]); _deb[k] = setTimeout(fn, ms || 250); }
 function refreshResults() { // 입력 중: 결과 영역만 다시 그림
-  if (ST.page === 'bt') { BT.R = null; debounce('bt', () => { const e = $('#bt-res'); if (e) e.innerHTML = btResults(); refreshSlotMeta(curSet().slots); }); }
+  if (ST.page === 'bt' || ST.page === 'bt2') { BT.R = null; debounce('bt', () => { const e = $('#bt-res'); if (e) e.innerHTML = btResults(); refreshSlotMeta(curSet().slots); }); }
   else if (ST.page === 'live') debounce('lv', () => { const e = $('#lv-res'); if (e) e.innerHTML = liveResHtml(curLive()); refreshSlotMeta(curLive().slots); });
 }
 function refreshSlotMeta(slots) { // 요약줄·비중합만 갱신
@@ -2095,7 +2105,7 @@ document.addEventListener('click', async e => {
   const b = e.target.closest('[data-act]'); if (!b) return; const a = b.dataset.act, id = b.dataset.id;
   const set = curSet();
   switch (a) {
-    case 'nav': ST.page = b.dataset.p; saveLocal(); render(); window.scrollTo(0, 0); return;
+    case 'nav': btSwapTo(b.dataset.p); ST.page = b.dataset.p; saveLocal(); render(); window.scrollTo(0, 0); return;
     case 'cloud': cloudSaveAll(); return;
     case 'set-pick': { ST.bt.cur = id; const ns = curSet(), o = setOrigin(ns); if (o) { ns.slots = o.map(x => Object.assign(x, { id: uid('s') })); ns.opts = null; } BT.R = null; BT.selY = null; saveLocal(); render(); if (o) toast('저장된 원래 값으로 불러왔어요'); return; }
     case 'set-add': { const nm = prompt('새 설정 이름', '설정 ' + (ST.bt.sets.length + 1)); if (!nm) return; const s = { id: uid('bt'), name: nm, cap: set.cap, sm: 1, y0: set.y0, y1: set.y1, slots: [] }; ST.bt.sets.push(s); ST.bt.cur = s.id; BT.R = null; saveLocal(); render(); return; }
@@ -2250,7 +2260,7 @@ const SOXL_SETS = [["3모드 MDD20 (15~25)", [["b_t21", 25], ["b_t22", 38.5], ["
 function setOrigin(set) { // 원래 매매법·비중 (내장 조합은 코드 값, 내가 만든 설정은 '기준 저장' 시점)
   if (set.orig) return clone(set.orig);
   if (set.name === '전체매매') return defaultSlots();
-  const def = (TK === 'SOXL' ? SOXL_SETS.concat(CAL_SETS, HOLD_SETS, ONE_SETS, REC_SETS, DPK_SETS) : (typeof TK_SETS !== 'undefined' ? TK_SETS : [])).find(x => x[0] === set.name); if (!def) return null;
+  const def = (TK === 'SOXL' ? SOXL_SETS.concat(CAL_SETS, HOLD_SETS, ONE_SETS, REC_SETS, DPK_SETS, BT2_SETS) : (typeof TK_SETS !== 'undefined' ? TK_SETS : [])).find(x => x[0] === set.name); if (!def) return null;
   return def[1].map(([pid, w]) => { const b = BUILTIN.find(x => x.id === pid); return b ? { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) } : null; }).filter(Boolean);
 }
 function seedTk() { // TQQQ판 전용 조합만
@@ -2325,9 +2335,16 @@ function seedLw() { // 3모드 저MDD 고점30 추가 (1회, 현금 4.5%는 비�
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
   ONE_SETS.filter(([nm]) => /저MDD 고점30/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
+const BT2_SETS = [["금액하락20 (11~25)", [["b_m1", 25.5], ["b_m2", 28], ["b_m3", 27]]], ["금액하락20 (11~26)", [["b_m4", 25], ["b_m5", 27.5], ["b_m6", 26.5]]], ["3모드 저MDD 고점30 (11~25)", [["b_l1", 28], ["b_l2", 26], ["b_l3", 41.5]]], ["3모드 검증 칼마 MDD20 (11~24)", [["b_h1", 29.5], ["b_h2", 43], ["b_h3", 27.5]]], ["3모드 칼마 MDD20 (11~25)", [["b_c1", 26.5], ["b_c2", 38.5], ["b_c3", 35]]]];
+function seedBt2() { // 백테스트2: 연중 금액하락 기준 세트 (1회)
+  if (TK !== 'SOXL' || !BT2_SETS.length) return; if (!ST.bt2) ST.bt2 = { cur: null, sets: [] }; if ((ST.seeded || []).includes('bt2a')) return; ST.seeded.push('bt2a');
+  const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
+  const tgt = ST.btSwap ? ST.bt : ST.bt2;
+  BT2_SETS.forEach(([nm, sl]) => { if (!tgt.sets.some(x => x.name === nm)) tgt.sets.push({ id: uid('bt'), name: nm, cap: 250000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
+  if (!tgt.cur && tgt.sets.length) tgt.cur = tgt.sets[0].id; saveLocal(); }
 async function boot() {
-  initInputs(); ST = loadState(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedLw(); buildData(ST.manual); render();
-  setSync('☁ 확인 중…'); const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { buildData(ST.manual); invalidate(); render(); }
+  initInputs(); ST = loadState(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedLw(); seedBt2(); btSwapTo(ST.page); buildData(ST.manual); render();
+  setSync('☁ 확인 중…'); const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); }
   window.addEventListener('beforeunload', () => saveNow());
   try { const ck = await idbGet('ckpt', 'run'); if (ck && ck.running && ck.cfg) { window._resume = ck; if (ST.page === 'opt') render(); } } catch (e) { }
   let lw = window.innerWidth; window.addEventListener('resize', () => debounce('rs', () => { if (Math.abs(window.innerWidth - lw) < 40) return; lw = window.innerWidth; const a = document.activeElement; if (!a || !a.matches || !a.matches('input')) render(); }, 300));
