@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>트레이딩 랩 v1.5</title>
+<title>트레이딩 랩 v1.6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -107,7 +107,7 @@ input.wr{flex:1;min-width:0;height:16px;accent-color:#5AA9FF;margin:0;cursor:poi
 .mbox{background:var(--bg2,#101a2e);border:1px solid #2a3a55;border-radius:10px;padding:10px 13px;max-width:calc(100vw - 16px);box-shadow:0 10px 40px rgba(0,0,0,.5)}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v1.5</span></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v1.6</span></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1169,7 +1169,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v1.5';
+const APP_VER = 'v1.6';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -2067,18 +2067,83 @@ function narrowRanges() { const R = RUN; if (!R) return; const L = R.recs.filter
     if (x.d.cat || r.mode === 'list') r.list = used.map(i => x.v.vals[i]).join(', '); else { r.min = x.v.vals[used[0]]; r.max = x.v.vals[used[used.length - 1]]; } });
   saveLocal(); toast('상위 ' + top.length + '개가 쓰는 값으로 범위를 좁혔어요'); }
 
+// ── 금액분석: 고정원금(매년 원금 동일, 이익은 따로 누적) 또는 복리로 백테스트 세트를 '돈' 기준으로 비교
+const MONEY = { cache: new Map(), rows: null, sig: '' };
+function moneyCfg() { if (!ST.money) ST.money = { cap: 250000, mode: 'fixed', lim: 75000, ceil: 500000, y0: 2011, y1: 2026, sel: [], sort: 'ratio' }; if (!ST.money.ceil) ST.money.ceil = 500000; return ST.money; }
+function moneySeries(set, cap) { // 세트의 일별 값(연초=1)을 연도별로 — 백테스트 엔진 그대로
+  const key = JSON.stringify([set.slots, set.opts, cap, ST.fee, lastYmd()]); if (MONEY.cache.has(key)) return MONEY.cache.get(key);
+  START_MONTH = 1; const fy = y => fiscalYear(y, 1); const R = computePortfolio(set.slots, cap, fy, null, false, set.opts);
+  const out = R.days.map(d => [d.ymd, d.y, d.v]); MONEY.cache.set(key, out); return out;
+}
+function moneyEval(set, M) { // 금액 곡선 + 지표
+  const ds = moneySeries(set, M.cap).filter(d => d[1] >= M.y0 && d[1] <= M.y1); if (!ds.length) return null;
+  // 매년 초 매매금 K·현금 C 결정: 고정원금 K=원금 / 복리 K=전체 / 복리→상한 K=min(전체, 상한)
+  const cur = fiscalYear(lastYmd(), 1); const pts = [], yr = {}; let A = M.cap, K = 0, C = 0, cy = null;
+  ds.forEach(([ymd, y, v]) => { if (y !== cy) { if (cy !== null) A = yr[cy].end; cy = y; K = M.mode === 'fixed' ? M.cap : M.mode === 'hyb' ? Math.min(A, M.ceil) : A; C = A - K; yr[y] = { start: A, K, peak: -Infinity, dd: 0 }; }
+    const E = C + K * v; pts.push([ymd, E]); const o = yr[y]; o.end = E; o.peak = Math.max(o.peak, E); o.dd = Math.max(o.dd, o.peak - E); });
+  let pk = -Infinity, pkD = null, dd = 0, ddA = null, ddB = null, ddp = 0; pts.forEach(([d, E]) => { if (E > pk) { pk = E; pkD = d; } if (pk - E > dd) { dd = pk - E; ddA = pkD; ddB = d; } ddp = Math.max(ddp, (pk - E) / pk * 100); });
+  Object.keys(yr).forEach(y => { const o = yr[y]; o.prof = o.end - o.start; });
+  const full = Object.keys(yr).map(Number).filter(y => y !== cur); const profs = full.map(y => yr[y].prof);
+  const n = profs.length, mu = n ? profs.reduce((a, b) => a + b, 0) / n : 0, sd = n ? Math.sqrt(profs.reduce((a, b) => a + (b - mu) ** 2, 0) / n) : 0;
+  const end = pts[pts.length - 1][1], years = pts.length / 252;
+  const avg = M.mode === 'comp' ? (Math.pow(end / M.cap, 1 / years) - 1) * 100 : (end - M.cap) / years;
+  return { pts, yr, end, avg, minY: n ? Math.min(...profs) : 0, minYy: n ? full[profs.indexOf(Math.min(...profs))] : null, cv: mu > 0 ? sd / mu : null, dd, ddA, ddB, ratio: M.mode !== 'comp' ? (dd > 0 ? (end - M.cap) / years / dd : null) : (ddp > 0 ? avg / ddp : null), ddp, neg: profs.filter(p => p < 0).length, ytd: yr[cur] ? yr[cur].prof : null, cur };
+}
+function renderMoney() {
+  const M = moneyCfg(); const sets = ST.bt.sets.filter(s => s.slots && s.slots.length);
+  const head = `<div class="sec"><h3>금액분석 <span class="small muted">수익률 대신 '돈' 기준 — 매년 원금을 같은 금액으로 두고(고정원금) 이익은 따로 쌓았을 때 자산이 얼마나 직선으로 늘고, 얼마까지 빠지는지</span></h3>
+    <div class="row" style="gap:10px;flex-wrap:wrap;align-items:end">
+      <label class="f">투자금($)${numInput({ v: M.cap, step: 10000, attrs: 'data-mf="cap"' })}</label>
+      <label class="f">방식<select class="in" data-mf="mode"><option value="fixed" ${M.mode === 'fixed' ? 'selected' : ''}>고정원금 (매년 원금 동일)</option><option value="comp" ${M.mode === 'comp' ? 'selected' : ''}>복리 (이익 재투자)</option><option value="hyb" ${M.mode === 'hyb' ? 'selected' : ''}>복리 → 매매금 상한 고정</option></select></label>
+      <label class="f" title="복리로 키우다가 매매금이 이 금액에 닿으면 더 늘리지 않고, 넘는 이익은 현금으로 쌓음 (방식 '복리 → 상한'일 때만)">매매금 상한($)${numInput({ v: M.ceil, step: 50000, attrs: 'data-mf="ceil"' })}</label>
+      <label class="f" title="꼭지 대비 이 금액 넘게 빠진 세트는 흐리게 표시">최대 금액하락 한도($)${numInput({ v: M.lim, step: 5000, attrs: 'data-mf="lim"' })}</label>
+      <label class="f">시작연도${numInput({ v: M.y0, step: 1, attrs: 'data-mf="y0"', w: '70px' })}</label>
+      <label class="f">종료연도${numInput({ v: M.y1, step: 1, attrs: 'data-mf="y1"', w: '70px' })}</label>
+      <label class="f">정렬<select class="in" data-mf="sort"><option value="ratio" ${M.sort === 'ratio' ? 'selected' : ''}>이익/하락</option><option value="avg" ${M.sort === 'avg' ? 'selected' : ''}>연평균 이익</option><option value="dd" ${M.sort === 'dd' ? 'selected' : ''}>금액하락 작은 순</option><option value="cv" ${M.sort === 'cv' ? 'selected' : ''}>직선(들쭉날쭉 작은 순)</option></select></label>
+      <span class="small muted">수수료 ${ST.fee}% · 백테스트 탭의 세트를 그대로 사용 · 체크한 세트(최대 5개)를 그래프로 비교</span></div></div>`;
+  return head + `<div id="mn-res"><div class="sec muted">계산 중… (세트 ${sets.length}개)</div></div>`;
+}
+function moneyResHtml() {
+  const M = moneyCfg(); const sets = ST.bt.sets.filter(s => s.slots && s.slots.length);
+  const R = sets.map(s => ({ s, e: moneyEval(s, M) })).filter(o => o.e); const fixed = M.mode !== 'comp', base = M.mode === 'hyb' ? M.ceil : M.cap;
+  if (!M.sel.length && R.length) M.sel = R.slice().sort((a, b) => (b.e.ratio || 0) - (a.e.ratio || 0)).slice(0, 3).map(o => o.s.id);
+  const key = { ratio: o => -(o.e.ratio || -1e9), avg: o => -o.e.avg, dd: o => o.e.dd, cv: o => o.e.cv == null ? 1e9 : o.e.cv }[M.sort] || (o => -(o.e.ratio || 0));
+  R.sort((a, b) => key(a) - key(b));
+  const avgLab = fixed ? '연평균 이익($)' : 'CAGR', avgFmt = e => fixed ? money(e.avg) : pct(e.avg);
+  const tbl = `<div class="sec"><div class="tw"><table class="t"><tr><th class="l">비교</th><th class="l">세트</th><th>최종 자산</th><th>${avgLab}</th><th title="완료된 해 중 가장 적게 번 해">최저 연 이익</th><th title="연 이익의 표준편차÷평균 — 작을수록 매년 비슷하게 벌어 곡선이 직선">들쭉날쭉</th><th title="자산 꼭지에서 바닥까지 금액 (해를 넘겨도 이어서)">최대 금액하락</th><th>${M.mode === 'fixed' ? '원금 대비' : M.mode === 'hyb' ? '상한 대비' : '꼭지 대비'}</th><th title="${fixed ? '연평균 이익 ÷ 최대 금액하락' : 'CAGR ÷ 꼭지 대비 최대 하락%'}">이익/하락</th><th>손실 연도</th><th>${R[0] ? R[0].e.cur : ''} 이익</th></tr>
+    ${R.map(({ s, e }) => { const over = e.dd > M.lim, on = M.sel.includes(s.id); return `<tr style="${over ? 'opacity:.45' : ''}"><td class="l"><input type="checkbox" data-mx="sel" data-id="${s.id}" ${on ? 'checked' : ''}></td><td class="l tx">${esc(s.name)}${over ? ' <span class="small neg">한도 초과</span>' : ''}</td>
+      <td>${money(e.end)}</td><td class="${cls(e.avg)}">${avgFmt(e)}</td><td class="${cls(e.minY)}">${money(e.minY)}<span class="small muted"> ${e.minYy || ''}</span></td><td>${e.cv == null ? '—' : e.cv.toFixed(2)}</td>
+      <td class="neg" title="${e.ddA ? ymdFmt(e.ddA) + ' → ' + ymdFmt(e.ddB) : ''}">−${money(e.dd)}</td><td class="neg">${(fixed ? e.dd / base * 100 : e.ddp).toFixed(0)}%</td><td>${e.ratio == null ? '—' : e.ratio.toFixed(2)}</td><td>${e.neg}</td><td class="${cls(e.ytd)}">${e.ytd == null ? '—' : money(e.ytd)}</td></tr>`; }).join('')}</table></div>
+    <div class="small muted" style="margin-top:3px">${M.mode === 'fixed' ? `고정원금: 매년 1월 매매 원금을 ${money(M.cap)}로 다시 맞추고, 이익은 따로 쌓고 손실은 거기서 채움` : M.mode === 'hyb' ? `복리 → 상한: 매매금이 ${money(M.ceil)}가 될 때까지 복리로 키우고, 그 뒤로는 매년 1월 ${money(M.ceil)}만 매매·나머지는 현금` : '복리: 이익을 전부 재투자'} (세금·인출 없음) · 흐린 줄 = 최대 금액하락 ${money(M.lim)} 초과</div></div>`;
+  const pick = R.filter(o => M.sel.includes(o.s.id)).slice(0, 5); let chart = '', ytab = '';
+  if (pick.length) { const dates = pick[0].e.pts.map(p => p[0]); const ix = new Map(dates.map((d, i) => [d, i])); const xl = []; let lastY = null; dates.forEach((d, i) => { const y = d.slice(0, 2); if (y !== lastY && (+y) % 2 === 0) xl.push([i, "'" + y]); lastY = y; });
+    const series = pick.map((o, k) => ({ pts: o.e.pts.filter(p => ix.has(p[0])).map(p => [ix.get(p[0]), p[1] / 1000]), color: COLORS[k], wd: 1.6 }));
+    series.push({ pts: [[0, M.cap / 1000], [dates.length - 1, M.cap / 1000]], color: '#5E7299', dash: '3 3', wd: 1 });
+    chart = `<div class="sec"><h3>자산 곡선 (금액, 천 달러) <span class="small muted">${pick.map((o, k) => `<span style="color:${COLORS[k]}">■</span> ${esc(o.s.name)}`).join(' · ')} · 점선 = 원금</span></h3>${lineChart({ w: CW(), h: 260, series, xlab: xl, ylab: v => v >= 1000 ? '$' + (v / 1000).toFixed(1) + 'M' : '$' + Math.round(v) + 'k' })}</div>`;
+    const f = pick[0], ys = Object.keys(f.e.yr).map(Number).sort((a, b) => a - b);
+    ytab = `<div class="sec"><h3>연도별 금액 — ${esc(f.s.name)}</h3><div class="tw"><table class="t"><tr><th class="l">연도</th><th>연초 자산</th><th>매매금</th><th>연 이익</th><th>연말 자산</th><th>그해 최대 금액하락</th><th>매매금 대비</th></tr>${ys.map(y => { const o = f.e.yr[y]; return `<tr><td class="l">${y}${y === f.e.cur ? '*' : ''}</td><td>${money(o.start)}</td><td>${money(o.K)}</td><td class="${cls(o.prof)}">${money(o.prof)}</td><td>${money(o.end)}</td><td class="neg">−${money(o.dd)}</td><td class="neg">${(o.dd / o.K * 100).toFixed(0)}%</td></tr>`; }).join('')}</table></div></div>`; }
+  return tbl + chart + ytab;
+}
+function refreshMoney() { const el = document.getElementById('mn-res'); if (!el) return; debounce('mn', () => { try { el.innerHTML = moneyResHtml(); } catch (e) { console.error(e); el.innerHTML = `<div class="sec neg">계산 오류: ${esc(e.message)}</div>`; } }, 30); }
+document.addEventListener('click', e => { const b = e.target.closest('[data-mx]'); if (!b) return; const M = moneyCfg();
+  if (b.dataset.mx === 'sel') { const id = b.dataset.id; M.sel = b.checked ? M.sel.filter(x => x !== id).concat([id]).slice(-5) : M.sel.filter(x => x !== id); saveLocal(); refreshMoney(); } });
+function moneyField(t) { const M = moneyCfg(), k = t.dataset.mf; if (k === 'mode' || k === 'sort') M[k] = t.value; else { const v = +t.value; if (!isFinite(v) || v <= 0) return; M[k] = v; } saveLocal(); refreshMoney(); }
+document.addEventListener('change', e => { if (e.target.dataset && e.target.dataset.mf) moneyField(e.target); });
+document.addEventListener('input', e => { if (e.target.dataset && e.target.dataset.mf && e.target.tagName === 'INPUT') { clearTimeout(MONEY.t); MONEY.t = setTimeout(() => moneyField(e.target), 400); } });
+
 // ===== 라우터·이벤트·시작 =====
-const PAGES = [['dash', '대시보드'], ['bt', '백테스트'], ['opt', '최적화'], ['live', '실전현황'], ['sig', '폭락신호'], ['price', '주가 데이터']];
+const PAGES = [['dash', '대시보드'], ['bt', '백테스트'], ['money', '금액분석'], ['opt', '최적화'], ['live', '실전현황'], ['sig', '폭락신호'], ['price', '주가 데이터']];
 function invalidate() { BT.R = null; LIVE.cache = {}; WEEKS = null; }
-function pageHtml() { const p = ST.page; try { return p === 'bt' ? renderBacktest() : p === 'opt' ? renderOpt() : p === 'live' ? renderLive() : p === 'price' ? renderPrice() : p === 'sig' ? renderSig() : renderDash(); } catch (e) { console.error(e); return `<div class="sec neg">화면 오류: ${esc(e.message)}</div>`; } }
+function pageHtml() { const p = ST.page; try { return p === 'bt' ? renderBacktest() : p === 'money' ? renderMoney() : p === 'opt' ? renderOpt() : p === 'live' ? renderLive() : p === 'price' ? renderPrice() : p === 'sig' ? renderSig() : renderDash(); } catch (e) { console.error(e); return `<div class="sec neg">화면 오류: ${esc(e.message)}</div>`; } }
 function render() {
   $('#nav').innerHTML = PAGES.map(([k, l]) => `<button class="${ST.page === k ? 'on' : ''}" data-act="nav" data-p="${k}">${l}</button>`).join('');
   $('#datadate').textContent = '데이터 ' + ymdFmt(lastYmd()).replace(/-/g, '.');
-  const y = window.scrollY; $('#app').innerHTML = pageHtml(); window.scrollTo(0, y);
+  const y = window.scrollY; $('#app').innerHTML = pageHtml(); window.scrollTo(0, y); if (ST.page === 'money') refreshMoney();
 }
 let _deb = {}; function debounce(k, fn, ms) { clearTimeout(_deb[k]); _deb[k] = setTimeout(fn, ms || 250); }
 function refreshResults() { // 입력 중: 결과 영역만 다시 그림
   if (ST.page === 'bt') { BT.R = null; debounce('bt', () => { const e = $('#bt-res'); if (e) e.innerHTML = btResults(); refreshSlotMeta(curSet().slots); }); }
+  else if (ST.page === 'money') refreshMoney();
   else if (ST.page === 'live') debounce('lv', () => { const e = $('#lv-res'); if (e) e.innerHTML = liveResHtml(curLive()); refreshSlotMeta(curLive().slots); });
 }
 function refreshSlotMeta(slots) { // 요약줄·비중합만 갱신
