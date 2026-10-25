@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>트레이딩 랩 TQQQ v2.6</title>
+<title>트레이딩 랩 TQQQ v2.7</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -108,7 +108,7 @@ input.wr{flex:1;min-width:0;height:16px;accent-color:#5AA9FF;margin:0;cursor:poi
 .mbox{background:var(--bg2,#101a2e);border:1px solid #2a3a55;border-radius:10px;padding:10px 13px;max-width:calc(100vw - 16px);box-shadow:0 10px 40px rgba(0,0,0,.5)}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v2.6</span></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v2.7</span></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1189,7 +1189,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v2.6';
+const APP_VER = 'v2.7';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -1224,7 +1224,7 @@ function defaultSlots() { return [
 function defaultState() {
   const set = { id: uid('bt'), name: '전체매매', cap: 450000, sm: 1, y0: 2016, y1: 2026, slots: defaultSlots(), opts: null };
   return { ver: 1, page: 'dash', fee: 0, presets: [], bt: { cur: set.id, sets: [set] }, bt2: { cur: null, sets: [] },
-    live: { cur: null, tabs: [] }, opt: { strat: 'dongpa', judge: 'rsi', cfg: {}, history: [] }, manual: [], snapAt: 0, savedAt: 0 };
+    live: { cur: null, tabs: [] }, cmp: { items: [], sm: 1, y0: 2011, y1: 2026, cap: 450000 }, opt: { strat: 'dongpa', judge: 'rsi', cfg: {}, history: [] }, manual: [], snapAt: 0, savedAt: 0 };
 }
 let ST = null;
 function loadState() { try { const s = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); if (s && s.ver === 1) { if (s.btSwap) { const t = s.bt; s.bt = s.bt2; s.bt2 = t; s.btSwap = false; } return Object.assign(defaultState(), s); } } catch (e) { } return defaultState(); }
@@ -1809,6 +1809,67 @@ function renderSig() {
   return h;
 }
 
+// ===== 비교 탭: 세트·프리셋 2개 이상을 같은 조건(시작월·기간·원금·수수료)으로 연도별 독립 비교 =====
+const CMP = { cache: {}, n: 0, mon: null, busy: false };
+function cmpCfg() { if (!ST.cmp) ST.cmp = { items: [], sm: 1, y0: 2011, y1: 2026, cap: 450000 }; return ST.cmp; }
+function cmpSrc() { const a = ST.btSwap ? ST.bt2 : ST.bt, b = ST.btSwap ? ST.bt : ST.bt2; return { s1: (a && a.sets) || [], s2: (b && b.sets) || [] }; }
+function cmpItem(it) { const { s1, s2 } = cmpSrc();
+  if (it.k === 's' || it.k === 's2') { const s = (it.k === 's' ? s1 : s2).find(x => x.id === it.id); return s ? { name: s.name, tag: it.k === 's' ? '세트' : '세트2', slots: s.slots, opts: s.opts } : null; }
+  const p = presetById(it.id); return p ? { name: p.name, tag: TYPES[p.type] || '', slots: [{ id: 'cmp_' + p.id, type: p.type, presetId: p.id, w: 100, p: clone(p.p) }], opts: null } : null; }
+function cmpRun(it, sm) { const c = cmpCfg(), r = cmpItem(it); if (!r) return null;
+  const key = JSON.stringify([r.slots, r.opts, +c.cap, sm, ST.fee, DATA.length, lastYmd()]);
+  if (!CMP.cache[key]) { if (++CMP.n > 300) { CMP.cache = {}; CMP.n = 1; } const keep = START_MONTH; START_MONTH = sm;
+    try { CMP.cache[key] = computePortfolio(r.slots, +c.cap || 30000, y => fiscalYear(y, sm), null, false, r.opts); } finally { START_MONTH = keep; } }
+  return { name: r.name, tag: r.tag, R: CMP.cache[key] }; }
+function cmpYears(R, sm) { const c = cmpCfg(); return setYears({ sm, y0: +c.y0, y1: +c.y1 }, R); }
+function cmpMonKey() { const c = cmpCfg(); return JSON.stringify([c.items, c.cap, c.y0, c.y1, ST.fee, DATA.length, c.items.map(it => { const r = cmpItem(it); return r ? [r.slots, r.opts] : null; })]); }
+
+function renderCmp() {
+  const c = cmpCfg(), { s1, s2 } = cmpSrc(), o = (v, t) => `<option value="${v}">${esc(t)}</option>`;
+  const pick = `<select id="cmp-pick" class="in" style="max-width:300px"><optgroup label="백테스트 세트">${s1.map(s => o('s:' + s.id, s.name)).join('')}</optgroup>${s2.length ? `<optgroup label="백테스트2 세트">${s2.map(s => o('s2:' + s.id, s.name)).join('')}</optgroup>` : ''}${['three', 'dongpa', 'dual'].map(t => { const ps = allPresets(t); return ps.length ? `<optgroup label="프리셋 · ${TYPES[t]}">${ps.map(p => o('p:' + p.id, p.name)).join('')}</optgroup>` : ''; }).join('')}</select>`;
+  const curY = fiscalYear(lastYmd(), c.sm), yOpts = v => { let s = ''; for (let y = 2011; y <= Math.max(curY, 2026); y++) s += `<option ${y === +v ? 'selected' : ''}>${y}</option>`; return s; };
+  const chips = c.items.map((it, i) => { const r = cmpItem(it); return `<span class="chip" style="border-color:${COLORS[i % COLORS.length]}"><b style="color:${COLORS[i % COLORS.length]}">●</b> ${r ? esc(r.name) : '<span class="neg">삭제됨</span>'} <span class="dim small">${r ? r.tag : ''}</span> <button class="btn sm" data-act="cmp-del" data-i="${i}" title="빼기">×</button></span>`; }).join(' ');
+  let h = `<div class="sec"><h3>비교 <span class="small muted">세트·프리셋을 같은 조건으로 연도별 독립 비교 · 2개 이상</span></h3>
+    <div class="row small" style="flex-wrap:wrap;gap:6px;align-items:center">${pick}<button class="btn" data-act="cmp-add">+ 추가</button>${c.items.length ? '<button class="btn sm" data-act="cmp-clear">비우기</button>' : ''}
+      <span class="sp"></span><label class="f">시작월<select class="in" data-cmp="sm">${[...Array(12)].map((_, i) => `<option value="${i + 1}" ${i + 1 === +c.sm ? 'selected' : ''}>${i + 1}월</option>`).join('')}</select></label>
+      <label class="f">시작연도<select class="in" data-cmp="y0">${yOpts(c.y0)}</select></label><label class="f">종료연도<select class="in" data-cmp="y1">${yOpts(c.y1)}</select></label>
+      <label class="f">원금${numInput({ v: c.cap, step: 10000, attrs: 'data-cmp="cap"', w: '110px' })}</label><span class="dim">수수료 ${ST.fee}% (백테스트 탭 설정)</span></div>
+    <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px">${chips || '<span class="dim">위에서 골라 + 추가 (세트 또는 개별 프리셋)</span>'}</div></div>`;
+  const runs = c.items.map(it => cmpRun(it, +c.sm)).map((x, i) => x && Object.assign(x, { col: COLORS[i % COLORS.length] })).filter(Boolean);
+  if (!runs.length) return h;
+  const Ys = runs.map(x => cmpYears(x.R, +c.sm)), Y0 = Ys[0], yrs = Array.from(new Set([].concat(...Ys.map(y => y.inRange)))).sort((a, b) => a - b);
+  const fy0 = Y0.full.length ? Y0.full[0] % 100 : '', fy1 = Y0.full.length ? Y0.full[Y0.full.length - 1] % 100 : '', smTxt = +c.sm > 1 ? ` · 연도 = ${c.sm}월~다음해 ${+c.sm - 1}월` : '';
+  // KPI 표
+  const K = runs.map((x, i) => { const Y = Ys[i], k = kpiAll(x.R.years, Y); const fr = Y.full.map(y => x.R.years[y].ret); const best = fr.length ? Math.max(...fr) : null;
+    return { k, mean: fr.length ? fr.reduce((a, b) => a + b, 0) / fr.length : null, best, bestY: fr.length ? Y.full[fr.indexOf(best)] : null, plus: fr.filter(r => r >= 0).length, n: fr.length, cur: Y.inRange.includes(Y.cur) && x.R.years[Y.cur] ? x.R.years[Y.cur] : null }; });
+  const bestOf = (f, hi = true) => { const v = K.map(f).filter(x => x != null && isFinite(x)); return v.length ? (hi ? Math.max(...v) : Math.min(...v)) : null; };
+  const bC = bestOf(x => x.k && x.k.cagr), bM = bestOf(x => x.k && x.k.mdd), bK = bestOf(x => x.k && x.k.calmar), bW = bestOf(x => x.k && x.k.worst);
+  const mark = (v, b) => v != null && b != null && Math.abs(v - b) < 1e-9 && runs.length > 1 ? ' style="text-decoration:underline;text-underline-offset:3px"' : '';
+  h += `<div class="sec"><h3>요약 <span class="small muted">CAGR·평균·최저/최고 = 완료 연도 ${fy0}–${fy1}${smTxt} · 최악 MDD·칼마는 진행 중 연도 포함 · 밑줄 = 가장 좋음</span></h3><div class="tw"><table class="t"><tr><th class="l">매매</th><th>CAGR</th><th>최악 MDD</th><th>Calmar</th><th>평균 연수익</th><th>최저 연도</th><th>최고 연도</th><th>플러스 연도</th><th>${Y0.cur}${+c.sm > 1 ? ' (' + String(Y0.cur % 100).padStart(2, '0') + '.' + c.sm + '~)' : ''} 진행</th></tr>
+    ${runs.map((x, i) => { const q = K[i], k = q.k; return `<tr><td class="l tx"><b style="color:${x.col}">●</b> ${esc(x.name)}</td><td class="${cls(k && k.cagr)}"${mark(k && k.cagr, bC)}><b>${k ? pct(k.cagr) : '—'}</b></td><td class="neg"${mark(k && k.mdd, bM)}>${k ? pct(k.mdd) : '—'}</td><td${mark(k && k.calmar, bK)}>${k ? k.calmar.toFixed(2) : '—'}</td><td class="${cls(q.mean)}">${pct(q.mean)}</td><td class="${cls(k && k.worst)}"${mark(k && k.worst, bW)}>${k ? pct(k.worst) + ` <span class="dim small">${k.worstY}</span>` : '—'}</td><td class="pos">${q.best != null ? pct(q.best) + ` <span class="dim small">${q.bestY}</span>` : '—'}</td><td>${q.plus}/${q.n}</td><td class="${cls(q.cur && q.cur.ret)}">${q.cur ? pct(q.cur.ret) + ` <span class="dim small">${pc0(q.cur.mdd)}</span>` : '—'}</td></tr>`; }).join('')}</table></div></div>`;
+  // 연도별 수익 그래프 + 표
+  const series = runs.map((x, i) => ({ color: x.col, wd: 1.8, pts: yrs.map((y, j) => x.R.years[y] ? [j, x.R.years[y].ret] : null).filter(Boolean) }));
+  const allv = [].concat(...series.map(s => s.pts.map(p => p[1]))); const ymin = Math.min(0, ...allv), ymax = Math.max(0, ...allv);
+  h += `<div class="sec"><h3>연도별 수익률 <span class="small muted">${yrs.length && yrs[yrs.length - 1] === Y0.cur ? '마지막 = 진행 중' : ''}</span></h3>${lineChart({ h: 170, series: series.concat([{ color: '#3A4A6A', wd: 1, dash: '3 3', pts: yrs.map((y, j) => [j, 0]) }]), ymin, ymax, ylab: v => pc0(v), xlab: yrs.map((y, j) => [j, String(y % 100) + (y === Y0.cur ? '*' : '')]) })}
+    <div class="tw"><table class="t" style="margin-top:3px"><tr><th class="l">연도</th>${runs.map(x => `<th style="color:${x.col}">${esc(x.name)}</th>`).join('')}</tr>
+    ${yrs.slice().reverse().map(y => { const rs = runs.map(x => x.R.years[y] ? x.R.years[y].ret : null), mx = Math.max(...rs.filter(v => v != null));
+      return `<tr class="${y === Y0.cur ? 'ytd' : ''}"><td class="l">${y}${y === Y0.cur ? '*' : ''}${+c.sm > 1 ? `<span class="dim small"> ${String(y % 100).padStart(2, '0')}.${c.sm}~</span>` : ''}</td>${runs.map((x, i) => { const a = x.R.years[y]; return `<td>${a ? `<b class="${cls(a.ret)}"${runs.length > 1 && rs[i] === mx ? ' style="text-decoration:underline;text-underline-offset:3px"' : ''}>${pct(a.ret)}</b> <span class="dim small">${pc0(a.mdd)}</span>` : '—'}</td>`; }).join('')}</tr>`; }).join('')}</table></div>
+    <div class="small dim">칸 = 수익률 / 그해 MDD · 밑줄 = 그해 가장 좋은 것 · * 진행 중</div></div>`;
+  // 시작월 12개
+  const mk = cmpMonKey(), M = CMP.mon && CMP.mon.key === mk ? CMP.mon.rows : null;
+  h += `<div class="sec"><h3>시작월별 비교 <span class="small muted">1~12월 각각 시작했을 때 · 완료 연도 CAGR / 최악 연도</span><span class="sp"></span><button class="btn sm" data-act="cmp-mon" ${CMP.busy ? 'disabled' : ''}>${CMP.busy ? '계산 중…' : M ? '다시 계산' : '계산하기'}</button></h3>`;
+  if (M) h += `<div class="tw"><table class="t"><tr><th class="l">매매</th><th>평균 CAGR</th><th>무손실 월</th><th>최악</th>${[...Array(12)].map((_, i) => `<th>${i + 1}월</th>`).join('')}</tr>
+    ${M.map(r => `<tr><td class="l tx"><b style="color:${r.col}">●</b> ${esc(r.name)}</td><td class="${cls(r.mean)}"><b>${pct(r.mean)}</b></td><td>${r.ok}/12</td><td class="${cls(r.mn)}">${pct(r.mn)}</td>${r.m.map(x => `<td><span class="${cls(x.c)}">${pc0(x.c)}</span> <span class="small ${x.mn < 0 ? 'neg' : 'dim'}" title="${x.mnY || ''}">${pc0(x.mn)}</span></td>`).join('')}</tr>`).join('')}</table></div><div class="small dim">칸 = CAGR / 그 시작월에서 가장 나빴던 해 수익 (빨강 = 마이너스) · 기간·원금은 위 설정</div>`;
+  else h += `<div class="small dim">${CMP.busy ? '계산 중이에요…' : '누르면 매매마다 12번 계산해요 (몇 초 걸릴 수 있음)'}</div>`;
+  return h + '</div>';
+}
+function cmpMonCompute() { const c = cmpCfg(); if (CMP.busy || !c.items.length) return; CMP.busy = true; render(); const key = cmpMonKey();
+  setTimeout(() => { try { const rows = c.items.map((it, i) => { const ms = []; let name = '';
+        for (let m = 1; m <= 12; m++) { const x = cmpRun(it, m); if (!x) return null; name = x.name; const Y = cmpYears(x.R, m); const fr = Y.full.map(y => x.R.years[y].ret); const mn = fr.length ? Math.min(...fr) : null; ms.push({ c: fr.length ? geo(fr) : null, mn, mnY: mn != null ? Y.full[fr.indexOf(mn)] : null }); }
+        const cs = ms.map(x => x.c).filter(v => v != null), mns = ms.map(x => x.mn).filter(v => v != null);
+        return { name, col: COLORS[i % COLORS.length], m: ms, mean: cs.reduce((a, b) => a + b, 0) / (cs.length || 1), ok: ms.filter(x => x.mn != null && x.mn >= 0).length, mn: mns.length ? Math.min(...mns) : null }; }).filter(Boolean);
+      CMP.mon = { key, rows }; } finally { CMP.busy = false; if (ST.page === 'cmp') render(); } }, 30); }
+
 // ===== 최적화 =====
 const OSPEED = { dongpa: 0.35, dual: 0.9, three: 0.2, threema: 0.2 }; // ms/회 (코어 1개)
 const W_TOK = { t1: 'T1 1%+나머지', eq: '균등', ar: '등차(1:2:3…)', x2: '2배씩' };
@@ -2092,9 +2153,9 @@ function narrowRanges() { const R = RUN; if (!R) return; const L = R.recs.filter
   saveLocal(); toast('상위 ' + top.length + '개가 쓰는 값으로 범위를 좁혔어요'); }
 
 // ===== 라우터·이벤트·시작 =====
-const PAGES = [['dash', '대시보드'], ['bt', '백테스트']].concat(TK === 'SOXL' ? [['bt2', '백테스트2']] : []).concat([ ['opt', '최적화'], ['live', '실전현황'], ['sig', '폭락신호'], ['price', '주가 데이터']]);
+const PAGES = [['dash', '대시보드'], ['cmp', '비교'], ['bt', '백테스트']].concat(TK === 'SOXL' ? [['bt2', '백테스트2']] : []).concat([ ['opt', '최적화'], ['live', '실전현황'], ['sig', '폭락신호'], ['price', '주가 데이터']]);
 function invalidate() { BT.R = null; LIVE.cache = {}; WEEKS = null; }
-function pageHtml() { const p = ST.page; try { return (p === 'bt' || p === 'bt2') ? renderBacktest() : p === 'opt' ? renderOpt() : p === 'live' ? renderLive() : p === 'price' ? renderPrice() : p === 'sig' ? renderSig() : renderDash(); } catch (e) { console.error(e); return `<div class="sec neg">화면 오류: ${esc(e.message)}</div>`; } }
+function pageHtml() { const p = ST.page; try { return (p === 'bt' || p === 'bt2') ? renderBacktest() : p === 'opt' ? renderOpt() : p === 'live' ? renderLive() : p === 'price' ? renderPrice() : p === 'sig' ? renderSig() : p === 'cmp' ? renderCmp() : renderDash(); } catch (e) { console.error(e); return `<div class="sec neg">화면 오류: ${esc(e.message)}</div>`; } }
 function render() {
   $('#nav').innerHTML = PAGES.map(([k, l]) => `<button class="${ST.page === k ? 'on' : ''}" data-act="nav" data-p="${k}">${l}</button>`).join('');
   $('#datadate').textContent = '데이터 ' + ymdFmt(lastYmd()).replace(/-/g, '.');
@@ -2121,6 +2182,10 @@ document.addEventListener('click', async e => {
   switch (a) {
     case 'nav': btSwapTo(b.dataset.p); ST.page = b.dataset.p; saveLocal(); render(); window.scrollTo(0, 0); return;
     case 'cloud': cloudSaveAll(); return;
+    case 'cmp-add': { const v = ($('#cmp-pick') || {}).value || ''; const i = v.indexOf(':'); if (i < 0) return; const it = { k: v.slice(0, i), id: v.slice(i + 1) }; const c = cmpCfg(); if (!c.items.some(x => x.k === it.k && x.id === it.id)) c.items.push(it); saveLocal(); render(); return; }
+    case 'cmp-del': cmpCfg().items.splice(+b.dataset.i, 1); saveLocal(); render(); return;
+    case 'cmp-clear': cmpCfg().items = []; saveLocal(); render(); return;
+    case 'cmp-mon': cmpMonCompute(); return;
     case 'set-pick': { ST.bt.cur = id; const ns = curSet(), o = setOrigin(ns); if (o) { ns.slots = o.map(x => Object.assign(x, { id: uid('s') })); ns.opts = null; } BT.R = null; BT.selY = null; saveLocal(); render(); if (o) toast('저장된 원래 값으로 불러왔어요'); return; }
     case 'set-add': { const nm = prompt('새 설정 이름', '설정 ' + (ST.bt.sets.length + 1)); if (!nm) return; const s = { id: uid('bt'), name: nm, cap: set.cap, sm: 1, y0: set.y0, y1: set.y1, slots: [] }; ST.bt.sets.push(s); ST.bt.cur = s.id; BT.R = null; saveLocal(); render(); return; }
     case 'set-reset': { const o = setOrigin(set); if (!o) return toast('원래 값이 없어요 — 먼저 \'기준 저장\'을 눌러주세요'); if (!confirm(`'${set.name}' 매매법·비중·파라미터를 원래대로 되돌릴까요?`)) return; set.slots = o.map(x => Object.assign(x, { id: uid('s') })); set.opts = null; BT.R = null; saveLocal(); render(); toast('원래대로 되돌렸어요'); return; }
@@ -2216,6 +2281,7 @@ function optSettingsChanged(key) { if (RUN && RUN.done && RUN.k === oKey() && ['
 document.addEventListener('change', e => {
   if (e.target.matches && e.target.matches('[data-act="live-day"]')) { LIVE.daySel = e.target.value; const el = document.getElementById('lv-res'); if (el) el.innerHTML = liveResHtml(curLive()); return; }
   const t = e.target, d = t.dataset || {};
+  if (d.cmp) { const c = cmpCfg(); const v = +String(t.value).replace(/[^0-9.]/g, ''); if (!isFinite(v) || !v) return; c[d.cmp] = v; if (+c.y0 > +c.y1) { if (d.cmp === 'y0') c.y1 = c.y0; else c.y0 = c.y1; } saveLocal(); render(); return; }
   if (d.sp) { const r = applyParamInput(t); if (r && r.struct) { invalidate(); rerenderSlot(d.sp); refreshResults(); } else if (r && (t.type === 'checkbox' || t.tagName === 'SELECT')) { invalidate(); refreshResults(); } return; }
   if (d.preset) { const f = findSlot(d.preset); presetApply(f.slot, t.value); invalidate(); rerenderSlot(d.preset); refreshResults(); return; }
   if (d.opt && (t.type === 'checkbox' || t.tagName === 'SELECT')) { setOpt(d.opt, d.ok, t.type === 'checkbox' ? t.checked : t.value); invalidate(); render(); return; }
