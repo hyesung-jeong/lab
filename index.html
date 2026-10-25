@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>트레이딩 랩 v2.7</title>
+<title>트레이딩 랩 v2.8</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -108,7 +108,7 @@ input.wr{flex:1;min-width:0;height:16px;accent-color:#5AA9FF;margin:0;cursor:poi
 .mbox{background:var(--bg2,#101a2e);border:1px solid #2a3a55;border-radius:10px;padding:10px 13px;max-width:calc(100vw - 16px);box-shadow:0 10px 40px rgba(0,0,0,.5)}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v2.7</span></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v2.8</span></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1189,7 +1189,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v2.7';
+const APP_VER = 'v2.8';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -1223,14 +1223,18 @@ function defaultSlots() { return [
   { id: uid('s'), type: 'three', presetId: 'b_t3', w: 19 }, { id: uid('s'), type: 'dongpa', presetId: 'b_dp1', w: 10 }].map(s => Object.assign(s, { p: clone(BUILTIN.find(b => b.id === s.presetId).p) })); }
 function defaultState() {
   const set = { id: uid('bt'), name: '전체매매', cap: 450000, sm: 1, y0: 2016, y1: 2026, slots: defaultSlots(), opts: null };
-  return { ver: 1, page: 'dash', fee: 0, presets: [], bt: { cur: set.id, sets: [set] }, bt2: { cur: null, sets: [] },
+  return { ver: 1, page: 'dash', fee: 0, presets: [], bt: { cur: set.id, sets: [set] }, bt2: { cur: null, sets: [] }, bt0: { cur: null, sets: [] },
     live: { cur: null, tabs: [] }, cmp: { items: [], sm: 1, y0: 2011, y1: 2026, cap: 450000 }, opt: { strat: 'dongpa', judge: 'rsi', cfg: {}, history: [] }, manual: [], snapAt: 0, savedAt: 0 };
 }
 let ST = null;
-function loadState() { try { const s = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); if (s && s.ver === 1) { if (s.btSwap) { const t = s.bt; s.bt = s.bt2; s.bt2 = t; s.btSwap = false; } return Object.assign(defaultState(), s); } } catch (e) { } return defaultState(); }
-function btSwapTo(p) { // 백테스트2 탭: 화면에 있는 동안만 ST.bt 자리에 bt2 세트를 놓음
-  const want = p === 'bt2'; if (!ST.bt2) ST.bt2 = { cur: null, sets: [] }; if (!!ST.btSwap === want) return; if (want && !ST.bt2.sets.length) return;
-  const t = ST.bt; ST.bt = ST.bt2; ST.bt2 = t; ST.btSwap = want; if (typeof BT !== 'undefined') { BT.R = null; BT.selY = null; } }
+function loadState() { try { const s = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); if (s && s.ver === 1) { if (s.btSwap) { const k = s.btSwap === true ? 'bt2' : s.btSwap; const t = s.bt; s.bt = s[k]; s[k] = t; s.btSwap = false; } return Object.assign(defaultState(), s); } } catch (e) { } return defaultState(); }
+function btSwapTo(p) { // 백테스트0·2 탭: 화면에 있는 동안만 ST.bt 자리에 그 탭의 세트를 놓음 (ST.btSwap = 지금 바꿔 놓은 탭)
+  if (!ST.bt2) ST.bt2 = { cur: null, sets: [] }; if (!ST.bt0) ST.bt0 = { cur: null, sets: [] }; if (ST.btSwap === true) ST.btSwap = 'bt2';
+  const want = (p === 'bt2' || p === 'bt0') ? p : false, cur = ST.btSwap || false; if (cur === want) return;
+  if (cur) { const t = ST.bt; ST.bt = ST[cur]; ST[cur] = t; ST.btSwap = false; }
+  if (want && ST[want].sets.length) { const t = ST.bt; ST.bt = ST[want]; ST[want] = t; ST.btSwap = want; }
+  if (typeof BT !== 'undefined') { BT.R = null; BT.selY = null; } }
+function btGroup(k) { const s = ST.btSwap === true ? 'bt2' : (ST.btSwap || false); if (k === 'bt') return s ? ST[s] : ST.bt; if (s === k) return ST.bt; return ST[k] || { cur: null, sets: [] }; }
 let _saveT = 0;
 function saveLocal() { ST.savedAt = Date.now(); clearTimeout(_saveT); _saveT = setTimeout(() => { try { localStorage.setItem(LS_KEY, JSON.stringify(ST)); } catch (e) { } }, 200); }
 function saveNow() { try { ST.savedAt = Date.now(); localStorage.setItem(LS_KEY, JSON.stringify(ST)); } catch (e) { } }
@@ -1243,7 +1247,7 @@ function cloudHeaders() { return { apikey: SUPABASE_ANON_KEY, Authorization: 'Be
 async function cloudGet(id) { const r = await fetch(SUPABASE_URL + '/rest/v1/configs?id=eq.' + id + '&select=data', { cache: 'no-store', headers: cloudHeaders() }); if (!r.ok) throw new Error('불러오기 ' + r.status); const j = await r.json(); return j.length ? j[0].data : null; }
 async function cloudPut(id, data) { const r = await fetch(SUPABASE_URL + '/rest/v1/configs', { method: 'POST', headers: Object.assign(cloudHeaders(), { Prefer: 'resolution=merge-duplicates' }), body: JSON.stringify([{ id, data, updated_at: new Date().toISOString() }]) }); if (!r.ok) { let t = ''; try { t = await r.text(); } catch (e) { } throw new Error('저장 ' + r.status + ' ' + t.slice(0, 60)); } }
 function setSync(t, bad) { const e = $('#sync'); if (e) { e.textContent = t; e.style.color = bad ? 'var(--rd)' : 'var(--t3)'; } }
-function stateForCloud() { const s = clone(ST); delete s.page; if (s.btSwap) { const t = s.bt; s.bt = s.bt2; s.bt2 = t; } delete s.btSwap; s.opt = Object.assign({}, s.opt, { history: (s.opt.history || []).slice(0, 30) }); return s; }
+function stateForCloud() { const s = clone(ST); delete s.page; if (s.btSwap) { const k = s.btSwap === true ? 'bt2' : s.btSwap; const t = s.bt; s.bt = s[k]; s[k] = t; } delete s.btSwap; s.opt = Object.assign({}, s.opt, { history: (s.opt.history || []).slice(0, 30) }); return s; }
 async function cloudSaveAll() {
   setSync('☁ 저장 중…'); ST.snapAt = Date.now(); saveNow();
   try { await cloudPut(CLOUD_ID, stateForCloud()); setSync('☁ 저장됨 ' + new Date().toTimeString().slice(0, 5)); toast('전체 저장 완료 — 다른 기기는 새로고침하면 이 상태로 열려요'); }
@@ -1287,7 +1291,7 @@ function initInputs() {
 }
 
 // ===== 간단 SVG 차트 =====
-function CW(frac) { const w = Math.min(document.documentElement.clientWidth || window.innerWidth, 1500); const side = w > 900 ? (ST.page === 'opt' ? 346 : (ST.page === 'bt' || ST.page === 'bt2') ? 426 : 0) : 0; const main = w - (w > 900 ? 40 : 28) - side; return Math.max(260, Math.round(main * (frac || 1))); }
+function CW(frac) { const w = Math.min(document.documentElement.clientWidth || window.innerWidth, 1500); const side = w > 900 ? (ST.page === 'opt' ? 346 : (ST.page === 'bt' || ST.page === 'bt2' || ST.page === 'bt0') ? 426 : 0) : 0; const main = w - (w > 900 ? 40 : 28) - side; return Math.max(260, Math.round(main * (frac || 1))); }
 function lineChart(o) { // o:{w,h,series:[{pts:[[x,y]],color,dash,fill}],ymin,ymax,ylab:fn,xlab:[[x,label]],zero}
   const W = o.w || CW(), H = o.h || 140, L = 42, R = 6, T = 6, B = 16;
   let ymin = o.ymin, ymax = o.ymax; if (ymin == null || ymax == null) { let a = Infinity, b = -Infinity; o.series.forEach(s => s.pts.forEach(p => { if (p[1] < a) a = p[1]; if (p[1] > b) b = p[1]; })); if (ymin == null) ymin = a; if (ymax == null) ymax = b; }
@@ -1623,8 +1627,8 @@ function renderLive() {
       <label class="f">시작일<input class="in" type="date" data-lv="start" value="${ymdToIso(t.start)}"></label>
       <label class="f">종료일 <span class="dim">(비우면 최신)</span><input class="in" type="date" data-lv="end" value="${ymdToIso(t.end)}"></label>
       <label class="f" style="grid-column:span 1">자본금${numInput({ v: t.cap, step: 1000, attrs: 'data-lv="cap"' })}</label>
-      <label class="f">백테스트 설정<select class="in" id="lv-from">${ST.bt.sets.map(s => `<option value="${s.id}" ${s.name === t.from ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label>
-      <div class="row" style="align-self:end"><button class="btn" data-act="live-import">설정 가져오기</button><span class="small muted">현재: ${esc(t.from || '—')} · 기준일 ${ymdFmt(L.end)}</span></div></div>${optsBox(liveOpts(t), 'live', false, false)}</div>`;
+      <label class="f">백테스트 설정<select class="in" id="lv-from">${[['bt0', '백테스트0'], ['bt', '백테스트1'], ['bt2', '백테스트2']].map(([g, gl]) => { const ss = btGroup(g).sets || []; return ss.length ? `<optgroup label="${gl}">${ss.map(s => `<option value="${g}:${s.id}" ${s.name === t.from ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</optgroup>` : ''; }).join('')}</select></label>
+      <div class="row" style="align-self:end"><button class="btn" data-act="live-import">설정 가져오기</button><button class="btn" data-act="live-save0" title="지금 이 실전 탭의 매매법·비중·옵션을 백테스트0에 세트로 저장">백테스트0에 저장</button><span class="small muted">현재: ${esc(t.from || '—')} · 기준일 ${ymdFmt(L.end)}</span></div></div>${optsBox(liveOpts(t), 'live', false, false)}</div>`;
   return h + '<div id="lv-res" class="grid">' + liveResHtml(t) + '</div>' + liveSlotsSec(t);
 }
 function liveResHtml(t) { const L = computeLive(t); if (!L.ok) return '<div class="sec">시작일 이후 데이터가 없어요</div>'; let h = ''; const totSh = L.per.reduce((a, p) => a + (p.o ? p.o.shares : 0), 0), totCashS = L.per.reduce((a, p) => a + (p.o ? p.o.cash : 0), 0);
@@ -1812,9 +1816,9 @@ function renderSig() {
 // ===== 비교 탭: 세트·프리셋 2개 이상을 같은 조건(시작월·기간·원금·수수료)으로 연도별 독립 비교 =====
 const CMP = { cache: {}, n: 0, mon: null, busy: false };
 function cmpCfg() { if (!ST.cmp) ST.cmp = { items: [], sm: 1, y0: 2011, y1: 2026, cap: 450000 }; return ST.cmp; }
-function cmpSrc() { const a = ST.btSwap ? ST.bt2 : ST.bt, b = ST.btSwap ? ST.bt : ST.bt2; return { s1: (a && a.sets) || [], s2: (b && b.sets) || [] }; }
-function cmpItem(it) { const { s1, s2 } = cmpSrc();
-  if (it.k === 's' || it.k === 's2') { const s = (it.k === 's' ? s1 : s2).find(x => x.id === it.id); return s ? { name: s.name, tag: it.k === 's' ? '세트' : '세트2', slots: s.slots, opts: s.opts } : null; }
+function cmpSrc() { return { s1: btGroup('bt').sets || [], s2: btGroup('bt2').sets || [], s0: btGroup('bt0').sets || [] }; }
+function cmpItem(it) { const { s1, s2, s0 } = cmpSrc();
+  if (it.k === 's' || it.k === 's2' || it.k === 's0') { const s = (it.k === 's' ? s1 : it.k === 's2' ? s2 : s0).find(x => x.id === it.id); return s ? { name: s.name, tag: it.k === 's' ? '백테1' : it.k === 's2' ? '백테2' : '백테0', slots: s.slots, opts: s.opts } : null; }
   const p = presetById(it.id); return p ? { name: p.name, tag: TYPES[p.type] || '', slots: [{ id: 'cmp_' + p.id, type: p.type, presetId: p.id, w: 100, p: clone(p.p) }], opts: null } : null; }
 function cmpRun(it, sm) { const c = cmpCfg(), r = cmpItem(it); if (!r) return null;
   const key = JSON.stringify([r.slots, r.opts, +c.cap, sm, ST.fee, DATA.length, lastYmd()]);
@@ -1825,8 +1829,8 @@ function cmpYears(R, sm) { const c = cmpCfg(); return setYears({ sm, y0: +c.y0, 
 function cmpMonKey() { const c = cmpCfg(); return JSON.stringify([c.items, c.cap, c.y0, c.y1, ST.fee, DATA.length, c.items.map(it => { const r = cmpItem(it); return r ? [r.slots, r.opts] : null; })]); }
 
 function renderCmp() {
-  const c = cmpCfg(), { s1, s2 } = cmpSrc(), o = (v, t) => `<option value="${v}">${esc(t)}</option>`;
-  const pick = `<select id="cmp-pick" class="in" style="max-width:300px"><optgroup label="백테스트 세트">${s1.map(s => o('s:' + s.id, s.name)).join('')}</optgroup>${s2.length ? `<optgroup label="백테스트2 세트">${s2.map(s => o('s2:' + s.id, s.name)).join('')}</optgroup>` : ''}${['three', 'dongpa', 'dual'].map(t => { const ps = allPresets(t); return ps.length ? `<optgroup label="프리셋 · ${TYPES[t]}">${ps.map(p => o('p:' + p.id, p.name)).join('')}</optgroup>` : ''; }).join('')}</select>`;
+  const c = cmpCfg(), { s1, s2, s0 } = cmpSrc(), o = (v, t) => `<option value="${v}">${esc(t)}</option>`;
+  const pick = `<select id="cmp-pick" class="in" style="max-width:300px">${s0.length ? `<optgroup label="백테스트0 세트">${s0.map(s => o('s0:' + s.id, s.name)).join('')}</optgroup>` : ''}<optgroup label="백테스트1 세트">${s1.map(s => o('s:' + s.id, s.name)).join('')}</optgroup>${s2.length ? `<optgroup label="백테스트2 세트">${s2.map(s => o('s2:' + s.id, s.name)).join('')}</optgroup>` : ''}${['three', 'dongpa', 'dual'].map(t => { const ps = allPresets(t); return ps.length ? `<optgroup label="프리셋 · ${TYPES[t]}">${ps.map(p => o('p:' + p.id, p.name)).join('')}</optgroup>` : ''; }).join('')}</select>`;
   const curY = fiscalYear(lastYmd(), c.sm), yOpts = v => { let s = ''; for (let y = 2011; y <= Math.max(curY, 2026); y++) s += `<option ${y === +v ? 'selected' : ''}>${y}</option>`; return s; };
   const chips = c.items.map((it, i) => { const r = cmpItem(it); return `<span class="chip" style="border-color:${COLORS[i % COLORS.length]}"><b style="color:${COLORS[i % COLORS.length]}">●</b> ${r ? esc(r.name) : '<span class="neg">삭제됨</span>'} <span class="dim small">${r ? r.tag : ''}</span> <button class="btn sm" data-act="cmp-del" data-i="${i}" title="빼기">×</button></span>`; }).join(' ');
   let h = `<div class="sec"><h3>비교 <span class="small muted">세트·프리셋을 같은 조건으로 연도별 독립 비교 · 2개 이상</span></h3>
@@ -2153,9 +2157,9 @@ function narrowRanges() { const R = RUN; if (!R) return; const L = R.recs.filter
   saveLocal(); toast('상위 ' + top.length + '개가 쓰는 값으로 범위를 좁혔어요'); }
 
 // ===== 라우터·이벤트·시작 =====
-const PAGES = [['dash', '대시보드'], ['cmp', '비교'], ['bt', '백테스트']].concat(TK === 'SOXL' ? [['bt2', '백테스트2']] : []).concat([ ['opt', '최적화'], ['live', '실전현황'], ['sig', '폭락신호'], ['price', '주가 데이터']]);
+const PAGES = [['dash', '대시보드'], ['cmp', '비교'], ['bt0', '백테스트0'], ['bt', '백테스트1']].concat(TK === 'SOXL' ? [['bt2', '백테스트2']] : []).concat([ ['opt', '최적화'], ['live', '실전현황'], ['sig', '폭락신호'], ['price', '주가 데이터']]);
 function invalidate() { BT.R = null; LIVE.cache = {}; WEEKS = null; }
-function pageHtml() { const p = ST.page; try { return (p === 'bt' || p === 'bt2') ? renderBacktest() : p === 'opt' ? renderOpt() : p === 'live' ? renderLive() : p === 'price' ? renderPrice() : p === 'sig' ? renderSig() : p === 'cmp' ? renderCmp() : renderDash(); } catch (e) { console.error(e); return `<div class="sec neg">화면 오류: ${esc(e.message)}</div>`; } }
+function pageHtml() { const p = ST.page; try { return (p === 'bt' || p === 'bt2' || p === 'bt0') ? renderBacktest() : p === 'opt' ? renderOpt() : p === 'live' ? renderLive() : p === 'price' ? renderPrice() : p === 'sig' ? renderSig() : p === 'cmp' ? renderCmp() : renderDash(); } catch (e) { console.error(e); return `<div class="sec neg">화면 오류: ${esc(e.message)}</div>`; } }
 function render() {
   $('#nav').innerHTML = PAGES.map(([k, l]) => `<button class="${ST.page === k ? 'on' : ''}" data-act="nav" data-p="${k}">${l}</button>`).join('');
   $('#datadate').textContent = '데이터 ' + ymdFmt(lastYmd()).replace(/-/g, '.');
@@ -2163,7 +2167,7 @@ function render() {
 }
 let _deb = {}; function debounce(k, fn, ms) { clearTimeout(_deb[k]); _deb[k] = setTimeout(fn, ms || 250); }
 function refreshResults() { // 입력 중: 결과 영역만 다시 그림
-  if (ST.page === 'bt' || ST.page === 'bt2') { BT.R = null; debounce('bt', () => { const e = $('#bt-res'); if (e) e.innerHTML = btResults(); refreshSlotMeta(curSet().slots); }); }
+  if (ST.page === 'bt' || ST.page === 'bt2' || ST.page === 'bt0') { BT.R = null; debounce('bt', () => { const e = $('#bt-res'); if (e) e.innerHTML = btResults(); refreshSlotMeta(curSet().slots); }); }
   else if (ST.page === 'live') debounce('lv', () => { const e = $('#lv-res'); if (e) e.innerHTML = liveResHtml(curLive()); refreshSlotMeta(curLive().slots); });
 }
 function refreshSlotMeta(slots) { // 요약줄·비중합만 갱신
@@ -2192,7 +2196,7 @@ document.addEventListener('click', async e => {
     case 'set-mark': if (!confirm(`지금 '${set.name}' 상태를 '원래대로' 기준으로 저장할까요?`)) return; set.orig = clone(set.slots); saveLocal(); toast('기준 저장 완료'); render(); return;
     case 'set-copy': { const s = clone(set); s.id = uid('bt'); s.name = set.name + ' 복사'; s.slots.forEach(x => x.id = uid('s')); s.orig = clone(s.slots); ST.bt.sets.push(s); ST.bt.cur = s.id; BT.R = null; saveLocal(); render(); return; }
     case 'set-ren': { const nm = prompt('설정 이름', set.name); if (!nm) return; set.name = nm; saveLocal(); render(); return; }
-    case 'set-del': if (!confirm(`'${set.name}' 설정을 삭제할까요?`)) return; ST.bt.sets = ST.bt.sets.filter(s => s !== set); ST.bt.cur = ST.bt.sets[0].id; BT.R = null; saveLocal(); render(); return;
+    case 'set-del': if (ST.bt.sets.length <= 1) return toast('마지막 설정은 지울 수 없어요'); if (!confirm(`'${set.name}' 설정을 삭제할까요?`)) return; ST.bt.sets = ST.bt.sets.filter(s => s !== set); ST.bt.cur = ST.bt.sets[0].id; BT.R = null; saveLocal(); render(); return;
     case 'slot-add': { const ty = b.dataset.type; const slots = slotsOf(b.dataset.kind); const ws = slots.reduce((x, s) => x + +s.w, 0);
       if (ty === 'cash') { if (cashOf(slots)) return toast('현금 슬롯은 하나만 둘 수 있어요'); const c = { id: uid('s'), type: 'cash', w: ws < 100 ? +(100 - ws).toFixed(2) : 0, p: {}, lock: false }; slots.push(c); }
       else { const pr = allPresets(ty)[0]; slots.push({ id: uid('s'), type: ty, presetId: pr.id, w: Math.max(0, Math.min(20, 100 - ws)), p: clone(pr.p), open: true }); } saveLocal(); invalidate(); render(); return; }
@@ -2215,8 +2219,12 @@ document.addEventListener('click', async e => {
     case 'live-add': { const nm = prompt('새 실전 이름', '실전 ' + (ST.live.tabs.length + 1)); if (!nm) return; newLiveTab(nm); render(); return; }
     case 'live-ren': { const t = curLive(); const nm = prompt('실전 이름', t.name); if (!nm) return; t.name = nm; saveLocal(); render(); return; }
     case 'live-del': { const t = curLive(); if (!confirm(`'${t.name}' 실전 탭을 삭제할까요?`)) return; ST.live.tabs = ST.live.tabs.filter(x => x !== t); ST.live.cur = ST.live.tabs[0] && ST.live.tabs[0].id; saveLocal(); render(); return; }
-    case 'live-import': { const t = curLive(), src = ST.bt.sets.find(s => s.id === $('#lv-from').value); if (!src) return; if (t.slots.length && !confirm(`'${src.name}' 설정의 매매법·비중으로 바꿀까요?`)) return;
+    case 'live-import': { const t = curLive(), v = $('#lv-from').value, k = v.indexOf(':'), src = k < 0 ? null : (btGroup(v.slice(0, k)).sets || []).find(s => s.id === v.slice(k + 1)); if (!src) return; if (t.slots.length && !confirm(`'${src.name}' 설정의 매매법·비중으로 바꿀까요?`)) return;
       t.slots = clone(src.slots).map(s => Object.assign(s, { id: uid('s'), open: false })); t.opts = clone(src.opts || null); t.from = src.name; saveLocal(); LIVE.cache = {}; render(); toast(`'${src.name}' 설정을 가져왔어요`); return; }
+    case 'live-save0': { const t = curLive(); if (!t || !t.slots.length) return toast('저장할 매매법이 없어요'); const g = btGroup('bt0'); const nm = prompt('백테스트0에 저장할 이름', t.from || t.name); if (!nm) return;
+      const ex = g.sets.find(s => s.name === nm); if (ex && !confirm(`백테스트0에 '${nm}'이 이미 있어요. 덮어쓸까요?`)) return;
+      const ns = { id: ex ? ex.id : uid('bt'), name: nm, cap: +t.cap || 450000, sm: 1, y0: 2011, y1: 2026, opts: clone(t.opts || null), slots: clone(t.slots).map(s => { const x = Object.assign(s, { id: uid('s') }); delete x.open; return x; }) };
+      if (ex) Object.assign(ex, ns); else g.sets.push(ns); if (!g.cur) g.cur = ns.id; t.from = nm; saveLocal(); render(); toast(`백테스트0에 '${nm}' 저장됨`); return; }
     case 'pr-parse': { const r = parsePriceLine($('#pr-line').value); if (!r) return; if (r.d) $('#pr-date').value = ymdToIso(r.d); $$('[data-pr]').forEach((el, i) => { if (isFinite(r.vals[i])) el.value = r.vals[i]; }); return; }
     case 'pr-save': { const d = isoToYmd($('#pr-date').value); if (!/^\d{6}$/.test(d)) return toast('날짜를 확인하세요'); const vals = $$('[data-pr]').map(el => parseNum(el.value));
       const p = rowToManual(d, vals); if (!p.SOXL || !isFinite(p.SOXL.c) || !p.QQQ || !isFinite(p.QQQ.c)) return toast('SOXL 종가와 QQQ 종가는 꼭 넣어주세요');
@@ -2422,7 +2430,7 @@ function seedDpk5() { // 동파 무손실 10월 시작 세트 (회계연도 10�
   BT.R = null; saveLocal(); }
 function seedDpk6() { // 동파 첫 정산일 수정(v2.4) 후 NN10 재최적화 값으로 교체 (1회)
   if (TK !== 'SOXL' || ST.seeded.includes('dpk6')) return; ST.seeded.push('dpk6');
-  const b = BUILTIN.find(x => x.id === 'b_d12'); [ST.bt, ST.bt2].forEach(g => (g && g.sets || []).forEach(set => (set.slots || []).forEach(sl => { if (sl.presetId === 'b_d12') sl.p = clone(b.p); })));
+  const b = BUILTIN.find(x => x.id === 'b_d12'); [ST.bt, ST.bt2, ST.bt0].forEach(g => (g && g.sets || []).forEach(set => (set.slots || []).forEach(sl => { if (sl.presetId === 'b_d12') sl.p = clone(b.p); })));
   BT.R = null; saveLocal(); }
 function seedDpk7() { // 동파 시작월 무관 3세트 (1회)
   if (TK !== 'SOXL' || ST.seeded.includes('dpk7')) return; ST.seeded.push('dpk7');
@@ -2438,16 +2446,21 @@ const BT2_SETS = [["금액하락20 (11~25)", [["b_m1", 25.5], ["b_m2", 28], ["b_
 function seedBt2() { // 백테스트2: 연중 금액하락 기준 세트 (1회)
   if (TK !== 'SOXL' || !BT2_SETS.length) return; if (!ST.bt2) ST.bt2 = { cur: null, sets: [] }; if ((ST.seeded || []).includes('bt2a')) return; ST.seeded.push('bt2a');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-  const tgt = ST.btSwap ? ST.bt : ST.bt2;
+  const tgt = btGroup('bt2');
   BT2_SETS.forEach(([nm, sl]) => { if (!tgt.sets.some(x => x.name === nm)) tgt.sets.push({ id: uid('bt'), name: nm, cap: 250000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   if (!tgt.cur && tgt.sets.length) tgt.cur = tgt.sets[0].id; saveLocal(); }
+function seedBt0() { if (!ST.bt0) ST.bt0 = { cur: null, sets: [] }; if ((ST.seeded || []).includes('bt0a')) return; ST.seeded.push('bt0a');
+  const g = btGroup('bt0'), main = btGroup('bt'); if (g.sets.length) return;
+  (ST.live.tabs || []).filter(t => t.slots && t.slots.length).forEach(t => { const nm = t.from || t.name; if (g.sets.some(s => s.name === nm)) return; g.sets.push({ id: uid('bt'), name: nm, cap: +t.cap || 450000, sm: 1, y0: 2011, y1: 2026, opts: clone(t.opts || null), slots: clone(t.slots).map(s => { const x = Object.assign(s, { id: uid('s') }); delete x.open; return x; }) }); });
+  if (!g.sets.length) { const s = main.sets.find(x => x.id === main.cur) || main.sets[0]; if (s) { const c = clone(s); c.id = uid('bt'); c.slots.forEach(x => x.id = uid('s')); g.sets.push(c); } }
+  g.cur = g.sets.length ? g.sets[0].id : null; saveLocal(); }
 async function boot() {
-  initInputs(); ST = loadState(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedLw(); seedBt2(); btSwapTo(ST.page); buildData(ST.manual); render();
-  setSync('☁ 확인 중…'); const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); }
+  initInputs(); ST = loadState(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedLw(); seedBt2(); seedBt0(); btSwapTo(ST.page); buildData(ST.manual); render();
+  setSync('☁ 확인 중…'); const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); }
   window.addEventListener('beforeunload', () => saveNow());
   let _visBusy = false; document.addEventListener('visibilitychange', async () => { // 앱으로 돌아오면 클라우드 최신본·주가 다시 확인
     if (document.visibilityState !== 'visible' || _visBusy) return; _visBusy = true;
-    try { const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); if (a) toast('다른 기기에서 저장한 최신본을 불러왔어요'); } } finally { _visBusy = false; } });
+    try { const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); if (a) toast('다른 기기에서 저장한 최신본을 불러왔어요'); } } finally { _visBusy = false; } });
   try { const ck = await idbGet('ckpt', 'run'); if (ck && ck.running && ck.cfg) { window._resume = ck; if (ST.page === 'opt') render(); } } catch (e) { }
   let lw = window.innerWidth; window.addEventListener('resize', () => debounce('rs', () => { if (Math.abs(window.innerWidth - lw) < 40) return; lw = window.innerWidth; const a = document.activeElement; if (!a || !a.matches || !a.matches('input')) render(); }, 300));
 }
