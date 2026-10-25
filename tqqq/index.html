@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>트레이딩 랩 TQQQ v2.8</title>
+<title>트레이딩 랩 TQQQ v2.9</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -108,7 +108,7 @@ input.wr{flex:1;min-width:0;height:16px;accent-color:#5AA9FF;margin:0;cursor:poi
 .mbox{background:var(--bg2,#101a2e);border:1px solid #2a3a55;border-radius:10px;padding:10px 13px;max-width:calc(100vw - 16px);box-shadow:0 10px 40px rgba(0,0,0,.5)}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v2.8</span></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v2.9</span></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1189,7 +1189,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v2.8';
+const APP_VER = 'v2.9';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -1696,24 +1696,25 @@ function liveJournal(L) {
 }
 
 // ===== 주가 데이터 =====
-const PF_FIELDS = [['SOXL', 'o', 'SOXL 시가'], ['SOXL', 'c', 'SOXL 종가*'], ['SOXL', 'l', 'SOXL 저가'], ['SOXL', 'h', 'SOXL 고가'], ['TQQQ', 'c', 'TQQQ 종가'], ['TQQQ', 'l', 'TQQQ 저가'], ['TQQQ', 'h', 'TQQQ 고가'], ['QQQ', 'c', 'QQQ 종가*'], ['QQQ', 'l', 'QQQ 저가'], ['SOXX', 'c', 'SOXX 종가'], ['SOXX', 'l', 'SOXX 저가'], ['QLD', 'c', 'QLD 종가'], ['QLD', 'l', 'QLD 저가'], ['QQQ', 'h', 'QQQ 고가']];
+const PF_FIELDS = ['SOXL', 'QQQ', 'TQQQ', 'SOXX', 'QLD'].reduce((a, t) => a.concat([['c', '종가'], ['o', '시가'], ['h', '고가'], ['l', '저가']].map(([k, l]) => [t, k, t + ' ' + l + ((t === 'SOXL' || t === 'QQQ') && k === 'c' ? '*' : '')])), []); // 모든 종목 종가·시가·고가·저가 순
+const PF_ORDER = '종목마다 종가 → 시가 → 고가 → 저가 (SOXL · QQQ · TQQQ · SOXX · QLD 순)';
 function renderPrice() {
   const nd = nextTradingDay(lastYmd()); const baseLast = BASE[BASE.length - 1][0]; const man = new Set(ST.manual.filter(p => p.d > baseLast).map(p => p.d));
   let h = `<div class="grid g2w"><div class="grid" style="align-content:start"><div class="sec"><h3>하루치 입력 <span class="small muted">* 필수 · 저장하면 모든 기기·주가 페이지와 공유(hs-price)</span></h3>
     <div class="grid" style="grid-template-columns:repeat(4,minmax(0,1fr))"><label class="f" style="grid-column:span 2">날짜<input class="in" type="date" id="pr-date" value="${ymdToIso(nd)}"></label><div></div><div></div>
     ${PF_FIELDS.map(([t, k, l]) => `<label class="f">${l}${numInput({ v: '', step: 0.01, attrs: `data-pr="${t}.${k}"` })}</label>`).join('')}</div>
     <div class="row" style="margin-top:5px"><button class="btn pri" data-act="pr-save">저장</button><span class="small muted">SOXL·QQQ 종가만 있어도 모드 계산 가능</span></div></div>
-    <div class="sec"><h3>한 줄 붙여넣기</h3><input class="in" id="pr-line" placeholder="날짜 SOXL시가 종가 저가 고가 TQQQ종가 저가 고가 QQQ종가 저가 SOXX종가 저가 QLD종가 저가 QQQ고가"><div class="row" style="margin-top:4px"><button class="btn" data-act="pr-parse">칸에 채우기</button><span class="small muted">탭·공백·쉼표 구분, 엑셀에서 한 행 복사해도 돼요</span></div></div>
-    <div class="sec"><h3>엑셀 일괄 업로드</h3><input type="file" id="pr-xlsx" accept=".xlsx,.xls,.csv" class="small"><div class="small muted" style="margin-top:3px">열 순서: 날짜, SOXL 시가·종가·저가·고가, TQQQ 종가·저가·고가, QQQ 종가·저가, SOXX 종가·저가, QLD 종가·저가, QQQ 고가 (첫 줄 제목 있어도 됨, 마지막 칸은 없어도 됨)</div></div></div>
-    <div class="grid" style="align-content:start"><div class="sec"><h3>최근 데이터 <span class="small muted">강조 = 직접 입력</span></h3><div class="tw"><table class="t"><tr><th class="l">날짜</th><th>SOXL 시/종/저/고</th><th>QQQ 종/고</th><th>TQQQ</th><th>SOXX</th><th>QLD</th><th>동파</th><th>듀얼</th><th></th></tr>
+    <div class="sec"><h3>한 줄 붙여넣기</h3><input class="in" id="pr-line" placeholder="날짜 SOXL종가 시가 고가 저가 QQQ종가 시가 고가 저가 TQQQ… SOXX… QLD…"><div class="row" style="margin-top:4px"><button class="btn" data-act="pr-parse">칸에 채우기</button><span class="small muted">탭·공백·쉼표 구분 · ${PF_ORDER} · 없는 값은 빈칸 대신 - 로</span></div></div>
+    <div class="sec"><h3>엑셀 일괄 업로드</h3><input type="file" id="pr-xlsx" accept=".xlsx,.xls,.csv" class="small"><div class="small muted" style="margin-top:3px">열 순서: 날짜, 그다음 ${PF_ORDER} — 총 21열 (첫 줄 제목 있어도 됨, 빈 칸은 건너뜀)</div></div></div>
+    <div class="grid" style="align-content:start"><div class="sec"><h3>최근 데이터 <span class="small muted">강조 = 직접 입력</span></h3><div class="tw"><table class="t"><tr><th class="l">날짜</th><th>SOXL 종/시/고/저</th><th>QQQ 종/고/저</th><th>TQQQ</th><th>SOXX</th><th>QLD</th><th>동파</th><th>듀얼</th><th></th></tr>
     ${PRICES.slice(-14).reverse().map(r => { const di = dateIdxMap[r[0]], d = di != null ? DATA[di] : null; const m = man.has(r[0]);
-      return `<tr style="${m ? 'background:#1B2F5A' : ''}"><td class="l">${ymdFmt(r[0])}</td><td>${[1, 2, 3, 4].map(i => r[i] == null ? '—' : nfmt(r[i])).join(' / ')}</td><td>${nfmt(r[8])}${r[14] != null ? ' / ' + nfmt(r[14]) : ''}</td><td>${nfmt(r[5])}</td><td>${nfmt(r[10])}</td><td>${nfmt(r[12])}</td><td>${d ? modeChip('dongpa', d[5]) : ''}</td><td>${d ? modeChip('dual', d[2]) : ''}</td><td>${m ? `<button class="btn sm warn" data-act="pr-del" data-d="${r[0]}">삭제</button>` : ''}</td></tr>`; }).join('')}</table></div></div>
+      return `<tr style="${m ? 'background:#1B2F5A' : ''}"><td class="l">${ymdFmt(r[0])}</td><td>${[2, 1, 4, 3].map(i => r[i] == null ? '—' : nfmt(r[i])).join(' / ')}</td><td>${[8, 14, 9].map(i => r[i] == null ? '—' : nfmt(r[i])).join(' / ')}</td><td>${nfmt(r[5])}</td><td>${nfmt(r[10])}</td><td>${nfmt(r[12])}</td><td>${d ? modeChip('dongpa', d[5]) : ''}</td><td>${d ? modeChip('dual', d[2]) : ''}</td><td>${m ? `<button class="btn sm warn" data-act="pr-del" data-d="${r[0]}">삭제</button>` : ''}</td></tr>`; }).join('')}</table></div></div>
     <div class="sec"><h3>데이터 범위</h3><table class="t"><tr><th class="l">종목</th><th class="l">시작</th><th class="l">마지막</th><th>일수</th></tr>
     ${[['SOXL', 2], ['QQQ', 8], ['QQQ 고가', 14], ['TQQQ', 5], ['SOXX', 10], ['QLD', 12]].map(([n, c]) => { const rs = PRICES.filter(r => r[c] != null); return `<tr><td class="l">${n}</td><td class="l">${rs.length ? ymdFmt(rs[0][0]) : '—'}</td><td class="l">${rs.length ? ymdFmt(rs[rs.length - 1][0]) : '—'}</td><td>${rs.length.toLocaleString()}</td></tr>`; }).join('')}</table>
     <div class="small dim">가상 구간 없이 실제 주가만 사용 · SOXL 2010년은 지표 준비 기간이라 백테스트는 2011년부터</div></div></div></div>`;
   return h;
 }
-function parsePriceLine(s) { const parts = s.trim().split(/[\t,;\s]+/).filter(Boolean); if (!parts.length) return null; let d = null;
+function parsePriceLine(s) { s = String(s).replace(/\s+$/, '').replace(/^\s+/, ''); const parts = s.includes('\t') ? s.split('\t').map(x => x.trim()) : s.split(/[,;\s]+/).filter(Boolean); if (!parts.length) return null; let d = null;
   const first = parts[0]; if (/^\d{4}[-./]\d{1,2}[-./]\d{1,2}$/.test(first)) { const [y, m, dd] = first.split(/[-./]/); d = String(+y % 100).padStart(2, '0') + m.padStart(2, '0') + dd.padStart(2, '0'); parts.shift(); }
   else if (/^\d{6}$/.test(first)) { d = first; parts.shift(); } else if (/^\d{8}$/.test(first)) { d = first.slice(2); parts.shift(); }
   return { d, vals: parts.map(parseNum) }; }
@@ -2313,7 +2314,7 @@ async function importXlsx(file) {
     const wb = XLSX.read(await file.arrayBuffer(), { type: 'array', cellDates: true }); const ws = wb.Sheets[wb.SheetNames[0]]; const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true });
     const baseLast = BASE[BASE.length - 1][0]; const list = [];
     rows.forEach(r => { if (!r || !r.length) return; let d0 = r[0], d = null; if (d0 instanceof Date) d = dateToYmd(new Date(Date.UTC(d0.getFullYear(), d0.getMonth(), d0.getDate()))); else if (typeof d0 === 'number' && d0 > 30000 && d0 < 80000) { const dt = new Date(Date.UTC(1899, 11, 30) + d0 * 86400000); d = dateToYmd(dt); } else if (d0 != null) { const p = parsePriceLine(String(d0)); d = p && p.d; }
-      if (!d || d <= baseLast) return; const vals = r.slice(1, 15).map(parseNum); const m = rowToManual(d, vals); if (m.SOXL && isFinite(m.SOXL.c) && m.QQQ && isFinite(m.QQQ.c)) list.push(m); });
+      if (!d || d <= baseLast) return; const vals = r.slice(1, 1 + PF_FIELDS.length).map(parseNum); const m = rowToManual(d, vals); if (m.SOXL && isFinite(m.SOXL.c) && m.QQQ && isFinite(m.QQQ.c)) list.push(m); });
     if (!list.length) return toast('추가할 행이 없어요 (내장 데이터 이후 날짜만, SOXL·QQQ 종가 필수)', 3500);
     if (!confirm(list.length + '일치 주가를 추가할까요? (' + ymdFmt(list[0].d) + ' ~ ' + ymdFmt(list[list.length - 1].d) + ')')) return; await savePrices(list); render();
   } catch (e) { toast('엑셀 읽기 실패: ' + e.message, 3500); }
