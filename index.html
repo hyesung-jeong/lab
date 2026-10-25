@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>트레이딩 랩 v2.4</title>
+<title>트레이딩 랩 v2.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -63,6 +63,7 @@ table.t{width:100%;border-collapse:collapse}
 .kpi .k{font-size:10px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kpi .v{font:700 16px var(--mono);white-space:nowrap}
 .kpi .s{font-size:10px;color:var(--t4)}
+.kpi .s2{font:600 12px var(--mono);color:var(--t3);display:flex;flex-wrap:wrap;gap:2px 10px;margin-top:1px}.kpi .s2 b{color:#E8EEF8;font-weight:700}.kpi .s2 b.acc{color:var(--ac2)}
 .tabs{display:flex;gap:3px;flex-wrap:wrap;align-items:center}
 .tab{min-height:24px;padding:0 9px;border-radius:999px;border:1px solid var(--bd);background:var(--p1);color:var(--t2);font-size:12px;cursor:pointer;font-weight:600}
 .tab.on{background:var(--acb);border-color:var(--ac);color:#fff}
@@ -107,7 +108,7 @@ input.wr{flex:1;min-width:0;height:16px;accent-color:#5AA9FF;margin:0;cursor:poi
 .mbox{background:var(--bg2,#101a2e);border:1px solid #2a3a55;border-radius:10px;padding:10px 13px;max-width:calc(100vw - 16px);box-shadow:0 10px 40px rgba(0,0,0,.5)}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v2.4</span></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v2.5</span></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1182,7 +1183,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v2.4';
+const APP_VER = 'v2.5';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -1621,7 +1622,7 @@ function renderLive() {
   return h + '<div id="lv-res" class="grid">' + liveResHtml(t) + '</div>' + liveSlotsSec(t);
 }
 function liveResHtml(t) { const L = computeLive(t); if (!L.ok) return '<div class="sec">시작일 이후 데이터가 없어요</div>'; let h = ''; const totSh = L.per.reduce((a, p) => a + (p.o ? p.o.shares : 0), 0), totCashS = L.per.reduce((a, p) => a + (p.o ? p.o.cash : 0), 0);
-  h += `<div class="sec"><div class="kpis k8"><div class="kpi"><div class="k">총자산</div><div class="v">${money(L.total)}</div><div class="s">원금 ${money(t.cap)}</div></div>
+  h += `<div class="sec"><div class="kpis k8"><div class="kpi"><div class="k">총자산 <span class="dim">· 원금 ${money(t.cap)}</span></div><div class="v">${money(L.total)}</div><div class="s2"><span>현금 <b>${money(L.total * L.cash)}</b></span><span>평가 <b class="acc">${money(L.total * (1 - L.cash))}</b></span></div></div>
     <div class="kpi"><div class="k">수익률</div><div class="v ${cls(L.ret)}">${pct(L.ret)}</div><div class="s">${money(L.total - t.cap)}</div></div>
     <div class="kpi"><div class="k">최고 수익률</div><div class="v pos">${pct(L.hiRet)}</div><div class="s">${ymdFmt(L.peakY, true)} · ${money(L.peak)}</div></div>
     <div class="kpi"><div class="k">최저 수익률</div><div class="v ${cls(L.loRet)}">${pct(L.loRet)}</div><div class="s">${ymdFmt(L.loY, true)} · ${money(t.cap * (1 + L.loRet / 100))}</div></div>
