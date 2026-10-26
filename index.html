@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>트레이딩 랩 v3.0</title>
+<title>트레이딩 랩 v3.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -108,7 +108,7 @@ input.wr{flex:1;min-width:0;height:16px;accent-color:#5AA9FF;margin:0;cursor:poi
 .mbox{background:var(--bg2,#101a2e);border:1px solid #2a3a55;border-radius:10px;padding:10px 13px;max-width:calc(100vw - 16px);box-shadow:0 10px 40px rgba(0,0,0,.5)}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v3.0</span></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v3.1</span></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -227,14 +227,14 @@ function fThree(T, md, cap, fee, out) { // T={N:[3], BUY,SELL,HOLD,W: [3][N], co
   const bp = _tp.bp, qty = _tp.qty, cost = _tp.cost, pm = _tp.pm, pt = _tp.pt, pd = _tp.pd, NN = _tp.N, B = _tp.B, S = _tp.S, H = _tp.H, W = _tp.W;
   for (let m = 0; m < 3; m++) { NN[m] = T.N[m]; for (let t = 0; t < 64; t++) { const tt = t < T.N[m] ? t : T.N[m] - 1; B[m * 64 + t] = T.BUY[m][tt]; S[m * 64 + t] = T.SELL[m][tt]; H[m * 64 + t] = T.HOLD[m][tt]; W[m * 64 + t] = t < T.N[m] ? T.W[m][t] : 0; } }
   let ninv = 0;
-  const comp = T.comp || 0.811, loss = T.loss || 0.291; // 사이트 엔진과 동일한 기본값 처리
+  const comp = T.comp || 0.811, loss = T.loss || 0.291, CYC = Math.max(1, (+T.cyc | 0) || 1); let pend = 0, dcnt = 0; // 사이트 엔진과 동일한 기본값 처리
   let s = 0; while (s < n && warm[s]) s++;
   const init = Math.trunc(cap * 100) / 100; let cash = init, base = init, peak = init, ymdd = 0, yStart = init, curY = fy[s];
   for (let i = s; i < n; i++) {
     if (warm[i]) continue;
     if (fy[i] !== curY) { const lc = c[i - 1]; let g = 0; for (let j = 0; j < ninv; j++) g += qty[j] * lc; const ea = Math.trunc((cash + (g - g * TSF) + EPS) * 100) / 100;
       if (curY >= 0 && curY < ny) { out[curY * 2] = (ea / yStart - 1) * 100; out[curY * 2 + 1] = -ymdd * 100; }
-      yStart = init; curY = fy[i]; cash = init; base = init; ninv = 0; peak = init; ymdd = 0; }
+      yStart = init; curY = fy[i]; cash = init; base = init; ninv = 0; peak = init; ymdd = 0; pend = 0; dcnt = 0; }
     const close = c[i], prevClose = i > 0 ? c[i - 1] : close, cm = md[i], tier = ninv + 1, mo = cm * 64;
     let buyQty = 0, buyTarget = 0;
     if (tier <= NN[cm]) { const w = W[mo + tier - 1]; const sd0 = base * w < cash ? base * w : cash; const sd = Math.trunc((sd0 + EPS) * 100) / 100;
@@ -247,7 +247,7 @@ function fThree(T, md, cap, fee, out) { // T={N:[3], BUY,SELL,HOLD,W: [3][N], co
     ninv = k;
     if (buyQty > 0 && close <= buyTarget) { const gr = buyQty * close, cs = gr + gr * FB; if (cs <= cash) { cf -= cs; bp[ninv] = close; qty[ninv] = buyQty; cost[ninv] = cs; pm[ninv] = cm; pt[ninv] = tier; pd[ninv] = 0; ninv++; } }
     cash = Math.trunc((cash + cf + EPS) * 100) / 100; const plf = Math.trunc((pl + EPS) * 100) / 100;
-    if (plf > 0) base += plf * comp; else if (plf < 0) base += plf * loss; base = Math.trunc((base + EPS) * 100) / 100;
+    dcnt++; pend += plf; if (dcnt % CYC === 0) { if (pend > 0) base += pend * comp; else if (pend < 0) base += pend * loss; pend = 0; } base = Math.trunc((base + EPS) * 100) / 100;
     let eq = 0; for (let j = 0; j < ninv; j++) eq += qty[j] * close; eq = Math.trunc((eq + EPS) * 100) / 100;
     const tot = Math.trunc((cash + eq + EPS) * 100) / 100; if (tot > peak) peak = tot; const dd = peak > 0 ? (peak - tot) / peak : 0; if (dd > ymdd) ymdd = dd;
   }
@@ -599,6 +599,7 @@ function runThree(rows, P){
   const TOTAL_SELL_FEE=0.0000278+uFee, FEE_BUY=0+uFee;
 
   let running=trunc2(initCash), cash=running, base=running;
+  const CYC=Math.max(1, (+P.cyc|0) || 1); let pend=0, dcnt=0; // 투자금 갱신 주기(거래일)
   let inv=[]; let peak=running, ymdd=0, ymin=running;
   const tlog=[]; const MODE_KO={SF:'바닥',Middle:'중간',AG:'천장'};
   const warm3=rows.map(r=>r[6]===1);
@@ -620,7 +621,7 @@ function runThree(rows, P){
       const minRet=(ymin/yStart-1)*100;  // 연중 최저 수익률
       yearly[curYear]=[yr,-ymdd*100,maxRet,minRet];
       running=trunc2(initCash); yStart=running; curYear=years[i];
-      cash=running; base=running; inv=[]; peak=running; ymdd=0; ymin=running;
+      cash=running; base=running; inv=[]; peak=running; ymdd=0; ymin=running; pend=0; dcnt=0;
     }
     const close=closes[i]; const prevClose=i>0?closes[i-1]:close; const R=Rs[i];
     const cm=applyMode(R);
@@ -652,8 +653,8 @@ function runThree(rows, P){
         tlog.push({ymd:rows[i][0],act:'매수',tier:'T'+tier,mode:MODE_KO[cm]||cm,reason:'매수',qty:buyQty,price:close,amt:cost}); } }
     cash=trunc2(cash+cf+EPS3);
     const plf=trunc2(pl+EPS3);
-    if(plf>0) base+=plf*(MODES[cm].comp_rate||0.811);
-    else if(plf<0) base+=plf*(MODES[cm].loss_rate||0.291);
+    dcnt++; pend+=plf;
+    if(dcnt%CYC===0){ if(pend>0) base+=pend*(MODES[cm].comp_rate||0.811); else if(pend<0) base+=pend*(MODES[cm].loss_rate||0.291); pend=0; }
     base=trunc2(base+EPS3);
     let eq=0; inv.forEach(p=>eq+=p.qty*close); eq=trunc2(eq+EPS3);
     const total=trunc2(cash+eq+EPS3);
@@ -986,7 +987,7 @@ function engineP(type, p, cap, fee) {
   if (type === 'dual') return { nAtk: +p.nAtk, holdA: +p.holdA, atkBuy: +p.atkBuy, atkBuyNeg: +(p.atkBuyNeg ?? -0.1), sellA: +p.sellA, nDef: +p.nDef, defHold: +p.defHold, defBuy1: +p.defBuy1, defBuy2: +p.defBuy2, defSell: +p.defSell, maN: +p.maN, atkW: p.atkW || '', defW: p.defW || '', initCap: cap, fee };
   const st = {}; ['SF', 'Middle', 'AG'].forEach(m => { const t = p[m], n = +t.n; const ext = (a, d) => { const r = []; for (let i = 0; i < n; i++) r.push(+(a[i] ?? a[a.length - 1] ?? d)); return r; };
     st[m] = { buy: ext(t.buy, 0).map(v => v / 100), sell: ext(t.sell, 0).map(v => v / 100), hold: ext(t.hold, 1), weight: ext(t.weight, 0).map(v => v / 100), comp_rate: p.comp / 100, loss_rate: p.loss / 100 }; });
-  return { settings: st, rsiMin: +p.rsiMin, rsiMax: +p.rsiMax, modeMethod: p.modeMethod, maN: +p.maN || 120, initCap: cap, fee };
+  return { settings: st, rsiMin: +p.rsiMin, rsiMax: +p.rsiMax, modeMethod: p.modeMethod, maN: +p.maN || 120, cyc: +p.cyc || 1, initCap: cap, fee };
 }
 function runEngine(type, P, rows) { rows = rows || DATA; return type === 'dongpa' ? runDongpa(rows, P) : type === 'dual' ? runDual(rows, P) : runThree(rows, P); }
 function presetSummary(type, p) {
@@ -994,7 +995,7 @@ function presetSummary(type, p) {
   if (type === 'dongpa') return p.nPos + '분할·' + p.cycle + ' / 안전 ' + p.safeBuy + '·' + p.safeProfit + '·' + p.safeHold + ' / 공세 ' + p.aggBuy + '·' + p.aggProfit + '·' + p.aggHold;
   if (type === 'dual') return '공격 ' + p.nAtk + '·a' + p.holdA + '·' + p.atkBuy + '·a' + p.sellA + ' / 방어 ' + p.nDef + '·' + p.defHold + '일·' + p.defBuy1 + '·' + p.defBuy2 + '·' + p.defSell + (p.defW ? ' · ' + p.defW : '');
   const f = m => { const t = p[m]; return t.n + '티'; };
-  return (p.modeMethod === 'ma' ? '이격 ' : p.modeMethod === 'srsi' ? 'SOXX RSI ' : 'RSI ') + p.rsiMin + '/' + p.rsiMax + ' · 복리' + p.comp + '/손실' + p.loss + ' · ' + f('SF') + '/' + f('Middle') + '/' + f('AG');
+  return (p.modeMethod === 'ma' ? '이격 ' : p.modeMethod === 'srsi' ? 'SOXX RSI ' : 'RSI ') + p.rsiMin + '/' + p.rsiMax + ' · 복리' + p.comp + '/손실' + p.loss + (+p.cyc > 1 ? ' · 갱신' + p.cyc + '일' : '') + ' · ' + f('SF') + '/' + f('Middle') + '/' + f('AG');
 }
 
 // ===== 워커용 데이터 준비 =====
@@ -1132,14 +1133,14 @@ function fThree(T, md, cap, fee, out) { // T={N:[3], BUY,SELL,HOLD,W: [3][N], co
   const bp = _tp.bp, qty = _tp.qty, cost = _tp.cost, pm = _tp.pm, pt = _tp.pt, pd = _tp.pd, NN = _tp.N, B = _tp.B, S = _tp.S, H = _tp.H, W = _tp.W;
   for (let m = 0; m < 3; m++) { NN[m] = T.N[m]; for (let t = 0; t < 64; t++) { const tt = t < T.N[m] ? t : T.N[m] - 1; B[m * 64 + t] = T.BUY[m][tt]; S[m * 64 + t] = T.SELL[m][tt]; H[m * 64 + t] = T.HOLD[m][tt]; W[m * 64 + t] = t < T.N[m] ? T.W[m][t] : 0; } }
   let ninv = 0;
-  const comp = T.comp || 0.811, loss = T.loss || 0.291; // 사이트 엔진과 동일한 기본값 처리
+  const comp = T.comp || 0.811, loss = T.loss || 0.291, CYC = Math.max(1, (+T.cyc | 0) || 1); let pend = 0, dcnt = 0; // 사이트 엔진과 동일한 기본값 처리
   let s = 0; while (s < n && warm[s]) s++;
   const init = Math.trunc(cap * 100) / 100; let cash = init, base = init, peak = init, ymdd = 0, yStart = init, curY = fy[s];
   for (let i = s; i < n; i++) {
     if (warm[i]) continue;
     if (fy[i] !== curY) { const lc = c[i - 1]; let g = 0; for (let j = 0; j < ninv; j++) g += qty[j] * lc; const ea = Math.trunc((cash + (g - g * TSF) + EPS) * 100) / 100;
       if (curY >= 0 && curY < ny) { out[curY * 2] = (ea / yStart - 1) * 100; out[curY * 2 + 1] = -ymdd * 100; }
-      yStart = init; curY = fy[i]; cash = init; base = init; ninv = 0; peak = init; ymdd = 0; }
+      yStart = init; curY = fy[i]; cash = init; base = init; ninv = 0; peak = init; ymdd = 0; pend = 0; dcnt = 0; }
     const close = c[i], prevClose = i > 0 ? c[i - 1] : close, cm = md[i], tier = ninv + 1, mo = cm * 64;
     let buyQty = 0, buyTarget = 0;
     if (tier <= NN[cm]) { const w = W[mo + tier - 1]; const sd0 = base * w < cash ? base * w : cash; const sd = Math.trunc((sd0 + EPS) * 100) / 100;
@@ -1152,7 +1153,7 @@ function fThree(T, md, cap, fee, out) { // T={N:[3], BUY,SELL,HOLD,W: [3][N], co
     ninv = k;
     if (buyQty > 0 && close <= buyTarget) { const gr = buyQty * close, cs = gr + gr * FB; if (cs <= cash) { cf -= cs; bp[ninv] = close; qty[ninv] = buyQty; cost[ninv] = cs; pm[ninv] = cm; pt[ninv] = tier; pd[ninv] = 0; ninv++; } }
     cash = Math.trunc((cash + cf + EPS) * 100) / 100; const plf = Math.trunc((pl + EPS) * 100) / 100;
-    if (plf > 0) base += plf * comp; else if (plf < 0) base += plf * loss; base = Math.trunc((base + EPS) * 100) / 100;
+    dcnt++; pend += plf; if (dcnt % CYC === 0) { if (pend > 0) base += pend * comp; else if (pend < 0) base += pend * loss; pend = 0; } base = Math.trunc((base + EPS) * 100) / 100;
     let eq = 0; for (let j = 0; j < ninv; j++) eq += qty[j] * close; eq = Math.trunc((eq + EPS) * 100) / 100;
     const tot = Math.trunc((cash + eq + EPS) * 100) / 100; if (tot > peak) peak = tot; const dd = peak > 0 ? (peak - tot) / peak : 0; if (dd > ymdd) ymdd = dd;
   }
@@ -1197,7 +1198,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v3.0';
+const APP_VER = 'v3.1';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -1425,7 +1426,7 @@ function paramPanel(slot) {
     ${ma ? `<label class="f">이평 일수${numInput({ v: p.maN, step: 1, attrs: `data-sp="${sid}" data-k="maN"` })}</label>` : ''}
     <label class="f">${ma ? '바닥 이격%' : 'RSI 바닥'}${numInput({ v: p.rsiMin, step: ma ? 0.25 : 1, neg: ma, attrs: `data-sp="${sid}" data-k="rsiMin"` })}</label>
     <label class="f">${ma ? '천장 이격%' : 'RSI 천장'}${numInput({ v: p.rsiMax, step: ma ? 0.25 : 1, neg: ma, attrs: `data-sp="${sid}" data-k="rsiMax"` })}</label>
-    <label class="f">복리 반영%${numInput({ v: p.comp, step: 1, attrs: `data-sp="${sid}" data-k="comp"` })}</label><label class="f">손실 반영%${numInput({ v: p.loss, step: 1, attrs: `data-sp="${sid}" data-k="loss"` })}</label></div>`;
+    <label class="f">복리 반영%${numInput({ v: p.comp, step: 1, attrs: `data-sp="${sid}" data-k="comp"` })}</label><label class="f">손실 반영%${numInput({ v: p.loss, step: 1, attrs: `data-sp="${sid}" data-k="loss"` })}</label><label class="f" title="이 거래일 수마다 그동안 실현손익 합에 복리/손실 반영% 적용 (시트의 투자금 갱신 주기, 1 = 매일)">갱신 주기(일)${numInput({ v: p.cyc || 1, step: 1, attrs: `data-sp="${sid}" data-k="cyc"` })}</label></div>`;
   h += '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:5px">';
   for (const m of ['SF', 'Middle', 'AG']) { const t = p[m]; const n = +t.n; const ws = t.weight.slice(0, n).reduce((a, b) => a + +b, 0);
     h += `<div style="min-width:0"><div class="row" style="gap:4px"><span class="chip m-${m}">${MODE_KO[m]}</span><span class="small muted">분할</span>${numInput({ v: n, step: 1, w: '54px', attrs: `data-sp="${sid}" data-k="${m}.n" data-struct="1"` })}<span class="small ${Math.abs(ws - 100) > 0.01 ? 'orc' : 'dim'}">비중합 ${+ws.toFixed(2)}%</span></div>
