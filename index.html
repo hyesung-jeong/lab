@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>트레이딩 랩 v3.2</title>
+<title>트레이딩 랩 v3.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -108,7 +108,7 @@ input.wr{flex:1;min-width:0;height:16px;accent-color:#5AA9FF;margin:0;cursor:poi
 .mbox{background:var(--bg2,#101a2e);border:1px solid #2a3a55;border-radius:10px;padding:10px 13px;max-width:calc(100vw - 16px);box-shadow:0 10px 40px rgba(0,0,0,.5)}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v3.2</span></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v3.3</span></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -986,8 +986,15 @@ const BUILTIN = [
   { id: 'b_y4', tk: 'SOXL', type: 'three', name: '새칼마-A(11~26)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 50, rsiMax: 63, comp: 75, loss: 10, cyc: 2, SF: {n: 5, buy: [7.5, 3.5, 3.5, 3.5, 3.5], sell: [-1, 1, 1, 1, 1], hold: [22, 35, 35, 35, 35], weight: [3, 6.5, 13, 26, 51.5]}, Middle: {n: 9, buy: [6.5, 3, 3, 3, 3, 3, 3, 3, 3], sell: [0.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5], hold: [4, 5, 5, 5, 5, 5, 5, 5, 5], weight: [0.5, 0.5, 1, 1.5, 3, 6.5, 12.5, 25, 49.5]}, AG: {n: 4, buy: [7, -2, -2, -2], sell: [-1.5, 0, 0, 0], hold: [60, 8, 8, 8], weight: [40, 30, 20, 10]}} },
   { id: 'b_y5', tk: 'SOXL', type: 'three', name: '새칼마-B(11~26)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 33, rsiMax: 55, comp: 75, loss: 55, SF: {n: 4, buy: [7, 9.5, 9.5, 9.5], sell: [9.5, 9.5, 9.5, 9.5], hold: [14, 5, 5, 5], weight: [40, 30, 20, 10]}, Middle: {n: 4, buy: [4.3, 2.5, 2.5, 2.5], sell: [0, 2.5, 2.5, 2.5], hold: [17, 3, 3, 3], weight: [1, 33, 33, 33]}, AG: {n: 4, buy: [11.5, 6.5, 6.5, 6.5], sell: [9, 0, 0, 0], hold: [14, 5, 5, 5], weight: [6, 7, 8, 29]}} },
   { id: 'b_y6', tk: 'SOXL', type: 'three', name: '새칼마-C(11~26)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 33, rsiMax: 56, comp: 40, loss: 60, cyc: 4, SF: {n: 4, buy: [-2, 9.5, 9.5, 9.5], sell: [10, 1.7, 1.7, 1.7], hold: [19, 3, 3, 3], weight: [40, 30, 20, 10]}, Middle: {n: 4, buy: [2, 2.5, 2.5, 2.5], sell: [9.5, 2.5, 2.5, 2.5], hold: [12, 2, 2, 2], weight: [1, 33, 33, 33]}, AG: {n: 5, buy: [3.5, 6.5, 6.5, 6.5, 6.5], sell: [8, -0.5, -0.5, -0.5, -0.5], hold: [8, 5, 5, 5, 5], weight: [6, 7, 8, 29, 25]}} },
+  // TQQQ 3모드 연합 (매년 MDD 20% 이하·모든 연도 +10% 이상, CAGR 최대)
+  { id: 'b_q7', tk: 'TQQQ', type: 'three', name: 'TQ20M-A(11~25)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 30, rsiMax: 62, comp: 100, loss: 10, SF: {n: 5, buy: [10, 4.2, 4.2, 4.2, 4.2], sell: [10, 4.5, 4.5, 4.5, 4.5], hold: [52, 25, 25, 25, 25], weight: [6.5, 13.5, 20, 26.5, 33.5]}, Middle: {n: 7, buy: [3.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], sell: [10, 9, 9, 9, 9, 9, 9], hold: [10, 5, 5, 5, 5, 5, 5], weight: [1, 1.5, 3, 6.5, 12.5, 25, 50.5]}, AG: {n: 6, buy: [6, -1, -1, -1, -1, -1], sell: [-1, -0.5, -0.5, -0.5, -0.5, -0.5], hold: [60, 8, 8, 8, 8, 8], weight: [28, 24, 19, 14.5, 9.5, 5]}} },
+  { id: 'b_q8', tk: 'TQQQ', type: 'three', name: 'TQ20M-B(11~25)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 53, rsiMax: 58, comp: 100, loss: 10, cyc: 2, SF: {n: 4, buy: [2.5, 8, 8, 8], sell: [9, 10, 10, 10], hold: [19, 35, 35, 35], weight: [6.5, 13.5, 26.5, 53.5]}, Middle: {n: 4, buy: [0, 4.3, 4.3, 4.3], sell: [9.5, 2, 2, 2], hold: [10, 2, 2, 2], weight: [1, 33, 33, 33]}, AG: {n: 5, buy: [0, 4.3, 4.3, 4.3, 4.3], sell: [10, -0.5, -0.5, -0.5, -0.5], hold: [19, 5, 5, 5, 5], weight: [6, 7, 8, 29, 25]}} },
+  { id: 'b_q9', tk: 'TQQQ', type: 'three', name: 'TQ20M-C(11~25)', p: {modeMethod: 'srsi', maN: 120, rsiMin: 35, rsiMax: 56, comp: 100, loss: 25, SF: {n: 4, buy: [3.5, 6.5, 6.5, 6.5], sell: [9.5, 5, 5, 5], hold: [30, 3, 3, 3], weight: [40, 30, 20, 10]}, Middle: {n: 4, buy: [-1, 2, 2, 2], sell: [3, 8, 8, 8], hold: [3, 3, 3, 3], weight: [1, 33, 33, 33]}, AG: {n: 7, buy: [10, 5.5, 5.5, 5.5, 5.5, 5.5, 5.5], sell: [9.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5], hold: [10, 5, 5, 5, 5, 5, 5], weight: [6, 7, 8, 29, 25, 25, 9]}} },
+  { id: 'b_q10', tk: 'TQQQ', type: 'three', name: 'TQ20M-A(11~26)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 30, rsiMax: 62, comp: 100, loss: 10, SF: {n: 5, buy: [9.5, 10.5, 10.5, 10.5, 10.5], sell: [9.5, 4, 4, 4, 4], hold: [25, 35, 35, 35, 35], weight: [3, 6.5, 13, 26, 51.5]}, Middle: {n: 7, buy: [2, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], sell: [10, 9, 9, 9, 9, 9, 9], hold: [17, 5, 5, 5, 5, 5, 5], weight: [1, 1.5, 3, 6.5, 12.5, 25, 50.5]}, AG: {n: 6, buy: [4.9, -1.5, -1.5, -1.5, -1.5, -1.5], sell: [-1, -0.5, -0.5, -0.5, -0.5, -0.5], hold: [60, 8, 8, 8, 8, 8], weight: [28, 24, 19, 14.5, 9.5, 5]}} },
+  { id: 'b_q11', tk: 'TQQQ', type: 'three', name: 'TQ20M-B(11~26)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 53, rsiMax: 59, comp: 100, loss: 10, SF: {n: 4, buy: [2.5, 5.5, 5.5, 5.5], sell: [4.5, 10, 10, 10], hold: [7, 35, 35, 35], weight: [1, 33, 33, 33]}, Middle: {n: 4, buy: [10, 4.2, 4.2, 4.2], sell: [9.5, 1.5, 1.5, 1.5], hold: [6, 3, 3, 3], weight: [6.5, 13.5, 26.5, 53.5]}, AG: {n: 7, buy: [-0.5, 4.2, 4.2, 4.2, 4.2, 4.2, 4.2], sell: [9, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5], hold: [22, 6, 6, 6, 6, 6, 6], weight: [6, 7, 8, 29, 25, 25, 9]}} },
+  { id: 'b_q12', tk: 'TQQQ', type: 'three', name: 'TQ20M-C(11~26)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 35, rsiMax: 56, comp: 100, loss: 15, SF: {n: 4, buy: [2.5, 10, 10, 10], sell: [9.5, 3.7, 3.7, 3.7], hold: [60, 4, 4, 4], weight: [40, 30, 20, 10]}, Middle: {n: 4, buy: [0.5, 2, 2, 2], sell: [6.5, 8, 8, 8], hold: [4, 3, 3, 3], weight: [1, 33, 33, 33]}, AG: {n: 6, buy: [10, 5.5, 5.5, 5.5, 5.5, 5.5], sell: [9.5, 0, 0, 0, 0, 0], hold: [8, 5, 5, 5, 5, 5], weight: [6, 7, 8, 29, 25, 25]}} },
 ];
-const TK_SETS = [["TQQQ 3모드 MDD20", [["b_q1", 63.5], ["b_q2", 15.5], ["b_q3", 21]]], ["TQQQ 3모드 MDD30 (참고)", [["b_q4", 31.5], ["b_q5", 33.5], ["b_q6", 35]]]];
+const TK_SETS = [["TQQQ 3모드 MDD20", [["b_q1", 63.5], ["b_q2", 15.5], ["b_q3", 21]]], ["TQQQ 3모드 MDD30 (참고)", [["b_q4", 31.5], ["b_q5", 33.5], ["b_q6", 35]]], ["TQQQ 3모드 MDD20·최저10 (11~25)", [["b_q7", 56], ["b_q8", 20.5], ["b_q9", 23.5]]], ["TQQQ 3모드 MDD20·최저10 (11~26)", [["b_q10", 55], ["b_q11", 19], ["b_q12", 26]]]];
 // 슬롯 파라미터 → 엔진 P
 function engineP(type, p, cap, fee) {
   if (type === 'dongpa') return { nPos: +p.nPos, cycle: +p.cycle, safeBuy: +p.safeBuy, safeProfit: +p.safeProfit, safeHold: +p.safeHold, aggBuy: +p.aggBuy, aggProfit: +p.aggProfit, aggHold: +p.aggHold, initCap: cap, fee, dblSell: !!p.dblSell, tierW: null };
@@ -1205,7 +1212,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v3.2';
+const APP_VER = 'v3.3';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -1271,7 +1278,7 @@ async function cloudSaveAll() {
 }
 async function cloudInit() {
   try { const c = await cloudGet(CLOUD_ID);
-    if (c && c.ver === 1 && (c.snapAt || 0) > (ST.snapAt || 0)) { const page = ST.page; const man = ST.manual; ST = Object.assign(defaultState(), c); ST.page = page; ST.manual = mergeManual(man, c.manual || []); if (typeof seedSets === 'function') { seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedLw(); if (typeof seedBt2 === 'function') seedBt2(); } saveNow(); setSync('☁ 최신본 불러옴'); return true; }
+    if (c && c.ver === 1 && (c.snapAt || 0) > (ST.snapAt || 0)) { const page = ST.page; const man = ST.manual; ST = Object.assign(defaultState(), c); ST.page = page; ST.manual = mergeManual(man, c.manual || []); if (typeof seedSets === 'function') { seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedTk2(); seedLw(); if (typeof seedBt2 === 'function') seedBt2(); } saveNow(); setSync('☁ 최신본 불러옴'); return true; }
     setSync(c ? '☁ 준비됨' : '☁ 클라우드 비어 있음 · 저장으로 올리기'); } catch (e) { setSync('☁ 오프라인 (' + e.message + ')', true); }
   return false;
 }
@@ -2464,6 +2471,11 @@ function seedCy1() { // 3모드 새균형·새칼마 (1회)
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
   DPK_SETS.filter(([nm]) => /^3모드 새(균형|칼마)/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
+function seedTk2() { // TQQQ 3모드 MDD20·최저10 2세트 (1회)
+  if (typeof TK_SETS === 'undefined' || TK !== 'TQQQ' || ST.seeded.includes('tk2')) return; ST.seeded.push('tk2');
+  const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
+  TK_SETS.filter(([nm]) => /최저10/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
+  BT.R = null; saveLocal(); }
 function seedLw() { // 3모드 저MDD 고점30 추가 (1회, 현금 4.5%는 비중 합 나머지)
   if (TK !== 'SOXL' || ST.seeded.includes('lw1')) return; ST.seeded.push('lw1');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
@@ -2482,7 +2494,7 @@ function seedBt0() { if (!ST.bt0) ST.bt0 = { cur: null, sets: [] }; if ((ST.seed
   if (!g.sets.length) { const s = main.sets.find(x => x.id === main.cur) || main.sets[0]; if (s) { const c = clone(s); c.id = uid('bt'); c.slots.forEach(x => x.id = uid('s')); g.sets.push(c); } }
   g.cur = g.sets.length ? g.sets[0].id : null; saveLocal(); }
 async function boot() {
-  initInputs(); ST = loadState(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedLw(); seedBt2(); seedBt0(); btSwapTo(ST.page); buildData(ST.manual); render();
+  initInputs(); ST = loadState(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedTk2(); seedLw(); seedBt2(); seedBt0(); btSwapTo(ST.page); buildData(ST.manual); render();
   setSync('☁ 확인 중…'); const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); }
   window.addEventListener('beforeunload', () => saveNow());
   let _visBusy = false; document.addEventListener('visibilitychange', async () => { // 앱으로 돌아오면 클라우드 최신본·주가 다시 확인
