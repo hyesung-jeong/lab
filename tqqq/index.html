@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>try{localStorage.setItem('lab_tk','TQQQ')}catch(e){}</script>
-<title>트레이딩 랩 TQQQ v3.5</title>
+<title>트레이딩 랩 TQQQ v3.6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -110,7 +110,7 @@ input.wr{flex:1;min-width:0;height:16px;accent-color:#5AA9FF;margin:0;cursor:poi
 .tksw{display:flex;gap:0;margin-right:6px;border:1px solid var(--ln);border-radius:6px;overflow:hidden;flex:none}.tksw button{background:transparent;border:0;color:var(--t3);font:700 11px var(--mono);padding:3px 8px;cursor:pointer}.tksw button.on{background:#1f6f43;color:#fff}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v3.5</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v3.6</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -218,7 +218,7 @@ function t2(v) { return Math.trunc(v * 100) / 100; }
 function modesOf(ws, fl, ce) { // ws={v:주간값, rowW:행→주 index}
   const v = ws.v, nw = v.length, wm = new Int8Array(nw); let prev = 1;
   for (let i = 0; i < nw; i++) { const pr = (i > 0 && v[i - 1] === v[i - 1]) ? v[i - 1] : (v[i] === v[i] ? v[i] : 50); let m = prev;
-    if (prev === 1) { if (pr > ce) m = 2; else if (pr < fl) m = 0; } else if (prev === 2) { if (pr <= ce) m = 1; } else { if (pr >= fl) m = 1; }
+    m = pr < fl ? 0 : pr <= ce ? 1 : 2; // 만능 시트와 동일 (히스테리시스 없음)
     wm[i] = m; prev = m; }
   const rw = ws.rowW, out = new Int8Array(rw.length).fill(1); for (let r = 0; r < rw.length; r++) if (rw[r] >= 0) out[r] = wm[rw[r]]; return out;
 }
@@ -537,9 +537,7 @@ function rsiModeRows(rows, floorRsi, ceilRsi, src){ const SRC = src || 'QQQ'; //
   // 전주기준 히스테리시스
   const wMode=new Array(order.length).fill('Middle'); let prev='Middle';
   for(let i=0;i<order.length;i++){ const pr = (i>0 && wr[i-1]!=null) ? wr[i-1] : (wr[i]!=null?wr[i]:50); let m=prev;
-    if(prev==='Middle'){ if(pr>ceilRsi) m='AG'; else if(pr<floorRsi) m='SF'; }
-    else if(prev==='AG'){ if(pr<=ceilRsi) m='Middle'; }
-    else if(prev==='SF'){ if(pr>=floorRsi) m='Middle'; }
+    m = pr<floorRsi ? 'SF' : pr<=ceilRsi ? 'Middle' : 'AG'; // 만능 시트와 동일: 전주 값으로 바로 판정 (바닥↔천장 직행 가능)
     wMode[i]=m; prev=m; }
   const kMode={}; order.forEach((k,i)=>kMode[k]=wMode[i]);
   return {order, kMode}; });   // 가상/실제 구간 각각 독립 (RSI·히스테리시스 상태 구간 시작에서 새로)
@@ -562,9 +560,7 @@ function maModeRows(rows, maN, floorPct, ceilPct){
     for(let i=0;i<qc.length;i++){ const ymd=qc[i][0]; const dv=dev[ymd]; if(dv===undefined||dv===null) continue; const k=wk(ymd); if(!(k in weekLast)) order.push(k); weekLast[k]=dv; }
     const weekMode={}; let prev='Middle';
     order.forEach((k,idx)=>{ const pdev = idx>0 ? weekLast[order[idx-1]] : weekLast[k]; let m=prev;
-      if(prev==='Middle'){ if(pdev>C) m='AG'; else if(pdev<F) m='SF'; }
-      else if(prev==='AG'){ if(pdev<=C) m='Middle'; }
-      else if(prev==='SF'){ if(pdev>=F) m='Middle'; }
+      m = pdev<F ? 'SF' : pdev<=C ? 'Middle' : 'AG'; // 만능 시트와 동일 (히스테리시스 없음)
       weekMode[k]=m; prev=m; });
     return {order, weekMode}; });
   // SOXL 각 날짜 → 자기 구간의 그 주 모드 (없으면 직전 주)
@@ -1153,7 +1149,7 @@ function t2(v) { return Math.trunc(v * 100) / 100; }
 function modesOf(ws, fl, ce) { // ws={v:주간값, rowW:행→주 index}
   const v = ws.v, nw = v.length, wm = new Int8Array(nw); let prev = 1;
   for (let i = 0; i < nw; i++) { const pr = (i > 0 && v[i - 1] === v[i - 1]) ? v[i - 1] : (v[i] === v[i] ? v[i] : 50); let m = prev;
-    if (prev === 1) { if (pr > ce) m = 2; else if (pr < fl) m = 0; } else if (prev === 2) { if (pr <= ce) m = 1; } else { if (pr >= fl) m = 1; }
+    m = pr < fl ? 0 : pr <= ce ? 1 : 2; // 만능 시트와 동일 (히스테리시스 없음)
     wm[i] = m; prev = m; }
   const rw = ws.rowW, out = new Int8Array(rw.length).fill(1); for (let r = 0; r < rw.length; r++) if (rw[r] >= 0) out[r] = wm[rw[r]]; return out;
 }
@@ -1229,7 +1225,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v3.5';
+const APP_VER = 'v3.6';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
