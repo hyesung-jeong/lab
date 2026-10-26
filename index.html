@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>트레이딩 랩 v2.9</title>
+<title>트레이딩 랩 v3.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -108,7 +108,7 @@ input.wr{flex:1;min-width:0;height:16px;accent-color:#5AA9FF;margin:0;cursor:poi
 .mbox{background:var(--bg2,#101a2e);border:1px solid #2a3a55;border-radius:10px;padding:10px 13px;max-width:calc(100vw - 16px);box-shadow:0 10px 40px rgba(0,0,0,.5)}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v2.9</span></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v3.0</span></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -520,11 +520,13 @@ function runDual(rows, P){
 }
 
 function _qSeg(){ const v=[], r=[]; for(const x of QQQ_CLOSE){ (x[0]<Q_REAL_START?v:r).push(x); } return [v,r]; }
-function rsiModeRows(rows, floorRsi, ceilRsi){
+let SX_EXTRA = null; // 다음 거래일 모드 판정용 임시 SOXX 행
+function _sxClose(){ const a = PRICES.filter(r => r[10] != null).map(r => [r[0], r[10]]); if (SX_EXTRA) a.push(SX_EXTRA); return a; }
+function rsiModeRows(rows, floorRsi, ceilRsi, src){ const SRC = src || 'QQQ'; // src 'SOXX' = SOXX 주간 RSI
   // QQQ_CLOSE 주간(ISO주 마지막거래일) 종가의 Cutler(SMA14) RSI → 전주기준 히스테리시스 모드, SOXL 날짜 매핑 (엑셀 RSI_3모드와 동일)
   function wk(ymd){ const y=2000+parseInt(ymd.slice(0,2)),mo=parseInt(ymd.slice(2,4)),d=parseInt(ymd.slice(4,6)); const dt=new Date(Date.UTC(y,mo-1,d)); const day=(dt.getUTCDay()+6)%7; dt.setUTCDate(dt.getUTCDate()-day+3); const firstT=new Date(Date.UTC(dt.getUTCFullYear(),0,4)); const wn=1+Math.round(((dt-firstT)/86400000-3+((firstT.getUTCDay()+6)%7))/7); return dt.getUTCFullYear()*100+wn; }
   // QQQ 주간 종가 (ISO주 마지막 거래일)
-  const segs=_qSeg().map(qc=>{ const weekClose={}; const order=[];
+  const segs=(SRC==='SOXX' ? [[], _sxClose()] : _qSeg()).map(qc=>{ const weekClose={}; const order=[];
   for(let i=0;i<qc.length;i++){ const ymd=qc[i][0], c=qc[i][1]; const k=wk(ymd); if(!(k in weekClose)) order.push(k); weekClose[k]=c; }
   const wc=order.map(k=>weekClose[k]);
   // Cutler(SMA14) RSI
@@ -540,7 +542,7 @@ function rsiModeRows(rows, floorRsi, ceilRsi){
   const kMode={}; order.forEach((k,i)=>kMode[k]=wMode[i]);
   return {order, kMode}; });   // 가상/실제 구간 각각 독립 (RSI·히스테리시스 상태 구간 시작에서 새로)
   // SOXL 각 날짜 → 자기 구간의 그 주 모드 (없으면 이전 가장 가까운 주)
-  return rows.map(r=>{ const sg=segs[r[0]<=VIRTUAL_END?0:1]; let k=wk(r[0]); if(k in sg.kMode) return sg.kMode[k]; let best='Middle'; for(let w of sg.order){ if(w<=k) best=sg.kMode[w]; else break; } return best; });
+  return rows.map(r=>{ const sg=segs[(SRC!=='SOXX'&&r[0]<=VIRTUAL_END)?0:1]; let k=wk(r[0]); if(k in sg.kMode) return sg.kMode[k]; let best='Middle'; for(let w of sg.order){ if(w<=k) best=sg.kMode[w]; else break; } return best; });
 }
 function maModeRows(rows, maN, floorPct, ceilPct){
   // QQQ_CLOSE 자체 주간(ISO주 마지막거래일)으로 이평이격→전주기준 히스테리시스 모드 산출(엑셀과 동일), SOXL 날짜에 매핑
@@ -589,7 +591,7 @@ function runThree(rows, P){
   const n=rows.length;
   const closes=rows.map(r=>r[1]);
   const dailyRsi=rows.map(r=>r[3]);
-  const Rs=(P.modeMethod==='ma') ? maModeRows(rows, P.maN||120, P.rsiMin, P.rsiMax) : rsiModeRows(rows, P.rsiMin, P.rsiMax); // 이평선/RSI 히스테리시스 모드
+  const Rs=(P.modeMethod==='ma') ? maModeRows(rows, P.maN||120, P.rsiMin, P.rsiMax) : rsiModeRows(rows, P.rsiMin, P.rsiMax, P.modeMethod==='srsi'?'SOXX':undefined); // 이평선/RSI 히스테리시스 모드
   const years=rows.map(r=>fyOf(r[0]));
   const MODES=P.settings, rsiMin=P.rsiMin, rsiMax=P.rsiMax;
   const FEE=0.0000278, initCash=P.initCap;
@@ -780,12 +782,14 @@ function nextDayModes(threeSlots) {
   return { ymd: nd, newWeek, dongpa, dual, three };
 }
 function threeModeOn(P, ymd) { // ymd(다음 거래일) 기준 3모드 판정: 임시로 QQQ 행을 붙여 같은 로직으로 계산
+  if (P.modeMethod === 'srsi') { const sx = PRICES.filter(r => r[10] != null); const last = sx[sx.length - 1]; if (last && ymd > last[0]) SX_EXTRA = [ymd, last[10]]; _maCache = {};
+    try { return rsiModeRows([[ymd]], P.rsiMin, P.rsiMax, 'SOXX')[0]; } finally { SX_EXTRA = null; _maCache = {}; } }
   const pushed = ymd > QQQ_CLOSE[QQQ_CLOSE.length - 1][0];
   if (pushed) { QQQ_CLOSE.push([ymd, QQQ_CLOSE[QQQ_CLOSE.length - 1][1]]); _maCache = {}; }
   try { const rows = [[ymd]]; return (P.modeMethod === 'ma' ? maModeRows(rows, P.maN || 120, P.rsiMin, P.rsiMax) : rsiModeRows(rows, P.rsiMin, P.rsiMax))[0]; }
   finally { if (pushed) { QQQ_CLOSE.pop(); _maCache = {}; } }
 }
-function threeModeRows(P) { const k = 'm3|' + P.modeMethod + '|' + P.maN + '|' + P.rsiMin + '|' + P.rsiMax + '|' + DATA.length; if (!_maCache[k]) _maCache[k] = P.modeMethod === 'ma' ? maModeRows(DATA, P.maN || 120, P.rsiMin, P.rsiMax) : rsiModeRows(DATA, P.rsiMin, P.rsiMax); return _maCache[k]; }
+function threeModeRows(P) { const k = 'm3|' + P.modeMethod + '|' + P.maN + '|' + P.rsiMin + '|' + P.rsiMax + '|' + DATA.length; if (!_maCache[k]) _maCache[k] = P.modeMethod === 'ma' ? maModeRows(DATA, P.maN || 120, P.rsiMin, P.rsiMax) : rsiModeRows(DATA, P.rsiMin, P.rsiMax, P.modeMethod === 'srsi' ? 'SOXX' : undefined); return _maCache[k]; }
 
 // ===== 다음 거래일 주문 (엔진 종료상태 기준) =====
 const c2 = v => Math.round(v * 100) / 100, ceilC = v => Math.ceil(v * 100 - 1e-7) / 100, floorC = v => Math.floor(v * 100 + 1e-7) / 100, belowC = v => { const f = Math.floor(v * 100 + 1e-7) / 100; return Math.abs(f - v) < 1e-7 ? c2(f - 0.01) : f; };
@@ -970,6 +974,10 @@ const BUILTIN = [
   { id: 'b_d15', tk: 'SOXL', type: 'dongpa', name: '월무관B-①(11~25)', p: {nPos: 9, cycle: 10, safeBuy: 9.5, safeProfit: 0.7, safeHold: 30, aggBuy: 3.5, aggProfit: 3, aggHold: 8, dblSell: false} },
   { id: 'b_d16', tk: 'SOXL', type: 'dongpa', name: '월무관B-②(11~25)', p: {nPos: 7, cycle: 30, safeBuy: 9.5, safeProfit: 0.3, safeHold: 6, aggBuy: -0.5, aggProfit: 1.5, aggHold: 9, dblSell: false} },
   { id: 'b_d17', tk: 'SOXL', type: 'dongpa', name: '월무관-단독(11~25)', p: {nPos: 8, cycle: 10, safeBuy: 9.5, safeProfit: 0.3, safeHold: 8, aggBuy: -0.5, aggProfit: 3, aggHold: 9, dblSell: false} },
+  // 3모드 SOXX 주간 RSI 판정 (2011~2026, 매년 MDD 30% 이하·최저 +10% 이상, CAGR 최대)
+  { id: 'b_x1', tk: 'SOXL', type: 'three', name: 'SX-A(11~26)', p: {modeMethod: 'srsi', maN: 120, rsiMin: 39, rsiMax: 58, comp: 90, loss: 10, SF: {n: 8, buy: [-0.5, 6, 6, 6, 6, 6, 6, 6], sell: [7, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], hold: [45, 35, 35, 35, 35, 35, 35, 35], weight: [0.5, 1, 1.5, 3, 6.5, 12.5, 25, 50]}, Middle: {n: 5, buy: [0.5, 2.5, 2.5, 2.5, 2.5], sell: [3, 5.5, 5.5, 5.5, 5.5], hold: [4, 4, 4, 4, 4], weight: [33.5, 26.5, 20, 13.5, 6.5]}, AG: {n: 4, buy: [8.5, -1, -1, -1], sell: [1.5, 3.5, 3.5, 3.5], hold: [35, 8, 8, 8], weight: [40, 30, 20, 10]}} },
+  { id: 'b_x2', tk: 'SOXL', type: 'three', name: 'SX-B(11~26)', p: {modeMethod: 'srsi', maN: 120, rsiMin: 34, rsiMax: 58, comp: 100, loss: 10, SF: {n: 4, buy: [-1.5, 10, 10, 10], sell: [9.5, -5, -5, -5], hold: [25, 2, 2, 2], weight: [40, 30, 20, 10]}, Middle: {n: 4, buy: [1.5, 2.5, 2.5, 2.5], sell: [4.5, 5.5, 5.5, 5.5], hold: [17, 4, 4, 4], weight: [1, 33, 33, 33]}, AG: {n: 4, buy: [4.5, 6, 6, 6], sell: [10, -4, -4, -4], hold: [38, 10, 10, 10], weight: [10, 20, 30, 40]}} },
+  { id: 'b_x3', tk: 'SOXL', type: 'three', name: 'SX-C(11~26)', p: {modeMethod: 'srsi', maN: 120, rsiMin: 31, rsiMax: 56, comp: 95, loss: 15, SF: {n: 4, buy: [-2, 9.5, 9.5, 9.5], sell: [5, 9, 9, 9], hold: [22, 35, 35, 35], weight: [6.5, 13.5, 26.5, 53.5]}, Middle: {n: 5, buy: [4, -0.5, -0.5, -0.5, -0.5], sell: [0.5, 3, 3, 3, 3], hold: [10, 4, 4, 4, 4], weight: [3, 6.5, 13, 26, 51.5]}, AG: {n: 5, buy: [3.5, 5, 5, 5, 5], sell: [5, 1.5, 1.5, 1.5, 1.5], hold: [8, 5, 5, 5, 5], weight: [6, 7, 8, 29, 25]}} },
 ];
 const TK_SETS = [["TQQQ 3모드 MDD20", [["b_q1", 63.5], ["b_q2", 15.5], ["b_q3", 21]]], ["TQQQ 3모드 MDD30 (참고)", [["b_q4", 31.5], ["b_q5", 33.5], ["b_q6", 35]]]];
 // 슬롯 파라미터 → 엔진 P
@@ -986,7 +994,7 @@ function presetSummary(type, p) {
   if (type === 'dongpa') return p.nPos + '분할·' + p.cycle + ' / 안전 ' + p.safeBuy + '·' + p.safeProfit + '·' + p.safeHold + ' / 공세 ' + p.aggBuy + '·' + p.aggProfit + '·' + p.aggHold;
   if (type === 'dual') return '공격 ' + p.nAtk + '·a' + p.holdA + '·' + p.atkBuy + '·a' + p.sellA + ' / 방어 ' + p.nDef + '·' + p.defHold + '일·' + p.defBuy1 + '·' + p.defBuy2 + '·' + p.defSell + (p.defW ? ' · ' + p.defW : '');
   const f = m => { const t = p[m]; return t.n + '티'; };
-  return (p.modeMethod === 'ma' ? '이격 ' : 'RSI ') + p.rsiMin + '/' + p.rsiMax + ' · 복리' + p.comp + '/손실' + p.loss + ' · ' + f('SF') + '/' + f('Middle') + '/' + f('AG');
+  return (p.modeMethod === 'ma' ? '이격 ' : p.modeMethod === 'srsi' ? 'SOXX RSI ' : 'RSI ') + p.rsiMin + '/' + p.rsiMax + ' · 복리' + p.comp + '/손실' + p.loss + ' · ' + f('SF') + '/' + f('Middle') + '/' + f('AG');
 }
 
 // ===== 워커용 데이터 준비 =====
@@ -1189,7 +1197,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v2.9';
+const APP_VER = 'v3.0';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -1255,7 +1263,7 @@ async function cloudSaveAll() {
 }
 async function cloudInit() {
   try { const c = await cloudGet(CLOUD_ID);
-    if (c && c.ver === 1 && (c.snapAt || 0) > (ST.snapAt || 0)) { const page = ST.page; const man = ST.manual; ST = Object.assign(defaultState(), c); ST.page = page; ST.manual = mergeManual(man, c.manual || []); if (typeof seedSets === 'function') { seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedLw(); if (typeof seedBt2 === 'function') seedBt2(); } saveNow(); setSync('☁ 최신본 불러옴'); return true; }
+    if (c && c.ver === 1 && (c.snapAt || 0) > (ST.snapAt || 0)) { const page = ST.page; const man = ST.manual; ST = Object.assign(defaultState(), c); ST.page = page; ST.manual = mergeManual(man, c.manual || []); if (typeof seedSets === 'function') { seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedLw(); if (typeof seedBt2 === 'function') seedBt2(); } saveNow(); setSync('☁ 최신본 불러옴'); return true; }
     setSync(c ? '☁ 준비됨' : '☁ 클라우드 비어 있음 · 저장으로 올리기'); } catch (e) { setSync('☁ 오프라인 (' + e.message + ')', true); }
   return false;
 }
@@ -1413,7 +1421,7 @@ function paramPanel(slot) {
     return h + '</div></div>';
   }
   const ma = p.modeMethod === 'ma';
-  h += `<div class="pg"><label class="f">모드 판정<select class="in" data-sp="${sid}" data-k="modeMethod" data-txt="1"><option value="rsi" ${!ma ? 'selected' : ''}>RSI (QQQ 주간)</option><option value="ma" ${ma ? 'selected' : ''}>이평선 이격</option></select></label>
+  h += `<div class="pg"><label class="f">모드 판정<select class="in" data-sp="${sid}" data-k="modeMethod" data-txt="1"><option value="rsi" ${p.modeMethod !== 'ma' && p.modeMethod !== 'srsi' ? 'selected' : ''}>RSI (QQQ 주간)</option><option value="srsi" ${p.modeMethod === 'srsi' ? 'selected' : ''}>RSI (SOXX 주간)</option><option value="ma" ${ma ? 'selected' : ''}>이평선 이격</option></select></label>
     ${ma ? `<label class="f">이평 일수${numInput({ v: p.maN, step: 1, attrs: `data-sp="${sid}" data-k="maN"` })}</label>` : ''}
     <label class="f">${ma ? '바닥 이격%' : 'RSI 바닥'}${numInput({ v: p.rsiMin, step: ma ? 0.25 : 1, neg: ma, attrs: `data-sp="${sid}" data-k="rsiMin"` })}</label>
     <label class="f">${ma ? '천장 이격%' : 'RSI 천장'}${numInput({ v: p.rsiMax, step: ma ? 0.25 : 1, neg: ma, attrs: `data-sp="${sid}" data-k="rsiMax"` })}</label>
@@ -2344,7 +2352,7 @@ const CAL_SETS = [["3모드 칼마 MDD20 (11~25)", [["b_c1", 26.5], ["b_c2", 38.
 const HOLD_SETS = [["3모드 검증 칼마 MDD20 (11~24)", [["b_h1", 29.5], ["b_h2", 43], ["b_h3", 27.5]]], ["3모드 검증 CAGR MDD30 (11~24)", [["b_h4", 26.5], ["b_h5", 21], ["b_h6", 52.5]]], ["3모드 검증 CAGR MDD40 (11~24)", [["b_h7", 28], ["b_h8", 39], ["b_h9", 33]]]];
 const ONE_SETS = [["3모드 3종 MDD35 (11~25)", [["b_s6", 60], ["b_s7", 25], ["b_s8", 15]]], ["3모드 3종 MDD40 (11~25)", [["b_s1", 60], ["b_s2", 25], ["b_s3", 15]]], ["3모드 3종 MDD50 (11~25)", [["b_s4", 60], ["b_s5", 25], ["b_s1", 15]]], ["3모드 단독 MDD50 (11~25)", [["b_s4", 100]]], ["3모드 저MDD 고점30 (11~25)", [["b_l1", 28], ["b_l2", 26], ["b_l3", 41.5]]]];
 const REC_SETS = [["추천① 안정형 (11~26)", [["b_t9", 33.5], ["b_t15", 33.5], ["b_s7", 33]]], ["추천② 균형형 (권장, 11~26)", [["b_t15", 33.5], ["b_c2", 33.5], ["b_s4", 33]]], ["추천③ 수익형 (11~26)", [["b_t5", 33.5], ["b_t15", 33.5], ["b_s4", 33]]]];
-const DPK_SETS = [["동파 고점40 연합 (13~26)", [["b_d1", 21], ["b_d2", 79]]], ["동파 최고수익 단독 (11~25)", [["b_d3", 100]]], ["동파 최고수익 연합 (11~25)", [["b_d4", 64], ["b_d5", 36]]], ["동파 무손실 연합 (11~25)", [["b_d7", 53], ["b_d8", 47]]], ["동파 무손실 단독 (11~25)", [["b_d6", 100]]], ["동파 무손실2 연합 (11~25)", [["b_d10", 51.5], ["b_d11", 48.5]]], ["동파 무손실2 단독 (11~25)", [["b_d9", 100]]], ["동파 무손실 단독 10월시작 (11.10~26.09)", [["b_d12", 100]]], ["동파 월무관 연합A (11~25)", [["b_d13", 44.5], ["b_d14", 55.5]]], ["동파 월무관 연합B (11~25)", [["b_d15", 38], ["b_d16", 62]]], ["동파 월무관 단독 (11~25)", [["b_d17", 100]]]];
+const DPK_SETS = [["동파 고점40 연합 (13~26)", [["b_d1", 21], ["b_d2", 79]]], ["동파 최고수익 단독 (11~25)", [["b_d3", 100]]], ["동파 최고수익 연합 (11~25)", [["b_d4", 64], ["b_d5", 36]]], ["동파 무손실 연합 (11~25)", [["b_d7", 53], ["b_d8", 47]]], ["동파 무손실 단독 (11~25)", [["b_d6", 100]]], ["동파 무손실2 연합 (11~25)", [["b_d10", 51.5], ["b_d11", 48.5]]], ["동파 무손실2 단독 (11~25)", [["b_d9", 100]]], ["동파 무손실 단독 10월시작 (11.10~26.09)", [["b_d12", 100]]], ["동파 월무관 연합A (11~25)", [["b_d13", 44.5], ["b_d14", 55.5]]], ["동파 월무관 연합B (11~25)", [["b_d15", 38], ["b_d16", 62]]], ["동파 월무관 단독 (11~25)", [["b_d17", 100]]], ["3모드 SOXX 연합 (11~26)", [["b_x1", 36], ["b_x2", 42.5], ["b_x3", 21.5]]], ["3모드 SOXX 단독 (11~26)", [["b_x2", 100]]]];
 const SOXL_SETS = [["3모드 MDD20 (15~25)", [["b_t21", 25], ["b_t22", 38.5], ["b_t23", 24], ["b_t24", 12.5]]], ["3모드 MDD30 (15~25)", [["b_t25", 40], ["b_t26", 10.5], ["b_t27", 49.5]]], ["3모드 MDD20 (15~26)", [["b_t28", 21], ["b_t29", 42.5], ["b_t30", 22.5], ["b_t31", 14]]], ["3모드 MDD30 (15~26)", [["b_t32", 41.5], ["b_t33", 8.5], ["b_t34", 50]]], ["3모드 MDD30 조합", [["b_t15", 45], ["b_t16", 5.5], ["b_t17", 49.5]]], ["3모드+동파 MDD30 조합", [["b_t18", 38], ["b_t19", 10], ["b_t20", 42], ["b_dp3", 10]]], ["3모드 3개 조합", [["b_t8", 28], ["b_t9", 43], ["b_t10", 29]]], ["3모드 4개 조합", [["b_t11", 25.5], ["b_t12", 38], ["b_t13", 23], ["b_t14", 13.5]]]];
 function setOrigin(set) { // 원래 매매법·비중 (내장 조합은 코드 값, 내가 만든 설정은 '기준 저장' 시점)
   if (set.orig) return clone(set.orig);
@@ -2438,6 +2446,11 @@ function seedDpk7() { // 동파 시작월 무관 3세트 (1회)
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
   DPK_SETS.filter(([nm]) => /^동파 월무관/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
+function seedSx1() { // 3모드 SOXX RSI 2세트 (1회)
+  if (TK !== 'SOXL' || ST.seeded.includes('sx1')) return; ST.seeded.push('sx1');
+  const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
+  DPK_SETS.filter(([nm]) => /^3모드 SOXX/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
+  BT.R = null; saveLocal(); }
 function seedLw() { // 3모드 저MDD 고점30 추가 (1회, 현금 4.5%는 비중 합 나머지)
   if (TK !== 'SOXL' || ST.seeded.includes('lw1')) return; ST.seeded.push('lw1');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
@@ -2456,7 +2469,7 @@ function seedBt0() { if (!ST.bt0) ST.bt0 = { cur: null, sets: [] }; if ((ST.seed
   if (!g.sets.length) { const s = main.sets.find(x => x.id === main.cur) || main.sets[0]; if (s) { const c = clone(s); c.id = uid('bt'); c.slots.forEach(x => x.id = uid('s')); g.sets.push(c); } }
   g.cur = g.sets.length ? g.sets[0].id : null; saveLocal(); }
 async function boot() {
-  initInputs(); ST = loadState(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedLw(); seedBt2(); seedBt0(); btSwapTo(ST.page); buildData(ST.manual); render();
+  initInputs(); ST = loadState(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedLw(); seedBt2(); seedBt0(); btSwapTo(ST.page); buildData(ST.manual); render();
   setSync('☁ 확인 중…'); const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); }
   window.addEventListener('beforeunload', () => saveNow());
   let _visBusy = false; document.addEventListener('visibilitychange', async () => { // 앱으로 돌아오면 클라우드 최신본·주가 다시 확인
