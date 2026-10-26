@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>try{localStorage.setItem('lab_tk','TQQQ')}catch(e){}</script>
-<title>트레이딩 랩 TQQQ v3.4</title>
+<title>트레이딩 랩 TQQQ v3.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -110,7 +110,7 @@ input.wr{flex:1;min-width:0;height:16px;accent-color:#5AA9FF;margin:0;cursor:poi
 .tksw{display:flex;gap:0;margin-right:6px;border:1px solid var(--ln);border-radius:6px;overflow:hidden;flex:none}.tksw button{background:transparent;border:0;color:var(--t3);font:700 11px var(--mono);padding:3px 8px;cursor:pointer}.tksw button.on{background:#1f6f43;color:#fff}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v3.4</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v3.5</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -546,6 +546,10 @@ function rsiModeRows(rows, floorRsi, ceilRsi, src){ const SRC = src || 'QQQ'; //
   // SOXL 각 날짜 → 자기 구간의 그 주 모드 (없으면 이전 가장 가까운 주)
   return rows.map(r=>{ const sg=segs[(SRC!=='SOXX'&&r[0]<=VIRTUAL_END)?0:1]; let k=wk(r[0]); if(k in sg.kMode) return sg.kMode[k]; let best='Middle'; for(let w of sg.order){ if(w<=k) best=sg.kMode[w]; else break; } return best; });
 }
+function momModeRows(rows, N, floorPct, ceilPct){ // 모멘텀 판정(페라리모멘텀 시트의 '이평선'): 전주 마지막 QQQ 종가 / N거래일 전 종가 - 1 → 바닥 < F ≤ 중간 ≤ C < 천장 (히스테리시스 없음)
+  const q=QQQ_CLOSE, wl={}, order=[]; for(let i=N;i<q.length;i++){ const k=_isoWeek(q[i][0]); if(!(k in wl)) order.push(k); wl[k]=(q[i][1]/q[i-N][1]-1)*100; }
+  const wm={}; order.forEach((k,idx)=>{ const pv= idx>0 ? wl[order[idx-1]] : null; wm[k]= pv==null ? 'Middle' : pv<floorPct ? 'SF' : pv<=ceilPct ? 'Middle' : 'AG'; });
+  return rows.map(r=>{ const k=_isoWeek(r[0]); if(k in wm) return wm[k]; let best='Middle'; for(const w of order){ if(w<=k) best=wm[w]; else break; } return best; }); }
 function maModeRows(rows, maN, floorPct, ceilPct){
   // QQQ_CLOSE 자체 주간(ISO주 마지막거래일)으로 이평이격→전주기준 히스테리시스 모드 산출(엑셀과 동일), SOXL 날짜에 매핑
   const cacheKey='mamode'+maN+'_'+floorPct+'_'+ceilPct;
@@ -593,7 +597,7 @@ function runThree(rows, P){
   const n=rows.length;
   const closes=rows.map(r=>r[1]);
   const dailyRsi=rows.map(r=>r[3]);
-  const Rs=(P.modeMethod==='ma') ? maModeRows(rows, P.maN||120, P.rsiMin, P.rsiMax) : rsiModeRows(rows, P.rsiMin, P.rsiMax, P.modeMethod==='srsi'?'SOXX':undefined); // 이평선/RSI 히스테리시스 모드
+  const Rs=(P.modeMethod==='mom') ? momModeRows(rows, P.maN||80, P.rsiMin, P.rsiMax) : (P.modeMethod==='ma') ? maModeRows(rows, P.maN||120, P.rsiMin, P.rsiMax) : rsiModeRows(rows, P.rsiMin, P.rsiMax, P.modeMethod==='srsi'?'SOXX':undefined); // 이평선/RSI 히스테리시스 모드
   const years=rows.map(r=>fyOf(r[0]));
   const MODES=P.settings, rsiMin=P.rsiMin, rsiMax=P.rsiMax;
   const FEE=0.0000278, initCash=P.initCap;
@@ -629,10 +633,10 @@ function runThree(rows, P){
     const cm=applyMode(R);
     const tier=inv.length+1;
     const wlist=MODES[cm].weight;
-    let buyQty=0, buyTarget=0;
+    let buyQty=0, buyTarget=0, seedV=0;
     if(tier<=wlist.length){
       const w=wlist[tier-1];
-      const seed=trunc2(Math.min(base*w,cash)+EPS3);
+      const seed=trunc2(Math.min(base*w,cash)+EPS3); seedV=seed;
       const bRate=tier<=MODES[cm].buy.length?MODES[cm].buy[tier-1]:MODES[cm].buy[MODES[cm].buy.length-1];
       buyTarget=trunc2(prevClose*(1+bRate)+EPS3);
       if(buyTarget>0) buyQty=Math.floor(seed/buyTarget);
@@ -650,7 +654,8 @@ function runThree(rows, P){
       else newInv.push(p);
     });
     inv=newInv;
-    if(buyQty>0 && close<=buyTarget){ const gross=buyQty*close; const cost=gross+gross*FEE_BUY;
+    if(buyQty>0 && close<=buyTarget){ if(P.xr && tier<wlist.length && !MODES[cm].fix){ const bot=Math.floor(buyTarget*(1+P.xr)*100+EPS3)/100, xn=P.xn||4, q0=buyQty; const fq=Math.floor((seedV/bot-seedV/buyTarget)/xn); if(fq>0) for(let k=1;k<xn;k++){ const pz=seedV/(q0+k*fq); if(pz>=bot&&pz>=close) buyQty+=fq; else break; } } // 추가 주문(시트 FIXODC)
+      const gross=buyQty*close; const cost=gross+gross*FEE_BUY;
       if(cost<=cash){ cf-=cost; inv.push({bp:close,qty:buyQty,cost:cost,mode:cm,tier:tier,days:0});
         tlog.push({ymd:rows[i][0],act:'매수',tier:'T'+tier,mode:MODE_KO[cm]||cm,reason:'매수',qty:buyQty,price:close,amt:cost}); } }
     cash=trunc2(cash+cf+EPS3);
@@ -785,6 +790,7 @@ function nextDayModes(threeSlots) {
   return { ymd: nd, newWeek, dongpa, dual, three };
 }
 function threeModeOn(P, ymd) { // ymd(다음 거래일) 기준 3모드 판정: 임시로 QQQ 행을 붙여 같은 로직으로 계산
+  if (P.modeMethod === 'mom') { const pushed = ymd > QQQ_CLOSE[QQQ_CLOSE.length - 1][0]; if (pushed) QQQ_CLOSE.push([ymd, QQQ_CLOSE[QQQ_CLOSE.length - 1][1]]); try { return momModeRows([[ymd]], P.maN || 80, P.rsiMin, P.rsiMax)[0]; } finally { if (pushed) QQQ_CLOSE.pop(); } }
   if (P.modeMethod === 'srsi') { const sx = PRICES.filter(r => r[10] != null); const last = sx[sx.length - 1]; if (last && ymd > last[0]) SX_EXTRA = [ymd, last[10]]; _maCache = {};
     try { return rsiModeRows([[ymd]], P.rsiMin, P.rsiMax, 'SOXX')[0]; } finally { SX_EXTRA = null; _maCache = {}; } }
   const pushed = ymd > QQQ_CLOSE[QQQ_CLOSE.length - 1][0];
@@ -792,7 +798,7 @@ function threeModeOn(P, ymd) { // ymd(다음 거래일) 기준 3모드 판정: �
   try { const rows = [[ymd]]; return (P.modeMethod === 'ma' ? maModeRows(rows, P.maN || 120, P.rsiMin, P.rsiMax) : rsiModeRows(rows, P.rsiMin, P.rsiMax))[0]; }
   finally { if (pushed) { QQQ_CLOSE.pop(); _maCache = {}; } }
 }
-function threeModeRows(P) { const k = 'm3|' + P.modeMethod + '|' + P.maN + '|' + P.rsiMin + '|' + P.rsiMax + '|' + DATA.length; if (!_maCache[k]) _maCache[k] = P.modeMethod === 'ma' ? maModeRows(DATA, P.maN || 120, P.rsiMin, P.rsiMax) : rsiModeRows(DATA, P.rsiMin, P.rsiMax, P.modeMethod === 'srsi' ? 'SOXX' : undefined); return _maCache[k]; }
+function threeModeRows(P) { const k = 'm3|' + P.modeMethod + '|' + P.maN + '|' + P.rsiMin + '|' + P.rsiMax + '|' + DATA.length; if (!_maCache[k]) _maCache[k] = P.modeMethod === 'mom' ? momModeRows(DATA, P.maN || 80, P.rsiMin, P.rsiMax) : P.modeMethod === 'ma' ? maModeRows(DATA, P.maN || 120, P.rsiMin, P.rsiMax) : rsiModeRows(DATA, P.rsiMin, P.rsiMax, P.modeMethod === 'srsi' ? 'SOXX' : undefined); return _maCache[k]; }
 
 // ===== 다음 거래일 주문 (엔진 종료상태 기준) =====
 const c2 = v => Math.round(v * 100) / 100, ceilC = v => Math.ceil(v * 100 - 1e-7) / 100, floorC = v => Math.floor(v * 100 + 1e-7) / 100, belowC = v => { const f = Math.floor(v * 100 + 1e-7) / 100; return Math.abs(f - v) < 1e-7 ? c2(f - 0.01) : f; };
@@ -1002,15 +1008,17 @@ const BUILTIN = [
   { id: 'b_q16', tk: 'TQQQ', type: 'three', name: 'TQ30M-A(11~26)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 50, rsiMax: 60, comp: 100, loss: 50, cyc: 2, SF: {n: 7, buy: [0.5, 4.9, 4.9, 4.9, 4.9, 4.9, 4.9], sell: [1, 2, 2, 2, 2, 2, 2], hold: [60, 19, 19, 19, 19, 19, 19], weight: [1, 1.5, 3, 6.5, 12.5, 25, 50.5]}, Middle: {n: 9, buy: [2, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5], sell: [3, 10, 10, 10, 10, 10, 10, 10, 10], hold: [2, 10, 10, 10, 10, 10, 10, 10, 10], weight: [0.5, 0.5, 1, 1.5, 3, 6.5, 12.5, 25, 49.5]}, AG: {n: 4, buy: [5, -1.5, -1.5, -1.5], sell: [-4.5, 5.5, 5.5, 5.5], hold: [60, 8, 8, 8], weight: [1, 33, 33, 33]}} },
   { id: 'b_q17', tk: 'TQQQ', type: 'three', name: 'TQ30M-B(11~26)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 33, rsiMax: 54, comp: 100, loss: 10, SF: {n: 4, buy: [9.5, 10, 10, 10], sell: [9, 5, 5, 5], hold: [8, 35, 35, 35], weight: [1, 33, 33, 33]}, Middle: {n: 4, buy: [12, 4, 4, 4], sell: [1, 2, 2, 2], hold: [19, 5, 5, 5], weight: [1, 33, 33, 33]}, AG: {n: 4, buy: [-2, 8, 8, 8], sell: [-0.5, 5.5, 5.5, 5.5], hold: [6, 5, 5, 5], weight: [6, 7, 8, 29]}} },
   { id: 'b_q18', tk: 'TQQQ', type: 'three', name: 'TQ30M-C(11~26)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 34, rsiMax: 58, comp: 100, loss: 30, SF: {n: 4, buy: [4.2, -1.5, -1.5, -1.5], sell: [10, 0, 0, 0], hold: [25, 4, 4, 4], weight: [40, 30, 20, 10]}, Middle: {n: 4, buy: [0, 8.5, 8.5, 8.5], sell: [7, 2.4, 2.4, 2.4], hold: [6, 4, 4, 4], weight: [6.5, 13.5, 26.5, 53.5]}, AG: {n: 5, buy: [3.5, 1.5, 1.5, 1.5, 1.5], sell: [7, -1.5, -1.5, -1.5, -1.5], hold: [10, 8, 8, 8, 8], weight: [3, 6.5, 13, 26, 51.5]}} },
+  // 페라리 (페라리모멘텀 시트 파라미터: 모멘텀 80일 1.1/9%, 복리·손실 100%, 갱신 10일, 추가주문 -20%·4건)
+  { id: 'b_fr1', tk: 'TQQQ', type: 'three', name: '페라리', p: {modeMethod: 'mom', maN: 80, rsiMin: 1.1, rsiMax: 9, comp: 100, loss: 100, cyc: 10, xr: -20, xn: 4, SF: {n: 5, weight: [5, 16.7, 16.7, 16.7, 45], buy: [10, -8, -8, -8, 3], sell: [16, 9, 9, 9, 10], hold: [85, 70, 70, 70, 55]}, Middle: {n: 5, weight: [45, 5, 5, 5, 40], buy: [0, -9, -9, -9, 7], sell: [13.5, 9, 9, 9, 17], hold: [90, 50, 50, 50, 55]}, AG: {n: 5, weight: [5, 27.5, 27.5, 27.5, 12.5], buy: [-3.5, -0.5, -0.5, -0.5, -6.5], sell: [11, 5.5, 5.5, 5.5, 13.5], hold: [65, 80, 80, 80, 175]}} },
 ];
-const TK_SETS = [["TQQQ 3모드 MDD20", [["b_q1", 63.5], ["b_q2", 15.5], ["b_q3", 21]]], ["TQQQ 3모드 MDD30 (참고)", [["b_q4", 31.5], ["b_q5", 33.5], ["b_q6", 35]]], ["TQQQ 3모드 MDD20·최저10 (11~25)", [["b_q7", 56], ["b_q8", 20.5], ["b_q9", 23.5]]], ["TQQQ 3모드 MDD20·최저10 (11~26)", [["b_q10", 55], ["b_q11", 19], ["b_q12", 26]]], ["TQQQ 3모드 MDD30·최저10 (11~25)", [["b_q13", 55], ["b_q14", 30], ["b_q15", 15]]], ["TQQQ 3모드 MDD30·최저10 (11~26)", [["b_q16", 33.5], ["b_q17", 61.5], ["b_q18", 5]]]];
+const TK_SETS = [["TQQQ 3모드 MDD20", [["b_q1", 63.5], ["b_q2", 15.5], ["b_q3", 21]]], ["TQQQ 3모드 MDD30 (참고)", [["b_q4", 31.5], ["b_q5", 33.5], ["b_q6", 35]]], ["TQQQ 3모드 MDD20·최저10 (11~25)", [["b_q7", 56], ["b_q8", 20.5], ["b_q9", 23.5]]], ["TQQQ 3모드 MDD20·최저10 (11~26)", [["b_q10", 55], ["b_q11", 19], ["b_q12", 26]]], ["TQQQ 3모드 MDD30·최저10 (11~25)", [["b_q13", 55], ["b_q14", 30], ["b_q15", 15]]], ["TQQQ 3모드 MDD30·최저10 (11~26)", [["b_q16", 33.5], ["b_q17", 61.5], ["b_q18", 5]]], ["페라리 (시트)", [["b_fr1", 100]]]];
 // 슬롯 파라미터 → 엔진 P
 function engineP(type, p, cap, fee) {
   if (type === 'dongpa') return { nPos: +p.nPos, cycle: +p.cycle, safeBuy: +p.safeBuy, safeProfit: +p.safeProfit, safeHold: +p.safeHold, aggBuy: +p.aggBuy, aggProfit: +p.aggProfit, aggHold: +p.aggHold, initCap: cap, fee, dblSell: !!p.dblSell, tierW: null };
   if (type === 'dual') return { nAtk: +p.nAtk, holdA: +p.holdA, atkBuy: +p.atkBuy, atkBuyNeg: +(p.atkBuyNeg ?? -0.1), sellA: +p.sellA, nDef: +p.nDef, defHold: +p.defHold, defBuy1: +p.defBuy1, defBuy2: +p.defBuy2, defSell: +p.defSell, maN: +p.maN, atkW: p.atkW || '', defW: p.defW || '', initCap: cap, fee };
   const st = {}; ['SF', 'Middle', 'AG'].forEach(m => { const t = p[m], n = +t.n; const ext = (a, d) => { const r = []; for (let i = 0; i < n; i++) r.push(+(a[i] ?? a[a.length - 1] ?? d)); return r; };
-    st[m] = { buy: ext(t.buy, 0).map(v => v / 100), sell: ext(t.sell, 0).map(v => v / 100), hold: ext(t.hold, 1), weight: ext(t.weight, 0).map(v => v / 100), comp_rate: p.comp / 100, loss_rate: p.loss / 100 }; });
-  return { settings: st, rsiMin: +p.rsiMin, rsiMax: +p.rsiMax, modeMethod: p.modeMethod, maN: +p.maN || 120, cyc: +p.cyc || 1, initCap: cap, fee };
+    st[m] = { buy: ext(t.buy, 0).map(v => v / 100), sell: ext(t.sell, 0).map(v => v / 100), hold: ext(t.hold, 1), weight: ext(t.weight, 0).map(v => v / 100), comp_rate: p.comp / 100, loss_rate: p.loss / 100, fix: !!t.fix }; });
+  return { settings: st, rsiMin: +p.rsiMin, rsiMax: +p.rsiMax, modeMethod: p.modeMethod, maN: +p.maN || 120, cyc: +p.cyc || 1, xr: (+p.xr || 0) / 100, xn: +p.xn || 4, initCap: cap, fee };
 }
 function runEngine(type, P, rows) { rows = rows || DATA; return type === 'dongpa' ? runDongpa(rows, P) : type === 'dual' ? runDual(rows, P) : runThree(rows, P); }
 function presetSummary(type, p) {
@@ -1018,7 +1026,7 @@ function presetSummary(type, p) {
   if (type === 'dongpa') return p.nPos + '분할·' + p.cycle + ' / 안전 ' + p.safeBuy + '·' + p.safeProfit + '·' + p.safeHold + ' / 공세 ' + p.aggBuy + '·' + p.aggProfit + '·' + p.aggHold;
   if (type === 'dual') return '공격 ' + p.nAtk + '·a' + p.holdA + '·' + p.atkBuy + '·a' + p.sellA + ' / 방어 ' + p.nDef + '·' + p.defHold + '일·' + p.defBuy1 + '·' + p.defBuy2 + '·' + p.defSell + (p.defW ? ' · ' + p.defW : '');
   const f = m => { const t = p[m]; return t.n + '티'; };
-  return (p.modeMethod === 'ma' ? '이격 ' : p.modeMethod === 'srsi' ? 'SOXX RSI ' : 'RSI ') + p.rsiMin + '/' + p.rsiMax + ' · 복리' + p.comp + '/손실' + p.loss + (+p.cyc > 1 ? ' · 갱신' + p.cyc + '일' : '') + ' · ' + f('SF') + '/' + f('Middle') + '/' + f('AG');
+  return (p.modeMethod === 'ma' ? '이격 ' : p.modeMethod === 'mom' ? '모멘텀' + (p.maN || 80) + ' ' : p.modeMethod === 'srsi' ? 'SOXX RSI ' : 'RSI ') + p.rsiMin + '/' + p.rsiMax + ' · 복리' + p.comp + '/손실' + p.loss + (+p.cyc > 1 ? ' · 갱신' + p.cyc + '일' : '') + ' · ' + f('SF') + '/' + f('Middle') + '/' + f('AG');
 }
 
 // ===== 워커용 데이터 준비 =====
@@ -1221,7 +1229,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v3.4';
+const APP_VER = 'v3.5';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -1287,7 +1295,7 @@ async function cloudSaveAll() {
 }
 async function cloudInit() {
   try { const c = await cloudGet(CLOUD_ID);
-    if (c && c.ver === 1 && (c.snapAt || 0) > (ST.snapAt || 0)) { const page = ST.page; const man = ST.manual; ST = Object.assign(defaultState(), c); ST.page = page; ST.manual = mergeManual(man, c.manual || []); if (typeof seedSets === 'function') { seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedTk2(); seedTk3(); seedLw(); if (typeof seedBt2 === 'function') seedBt2(); } saveNow(); setSync('☁ 최신본 불러옴'); return true; }
+    if (c && c.ver === 1 && (c.snapAt || 0) > (ST.snapAt || 0)) { const page = ST.page; const man = ST.manual; ST = Object.assign(defaultState(), c); ST.page = page; ST.manual = mergeManual(man, c.manual || []); if (typeof seedSets === 'function') { seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedTk2(); seedTk3(); seedFr1(); seedLw(); if (typeof seedBt2 === 'function') seedBt2(); } saveNow(); setSync('☁ 최신본 불러옴'); return true; }
     setSync(c ? '☁ 준비됨' : '☁ 클라우드 비어 있음 · 저장으로 올리기'); } catch (e) { setSync('☁ 오프라인 (' + e.message + ')', true); }
   return false;
 }
@@ -1444,12 +1452,12 @@ function paramPanel(slot) {
     if (slot.type === 'dual') h += `<label class="f" style="grid-column:span 2">방어 티어 비중 (/ 구분, 빈칸=균등)<input class="in" data-sp="${sid}" data-k="defW" data-txt="1" value="${esc(p.defW || '')}"></label>`;
     return h + '</div></div>';
   }
-  const ma = p.modeMethod === 'ma';
-  h += `<div class="pg"><label class="f">모드 판정<select class="in" data-sp="${sid}" data-k="modeMethod" data-txt="1"><option value="rsi" ${p.modeMethod !== 'ma' && p.modeMethod !== 'srsi' ? 'selected' : ''}>RSI (QQQ 주간)</option><option value="srsi" ${p.modeMethod === 'srsi' ? 'selected' : ''}>RSI (SOXX 주간)</option><option value="ma" ${ma ? 'selected' : ''}>이평선 이격</option></select></label>
-    ${ma ? `<label class="f">이평 일수${numInput({ v: p.maN, step: 1, attrs: `data-sp="${sid}" data-k="maN"` })}</label>` : ''}
-    <label class="f">${ma ? '바닥 이격%' : 'RSI 바닥'}${numInput({ v: p.rsiMin, step: ma ? 0.25 : 1, neg: ma, attrs: `data-sp="${sid}" data-k="rsiMin"` })}</label>
-    <label class="f">${ma ? '천장 이격%' : 'RSI 천장'}${numInput({ v: p.rsiMax, step: ma ? 0.25 : 1, neg: ma, attrs: `data-sp="${sid}" data-k="rsiMax"` })}</label>
-    <label class="f">복리 반영%${numInput({ v: p.comp, step: 1, attrs: `data-sp="${sid}" data-k="comp"` })}</label><label class="f">손실 반영%${numInput({ v: p.loss, step: 1, attrs: `data-sp="${sid}" data-k="loss"` })}</label><label class="f" title="이 거래일 수마다 그동안 실현손익 합에 복리/손실 반영% 적용 (시트의 투자금 갱신 주기, 1 = 매일)">갱신 주기(일)${numInput({ v: p.cyc || 1, step: 1, attrs: `data-sp="${sid}" data-k="cyc"` })}</label></div>`;
+  const ma = p.modeMethod === 'ma', mo = p.modeMethod === 'mom', pc = ma || mo;
+  h += `<div class="pg"><label class="f">모드 판정<select class="in" data-sp="${sid}" data-k="modeMethod" data-txt="1"><option value="rsi" ${!pc && p.modeMethod !== 'srsi' ? 'selected' : ''}>RSI (QQQ 주간)</option><option value="srsi" ${p.modeMethod === 'srsi' ? 'selected' : ''}>RSI (SOXX 주간)</option><option value="ma" ${ma ? 'selected' : ''}>이평선 이격</option><option value="mom" ${mo ? 'selected' : ''}>모멘텀 (QQQ N일 전 대비)</option></select></label>
+    ${pc ? `<label class="f">${mo ? '모멘텀 일수' : '이평 일수'}${numInput({ v: p.maN, step: 1, attrs: `data-sp="${sid}" data-k="maN"` })}</label>` : ''}
+    <label class="f">${mo ? '바닥 미만%' : ma ? '바닥 이격%' : 'RSI 바닥'}${numInput({ v: p.rsiMin, step: pc ? 0.25 : 1, neg: pc, attrs: `data-sp="${sid}" data-k="rsiMin"` })}</label>
+    <label class="f">${mo ? '천장 초과%' : ma ? '천장 이격%' : 'RSI 천장'}${numInput({ v: p.rsiMax, step: pc ? 0.25 : 1, neg: pc, attrs: `data-sp="${sid}" data-k="rsiMax"` })}</label>
+    <label class="f">복리 반영%${numInput({ v: p.comp, step: 1, attrs: `data-sp="${sid}" data-k="comp"` })}</label><label class="f">손실 반영%${numInput({ v: p.loss, step: 1, attrs: `data-sp="${sid}" data-k="loss"` })}</label><label class="f" title="이 거래일 수마다 그동안 실현손익 합에 복리/손실 반영% 적용 (시트의 투자금 갱신 주기, 1 = 매일)">갱신 주기(일)${numInput({ v: p.cyc || 1, step: 1, attrs: `data-sp="${sid}" data-k="cyc"` })}</label><label class="f" title="0 = 끔. 예 -20: 주문가 아래 -20% 범위까지 추가 LOC 주문 (시트의 추가 매수 범위, 정량매수 해제와 같음). 마지막 티어는 추가 주문 없음">추가주문 범위%${numInput({ v: p.xr || 0, step: 1, neg: true, attrs: `data-sp="${sid}" data-k="xr"` })}</label><label class="f" title="기본 주문 포함 주문 건수 (시트의 추가 주문 건수 고정)">추가주문 건수${numInput({ v: p.xn || 4, step: 1, attrs: `data-sp="${sid}" data-k="xn"` })}</label></div>`;
   h += '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:5px">';
   for (const m of ['SF', 'Middle', 'AG']) { const t = p[m]; const n = +t.n; const ws = t.weight.slice(0, n).reduce((a, b) => a + +b, 0);
     h += `<div style="min-width:0"><div class="row" style="gap:4px"><span class="chip m-${m}">${MODE_KO[m]}</span><span class="small muted">분할</span>${numInput({ v: n, step: 1, w: '54px', attrs: `data-sp="${sid}" data-k="${m}.n" data-struct="1"` })}<span class="small ${Math.abs(ws - 100) > 0.01 ? 'orc' : 'dim'}">비중합 ${+ws.toFixed(2)}%</span></div>
@@ -1462,7 +1470,7 @@ function applyParamInput(el) { // 입력값 → slot.p
   const f = findSlot(el.dataset.sp); if (!f) return false; const s = f.slot, k = el.dataset.k;
   let v; if (el.type === 'checkbox') v = el.checked; else if (el.dataset.txt) v = el.value; else { v = parseNum(el.value); if (!isFinite(v)) { el.classList.add('bad'); return false; } el.classList.remove('bad'); }
   const parts = k.split('.');
-  if (parts.length === 1) { if (k === 'modeMethod' && s.p.modeMethod !== v) { s.p.rsiMin = v === 'ma' ? -1.25 : 36; s.p.rsiMax = v === 'ma' ? 5.75 : 60; s.p.maN = s.p.maN || 120; } s.p[k] = v; }
+  if (parts.length === 1) { if (k === 'modeMethod' && s.p.modeMethod !== v) { s.p.rsiMin = v === 'ma' ? -1.25 : v === 'mom' ? 1.1 : 36; s.p.rsiMax = v === 'ma' ? 5.75 : v === 'mom' ? 9 : 60; s.p.maN = v === 'mom' ? 80 : (s.p.maN || 120); } s.p[k] = v; }
   else if (parts.length === 2) { const t = s.p[parts[0]]; const n = Math.max(1, Math.min(20, Math.round(v))); const o = t.n; t.n = n;
     ['buy', 'sell', 'hold', 'weight'].forEach(fk => { while (t[fk].length < n) t[fk].push(fk === 'weight' ? 0 : t[fk][t[fk].length - 1] ?? (fk === 'hold' ? 1 : 0)); t[fk] = t[fk].slice(0, n); });
     if (n !== o && t.weight.every(x => x === 0 || x === t.weight[0])) t.weight = Array(n).fill(+(100 / n).toFixed(2)); }
@@ -2493,6 +2501,10 @@ function seedTk3() { // TQQQ 3모드 MDD30·최저10 2세트 (1회)
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
   TK_SETS.filter(([nm]) => /MDD30·최저10/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
+function seedFr1() { // 페라리 (TQQQ) 1세트
+  if (typeof TK_SETS === 'undefined' || TK !== 'TQQQ' || ST.seeded.includes('fr1')) return; ST.seeded.push('fr1');
+  const b = BUILTIN.find(x => x.id === 'b_fr1'); if (!b || ST.bt.sets.some(x => x.name === '페라리 (시트)')) return;
+  ST.bt.sets.push({ id: uid('bt'), name: '페라리 (시트)', cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: [{ id: uid('s'), type: b.type, presetId: b.id, w: 100, p: clone(b.p) }] }); BT.R = null; saveLocal(); }
 function seedLw() { // 3모드 저MDD 고점30 추가 (1회, 현금 4.5%는 비중 합 나머지)
   if (TK !== 'SOXL' || ST.seeded.includes('lw1')) return; ST.seeded.push('lw1');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
@@ -2511,7 +2523,7 @@ function seedBt0() { if (!ST.bt0) ST.bt0 = { cur: null, sets: [] }; if ((ST.seed
   if (!g.sets.length) { const s = main.sets.find(x => x.id === main.cur) || main.sets[0]; if (s) { const c = clone(s); c.id = uid('bt'); c.slots.forEach(x => x.id = uid('s')); g.sets.push(c); } }
   g.cur = g.sets.length ? g.sets[0].id : null; saveLocal(); }
 async function boot() {
-  initInputs(); ST = loadState(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedTk2(); seedTk3(); seedLw(); seedBt2(); seedBt0(); btSwapTo(ST.page); buildData(ST.manual); render();
+  initInputs(); ST = loadState(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedTk2(); seedTk3(); seedFr1(); seedLw(); seedBt2(); seedBt0(); btSwapTo(ST.page); buildData(ST.manual); render();
   setSync('☁ 확인 중…'); const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); }
   window.addEventListener('beforeunload', () => saveNow());
   let _visBusy = false; document.addEventListener('visibilitychange', async () => { // 앱으로 돌아오면 클라우드 최신본·주가 다시 확인
