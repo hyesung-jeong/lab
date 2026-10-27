@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>try{localStorage.setItem('lab_tk','TQQQ')}catch(e){}</script>
-<title>트레이딩 랩 TQQQ v4.0</title>
+<title>트레이딩 랩 TQQQ v4.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -110,7 +110,7 @@ input.wr{flex:1;min-width:0;height:16px;accent-color:#5AA9FF;margin:0;cursor:poi
 .tksw{display:flex;gap:0;margin-right:6px;border:1px solid var(--ln);border-radius:6px;overflow:hidden;flex:none}.tksw button{background:transparent;border:0;color:var(--t3);font:700 11px var(--mono);padding:3px 8px;cursor:pointer}.tksw button.on{background:#1f6f43;color:#fff}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v4.0</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v4.1</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1218,7 +1218,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v4.0';
+const APP_VER = 'v4.1';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -1275,7 +1275,7 @@ function saveLocal() { ST.savedAt = Date.now(); clearTimeout(_saveT); _saveT = s
 function saveNow() { clearTimeout(_saveT); ST.savedAt = Date.now(); lsWrite(); }
 // 다른 탭(창)에서 더 최근에 저장했으면 그 상태를 받아옴 → 열어둔 예전 탭이 최신 설정을 덮어쓰지 않게
 function lsNewer() { try { const j = localStorage.getItem(LS_KEY); if (!j) return null; const s = JSON.parse(j); return s && s.ver === 1 && (s.savedAt || 0) > (ST.savedAt || 0) ? s : null; } catch (e) { return null; } }
-function adoptLocal() { if (!lsNewer()) return false; const page = ST.page; ST = loadState(); ST.page = page; if (typeof btSwapTo === 'function') btSwapTo(ST.page); if (typeof invalidate === 'function') invalidate(); if (typeof render === 'function') render(); return true; }
+function adoptLocal() { if (!lsNewer()) return false; const page = ST.page; ST = loadState(); ST.page = page; if (typeof fixSlotIds === 'function') fixSlotIds(); if (typeof btSwapTo === 'function') btSwapTo(ST.page); if (typeof invalidate === 'function') invalidate(); if (typeof render === 'function') render(); return true; }
 function allPresets(type) { return BUILTIN.filter(b => !b.tk || b.tk === TK).filter(b => !type || b.type === type).concat(ST.presets.filter(p => !type || p.type === type)); }
 function presetById(id) { return allPresets().find(p => p.id === id); }
 function slotName(s) { if (s.type === 'cash') return '현금'; const p = presetById(s.presetId); return (s.name || (p ? p.name : TYPES[s.type])) + (s.modified ? '*' : ''); }
@@ -1293,7 +1293,7 @@ async function cloudSaveAll() {
 }
 async function cloudInit() {
   try { const c = await cloudGet(CLOUD_ID);
-    if (c && c.ver === 1 && (c.snapAt || 0) > (ST.snapAt || 0)) { const page = ST.page; const man = ST.manual; ST = Object.assign(defaultState(), c); ST.page = page; ST.manual = mergeManual(man, c.manual || []); if (typeof seedSets === 'function') { seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedTk2(); seedTk3(); seedFr1(); seedLw(); if (typeof seedBt2 === 'function') seedBt2(); } saveNow(); setSync('☁ 최신본 불러옴'); return true; }
+    if (c && c.ver === 1 && (c.snapAt || 0) > (ST.snapAt || 0)) { const page = ST.page; const man = ST.manual; ST = Object.assign(defaultState(), c); ST.page = page; if (typeof fixSlotIds === 'function') fixSlotIds(); ST.manual = mergeManual(man, c.manual || []); if (typeof seedSets === 'function') { seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedTk2(); seedTk3(); seedFr1(); seedLw(); if (typeof seedBt2 === 'function') seedBt2(); } saveNow(); setSync('☁ 최신본 불러옴'); return true; }
     setSync(c ? '☁ 준비됨' : '☁ 클라우드 비어 있음 · 저장으로 올리기'); } catch (e) { setSync('☁ 오프라인 (' + e.message + ')', true); }
   return false;
 }
@@ -1360,8 +1360,13 @@ function barChart(o) { // o:{items:[{label,v,color,op}],h}
 
 // ===== 백테스트: 계산 =====
 function curSet() { return ST.bt.sets.find(s => s.id === ST.bt.cur) || ST.bt.sets[0]; }
-function findSlot(id) { for (const s of ST.bt.sets) { const x = s.slots.find(z => z.id === id); if (x) return { slot: x, owner: s, kind: 'bt' }; }
-  for (const t of ST.live.tabs) { const x = t.slots.find(z => z.id === id); if (x) return { slot: x, owner: t, kind: 'live' }; } return null; }
+function findSlot(id) { // 지금 보고 있는 화면(실전현황이면 실전 탭, 백테스트면 백테스트 세트)을 먼저 찾음
+  const fb = () => { for (const s of ST.bt.sets) { const x = s.slots.find(z => z.id === id); if (x) return { slot: x, owner: s, kind: 'bt' }; } return null; };
+  const fl = () => { const c = typeof curLive === 'function' ? curLive() : null; const tabs = c ? [c].concat(ST.live.tabs.filter(t => t !== c)) : ST.live.tabs; for (const t of tabs) { const x = (t.slots || []).find(z => z.id === id); if (x) return { slot: x, owner: t, kind: 'live' }; } return null; };
+  return ST.page === 'live' ? (fl() || fb()) : (fb() || fl()); }
+function fixSlotIds() { // 같은 슬롯 id가 여러 곳에 있으면 새 id로 바꿈 (실전현황 수정이 백테스트 세트에 들어가던 문제)
+  const seen = new Set(); let n = 0; const fix = arr => (arr || []).forEach(z => { if (!z) return; if (!z.id || seen.has(z.id)) { z.id = uid('s'); n++; } seen.add(z.id); });
+  ['bt', 'bt2', 'bt0'].forEach(k => ((ST[k] && ST[k].sets) || []).forEach(s => fix(s.slots))); ((ST.live && ST.live.tabs) || []).forEach(t => fix(t.slots)); return n; }
 // ===== 포트폴리오 합산 (+ 리밸런싱 · 익절 리셋 · MDD 손절 · SOXX 이평 필터) =====
 function fyWithBreaks(baseFy, br) { return y => { const f = baseFy(y), b = br[f]; if (!b) return f; let k = 0; for (const z of b) if (y >= z) k++; return f + k / 100; }; }
 function runSlots(act, cap, fyFn, rows, capture, fee, caps) { return act.map((s, i) => { const c = caps ? caps[i] : cap * s.w / 100; const P = engineP(s.type, s.p, c, fee); if (capture) P._cap = {}; const r = withFy(fyFn, () => runEngine(s.type, P, rows)); return { slot: s, P, r, cap: c }; }); }
@@ -2232,7 +2237,7 @@ document.addEventListener('click', async e => {
     case 'cmp-del': cmpCfg().items.splice(+b.dataset.i, 1); saveLocal(); render(); return;
     case 'cmp-clear': cmpCfg().items = []; saveLocal(); render(); return;
     case 'cmp-mon': cmpMonCompute(); return;
-    case 'set-pick': { ST.bt.cur = id; BT.R = null; BT.selY = null; saveLocal(); render(); return; } // v4.0: 고른 세트의 수정 내용 유지 (되돌리기는 '원래대로' 버튼)
+    case 'set-pick': { ST.bt.cur = id; BT.R = null; BT.selY = null; saveLocal(); render(); return; } // v4.1: 고른 세트의 수정 내용 유지 (되돌리기는 '원래대로' 버튼)
     case 'set-add': { const nm = prompt('새 설정 이름', '설정 ' + (ST.bt.sets.length + 1)); if (!nm) return; const s = { id: uid('bt'), name: nm, cap: set.cap, sm: 1, y0: set.y0, y1: set.y1, slots: [] }; ST.bt.sets.push(s); ST.bt.cur = s.id; BT.R = null; saveLocal(); render(); return; }
     case 'set-reset': { const o = setOrigin(set); if (!o) return toast('원래 값이 없어요 — 먼저 \'기준 저장\'을 눌러주세요'); if (!confirm(`'${set.name}' 매매법·비중·파라미터를 원래대로 되돌릴까요?`)) return; set.slots = o.map(x => Object.assign(x, { id: uid('s') })); set.opts = null; BT.R = null; saveLocal(); render(); toast('원래대로 되돌렸어요'); return; }
     case 'set-mark': if (!confirm(`지금 '${set.name}' 상태를 '원래대로' 기준으로 저장할까요?`)) return; set.orig = clone(set.slots); saveLocal(); toast('기준 저장 완료'); render(); return;
@@ -2530,7 +2535,7 @@ function seedBt0() { if (!ST.bt0) ST.bt0 = { cur: null, sets: [] }; if ((ST.seed
   if (!g.sets.length) { const s = main.sets.find(x => x.id === main.cur) || main.sets[0]; if (s) { const c = clone(s); c.id = uid('bt'); c.slots.forEach(x => x.id = uid('s')); g.sets.push(c); } }
   g.cur = g.sets.length ? g.sets[0].id : null; saveLocal(); }
 async function boot() {
-  initInputs(); ST = loadState(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedTk2(); seedTk3(); seedFr1(); seedLw(); seedBt2(); seedBt0(); seedNh1(); btSwapTo(ST.page); buildData(ST.manual); render();
+  initInputs(); ST = loadState(); if (fixSlotIds()) saveLocal(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedTk2(); seedTk3(); seedFr1(); seedLw(); seedBt2(); seedBt0(); seedNh1(); btSwapTo(ST.page); buildData(ST.manual); render();
   setSync('☁ 확인 중…'); const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); seedNh1(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); }
   window.addEventListener('beforeunload', () => { if (!lsNewer()) saveNow(); });
   window.addEventListener('storage', e => { if (e.key === LS_KEY && e.newValue) adoptLocal(); });
