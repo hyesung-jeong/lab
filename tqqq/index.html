@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>try{localStorage.setItem('lab_tk','TQQQ')}catch(e){}</script>
-<title>트레이딩 랩 TQQQ v4.4</title>
+<title>트레이딩 랩 TQQQ v4.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -80,7 +80,7 @@ table.t{width:100%;border-collapse:collapse}
 .bars{display:flex;align-items:flex-end;gap:2px}
 .prog{height:8px;background:var(--p2);border-radius:999px;overflow:hidden}
 .prog>i{display:block;height:100%;background:var(--ac);border-radius:999px}
-.ord td.buy{color:var(--ac2)}.ord td.sell{color:var(--rd)}
+.ord td.buy,.tbuy{color:#FF5A5A;font-weight:700}.ord td.sell,.tsell{color:#4DA3FF;font-weight:700}
 .note{font-size:11px;color:var(--t3);background:var(--p2);border-radius:5px;padding:3px 7px}
 .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#20345F;border:1px solid var(--ac);color:#fff;padding:6px 12px;border-radius:8px;z-index:50;font-size:12px;box-shadow:0 6px 20px rgba(0,0,0,.4)}
 .hide{display:none!important}
@@ -110,7 +110,7 @@ input.wr{flex:1;min-width:0;height:16px;accent-color:#5AA9FF;margin:0;cursor:poi
 .tksw{display:flex;gap:0;margin-right:6px;border:1px solid var(--ln);border-radius:6px;overflow:hidden;flex:none}.tksw button{background:transparent;border:0;color:var(--t3);font:700 11px var(--mono);padding:3px 8px;cursor:pointer}.tksw button.on{background:#1f6f43;color:#fff}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v4.4</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v4.5</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1232,7 +1232,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v4.4';
+const APP_VER = 'v4.5';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -1749,7 +1749,7 @@ function liveJournal(L) {
   const rows = []; L.per.forEach((p, i) => p.tl.forEach(e => rows.push(Object.assign({ who: slotName(p.x.slot), ci: i }, e))));
   rows.sort((a, b) => b.ymd.localeCompare(a.ymd) || (a.act === '매도' ? -1 : 1)); const show = rows.slice(0, 80);
   return `<div class="sec"><h3>매매 기록 <span class="small muted">최근 ${show.length}건 / 전체 ${rows.length}건 (엔진 계산 기준)</span></h3><div class="tw" style="max-height:300px;overflow-y:auto"><table class="t"><tr><th class="l">날짜</th><th class="l">매매법</th><th class="l">구분</th><th class="l">티어</th><th class="l">모드</th><th class="l">사유</th><th>수량</th><th>가격</th><th>금액</th></tr>
-    ${show.map(e => `<tr><td class="l">${ymdFmt(e.ymd, true)}</td><td class="l tx" style="color:${COLORS[e.ci % COLORS.length]}">${esc(e.who)}</td><td class="l ${e.act === '매수' ? 'acc' : 'neg'}">${e.act}</td><td class="l">${e.tier}</td><td class="l tx">${e.mode || ''}</td><td class="l tx muted">${e.reason || ''}</td><td>${e.qty}</td><td>${nfmt(e.price)}</td><td>${money(e.amt)}</td></tr>`).join('')}</table></div></div>`;
+    ${show.map(e => `<tr><td class="l">${ymdFmt(e.ymd, true)}</td><td class="l tx" style="color:${COLORS[e.ci % COLORS.length]}">${esc(e.who)}</td><td class="l ${e.act === '매수' ? 'tbuy' : 'tsell'}">${e.act}</td><td class="l">${e.tier}</td><td class="l tx">${e.mode || ''}</td><td class="l tx muted">${e.reason || ''}</td><td>${e.qty}</td><td>${nfmt(e.price)}</td><td>${money(e.amt)}</td></tr>`).join('')}</table></div></div>`;
 }
 
 // ===== 주가 데이터 =====
@@ -2251,7 +2251,7 @@ document.addEventListener('click', async e => {
     case 'cmp-del': cmpCfg().items.splice(+b.dataset.i, 1); saveLocal(); render(); return;
     case 'cmp-clear': cmpCfg().items = []; saveLocal(); render(); return;
     case 'cmp-mon': cmpMonCompute(); return;
-    case 'set-pick': { ST.bt.cur = id; BT.R = null; BT.selY = null; saveLocal(); render(); return; } // v4.4: 고른 세트의 수정 내용 유지 (되돌리기는 '원래대로' 버튼)
+    case 'set-pick': { ST.bt.cur = id; BT.R = null; BT.selY = null; saveLocal(); render(); return; } // v4.5: 고른 세트의 수정 내용 유지 (되돌리기는 '원래대로' 버튼)
     case 'set-add': { const nm = prompt('새 설정 이름', '설정 ' + (ST.bt.sets.length + 1)); if (!nm) return; const s = { id: uid('bt'), name: nm, cap: set.cap, sm: 1, y0: set.y0, y1: set.y1, slots: [] }; ST.bt.sets.push(s); ST.bt.cur = s.id; BT.R = null; saveLocal(); render(); return; }
     case 'set-reset': { const o = setOrigin(set); if (!o) return toast('원래 값이 없어요 — 먼저 \'기준 저장\'을 눌러주세요'); if (!confirm(`'${set.name}' 매매법·비중·파라미터를 원래대로 되돌릴까요?`)) return; set.slots = o.map(x => Object.assign(x, { id: uid('s') })); set.opts = null; BT.R = null; saveLocal(); render(); toast('원래대로 되돌렸어요'); return; }
     case 'set-mark': if (!confirm(`지금 '${set.name}' 상태를 '원래대로' 기준으로 저장할까요?`)) return; set.orig = clone(set.slots); saveLocal(); toast('기준 저장 완료'); render(); return;
@@ -2563,7 +2563,7 @@ function seedBt0() { if (!ST.bt0) ST.bt0 = { cur: null, sets: [] }; if ((ST.seed
   (ST.live.tabs || []).filter(t => t.slots && t.slots.length).forEach(t => { const nm = t.from || t.name; if (g.sets.some(s => s.name === nm)) return; g.sets.push({ id: uid('bt'), name: nm, cap: +t.cap || 450000, sm: 1, y0: 2011, y1: 2026, opts: clone(t.opts || null), slots: clone(t.slots).map(s => { const x = Object.assign(s, { id: uid('s') }); delete x.open; return x; }) }); });
   if (!g.sets.length) { const s = main.sets.find(x => x.id === main.cur) || main.sets[0]; if (s) { const c = clone(s); c.id = uid('bt'); c.slots.forEach(x => x.id = uid('s')); g.sets.push(c); } }
   g.cur = g.sets.length ? g.sets[0].id : null; saveLocal(); }
-function liveImport(ask) { // 실전 탭에 백테스트 세트의 매매법·비중 가져오기 (v4.4: 드롭다운에서 고르면 바로 적용)
+function liveImport(ask) { // 실전 탭에 백테스트 세트의 매매법·비중 가져오기 (v4.5: 드롭다운에서 고르면 바로 적용)
   const t = curLive(), el = $('#lv-from'); if (!t || !el) return; const v = el.value, k = v.indexOf(':'), src = k < 0 ? null : (btGroup(v.slice(0, k)).sets || []).find(s => s.id === v.slice(k + 1)); if (!src) return;
   if (ask && t.slots.length && !confirm(`'${src.name}' 설정의 매매법·비중으로 다시 바꿀까요? (실전에서 고친 값은 사라져요)`)) return;
   t.slots = clone(src.slots).map(s => Object.assign(s, { id: uid('s'), open: false })); t.opts = clone(src.opts || null); t.from = src.name; saveLocal(); LIVE.cache = {}; render(); toast(`'${src.name}' 설정으로 바꿨어요`); }
