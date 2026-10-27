@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>try{localStorage.setItem('lab_tk','TQQQ')}catch(e){}</script>
-<title>트레이딩 랩 TQQQ v4.2</title>
+<title>트레이딩 랩 TQQQ v4.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -110,7 +110,7 @@ input.wr{flex:1;min-width:0;height:16px;accent-color:#5AA9FF;margin:0;cursor:poi
 .tksw{display:flex;gap:0;margin-right:6px;border:1px solid var(--ln);border-radius:6px;overflow:hidden;flex:none}.tksw button{background:transparent;border:0;color:var(--t3);font:700 11px var(--mono);padding:3px 8px;cursor:pointer}.tksw button.on{background:#1f6f43;color:#fff}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v4.2</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v4.3</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -983,6 +983,10 @@ const BUILTIN = [
   { id: 'b_y4', tk: 'SOXL', type: 'three', name: '새칼마-A(11~26)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 50, rsiMax: 63, comp: 75, loss: 10, cyc: 2, SF: {n: 5, buy: [7.5, 3.5, 3.5, 3.5, 3.5], sell: [-1, 1, 1, 1, 1], hold: [22, 35, 35, 35, 35], weight: [3, 6.5, 13, 26, 51.5]}, Middle: {n: 9, buy: [6.5, 3, 3, 3, 3, 3, 3, 3, 3], sell: [0.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5], hold: [4, 5, 5, 5, 5, 5, 5, 5, 5], weight: [0.5, 0.5, 1, 1.5, 3, 6.5, 12.5, 25, 49.5]}, AG: {n: 4, buy: [7, -2, -2, -2], sell: [-1.5, 0, 0, 0], hold: [60, 8, 8, 8], weight: [40, 30, 20, 10]}} },
   { id: 'b_y5', tk: 'SOXL', type: 'three', name: '새칼마-B(11~26)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 33, rsiMax: 55, comp: 75, loss: 55, SF: {n: 4, buy: [7, 9.5, 9.5, 9.5], sell: [9.5, 9.5, 9.5, 9.5], hold: [14, 5, 5, 5], weight: [40, 30, 20, 10]}, Middle: {n: 4, buy: [4.3, 2.5, 2.5, 2.5], sell: [0, 2.5, 2.5, 2.5], hold: [17, 3, 3, 3], weight: [1, 33, 33, 33]}, AG: {n: 4, buy: [11.5, 6.5, 6.5, 6.5], sell: [9, 0, 0, 0], hold: [14, 5, 5, 5], weight: [6, 7, 8, 29]}} },
   { id: 'b_y6', tk: 'SOXL', type: 'three', name: '새칼마-C(11~26)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 33, rsiMax: 56, comp: 40, loss: 60, cyc: 4, SF: {n: 4, buy: [-2, 9.5, 9.5, 9.5], sell: [10, 1.7, 1.7, 1.7], hold: [19, 3, 3, 3], weight: [40, 30, 20, 10]}, Middle: {n: 4, buy: [2, 2.5, 2.5, 2.5], sell: [9.5, 2.5, 2.5, 2.5], hold: [12, 2, 2, 2], weight: [1, 33, 33, 33]}, AG: {n: 5, buy: [3.5, 6.5, 6.5, 6.5, 6.5], sell: [8, -0.5, -0.5, -0.5, -0.5], hold: [8, 5, 5, 5, 5], weight: [6, 7, 8, 29, 25]}} },
+  // 3모드 MDD15·최저5 (2011~2026 매년 MDD 15% 이하·+5% 이상, CAGR 최대, 현금 11%)
+  { id: 'b_n1', tk: 'SOXL', type: 'three', name: 'M15-A(11~26)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 50, rsiMax: 63, comp: 45, loss: 10, SF: {n: 5, buy: [4.2, 3.5, 3.5, 3.5, 3.5], sell: [-1.5, 1, 1, 1, 1], hold: [38, 35, 35, 35, 35], weight: [3, 6.5, 13, 26, 51.5]}, Middle: {n: 9, buy: [-1.5, 4, 4, 4, 4, 4, 4, 4, 4], sell: [5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5], hold: [12, 5, 5, 5, 5, 5, 5, 5, 5], weight: [0.5, 0.5, 1, 1.5, 3, 6.5, 12.5, 25, 49.5]}, AG: {n: 5, buy: [7, -2, -2, -2, -2], sell: [-1.5, 4, 4, 4, 4], hold: [60, 7, 7, 7, 7], weight: [33.5, 26.5, 20, 13.5, 6.5]}} },
+  { id: 'b_n2', tk: 'SOXL', type: 'three', name: 'M15-B(11~26)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 33, rsiMax: 55, comp: 75, loss: 55, SF: {n: 4, buy: [7, 9.5, 9.5, 9.5], sell: [10, 9.5, 9.5, 9.5], hold: [12, 5, 5, 5], weight: [40, 30, 20, 10]}, Middle: {n: 4, buy: [4.3, 2.5, 2.5, 2.5], sell: [0, 2.4, 2.4, 2.4], hold: [17, 3, 3, 3], weight: [1, 33, 33, 33]}, AG: {n: 4, buy: [7, 6.5, 6.5, 6.5], sell: [4, 0, 0, 0], hold: [6, 5, 5, 5], weight: [6, 7, 8, 29]}} },
+  { id: 'b_n3', tk: 'SOXL', type: 'three', name: 'M15-C(11~26)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 33, rsiMax: 56, comp: 40, loss: 85, cyc: 4, SF: {n: 4, buy: [-2, 12, 12, 12], sell: [10, 1.7, 1.7, 1.7], hold: [60, 3, 3, 3], weight: [40, 30, 20, 10]}, Middle: {n: 4, buy: [2, 2.5, 2.5, 2.5], sell: [9.5, 2.5, 2.5, 2.5], hold: [12, 2, 2, 2], weight: [1, 33, 33, 33]}, AG: {n: 5, buy: [3.5, 6, 6, 6, 6], sell: [8, -0.5, -0.5, -0.5, -0.5], hold: [8, 5, 5, 5, 5], weight: [6, 7, 8, 29, 25]}} },
   // TQQQ 3모드 연합 (매년 MDD 20% 이하·모든 연도 +10% 이상, CAGR 최대)
   { id: 'b_q7', tk: 'TQQQ', type: 'three', name: 'TQ20M-A(11~25)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 30, rsiMax: 62, comp: 90, loss: 15, SF: {n: 5, buy: [10, 4.2, 4.2, 4.2, 4.2], sell: [10, 4.5, 4.5, 4.5, 4.5], hold: [52, 30, 30, 30, 30], weight: [3, 6.5, 13, 26, 51.5]}, Middle: {n: 7, buy: [3.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], sell: [10, 9.5, 9.5, 9.5, 9.5, 9.5, 9.5], hold: [10, 5, 5, 5, 5, 5, 5], weight: [1, 1.5, 3, 6.5, 12.5, 25, 50.5]}, AG: {n: 6, buy: [6, -1, -1, -1, -1, -1], sell: [-1, -0.5, -0.5, -0.5, -0.5, -0.5], hold: [60, 8, 8, 8, 8, 8], weight: [28, 24, 19, 14.5, 9.5, 5]}} },
   { id: 'b_q8', tk: 'TQQQ', type: 'three', name: 'TQ20M-B(11~25)', p: {modeMethod: 'rsi', maN: 120, rsiMin: 53, rsiMax: 59, comp: 100, loss: 15, SF: {n: 4, buy: [3, 8.5, 8.5, 8.5], sell: [1.7, 10, 10, 10], hold: [19, 10, 10, 10], weight: [6.5, 13.5, 26.5, 53.5]}, Middle: {n: 4, buy: [8, 7.5, 7.5, 7.5], sell: [2, 6, 6, 6], hold: [7, 19, 19, 19], weight: [1, 33, 33, 33]}, AG: {n: 5, buy: [1.5, 4.3, 4.3, 4.3, 4.3], sell: [9.5, 0, 0, 0, 0], hold: [7, 6, 6, 6, 6], weight: [6, 7, 8, 29, 25]}} },
@@ -1218,7 +1222,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v4.2';
+const APP_VER = 'v4.3';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -2237,7 +2241,7 @@ document.addEventListener('click', async e => {
     case 'cmp-del': cmpCfg().items.splice(+b.dataset.i, 1); saveLocal(); render(); return;
     case 'cmp-clear': cmpCfg().items = []; saveLocal(); render(); return;
     case 'cmp-mon': cmpMonCompute(); return;
-    case 'set-pick': { ST.bt.cur = id; BT.R = null; BT.selY = null; saveLocal(); render(); return; } // v4.2: 고른 세트의 수정 내용 유지 (되돌리기는 '원래대로' 버튼)
+    case 'set-pick': { ST.bt.cur = id; BT.R = null; BT.selY = null; saveLocal(); render(); return; } // v4.3: 고른 세트의 수정 내용 유지 (되돌리기는 '원래대로' 버튼)
     case 'set-add': { const nm = prompt('새 설정 이름', '설정 ' + (ST.bt.sets.length + 1)); if (!nm) return; const s = { id: uid('bt'), name: nm, cap: set.cap, sm: 1, y0: set.y0, y1: set.y1, slots: [] }; ST.bt.sets.push(s); ST.bt.cur = s.id; BT.R = null; saveLocal(); render(); return; }
     case 'set-reset': { const o = setOrigin(set); if (!o) return toast('원래 값이 없어요 — 먼저 \'기준 저장\'을 눌러주세요'); if (!confirm(`'${set.name}' 매매법·비중·파라미터를 원래대로 되돌릴까요?`)) return; set.slots = o.map(x => Object.assign(x, { id: uid('s') })); set.opts = null; BT.R = null; saveLocal(); render(); toast('원래대로 되돌렸어요'); return; }
     case 'set-mark': if (!confirm(`지금 '${set.name}' 상태를 '원래대로' 기준으로 저장할까요?`)) return; set.orig = clone(set.slots); saveLocal(); toast('기준 저장 완료'); render(); return;
@@ -2390,7 +2394,7 @@ const CAL_SETS = [["3모드 칼마 MDD20 (11~25)", [["b_c1", 26.5], ["b_c2", 38.
 const HOLD_SETS = [["3모드 검증 칼마 MDD20 (11~24)", [["b_h1", 29.5], ["b_h2", 43], ["b_h3", 27.5]]], ["3모드 검증 CAGR MDD30 (11~24)", [["b_h4", 26.5], ["b_h5", 21], ["b_h6", 52.5]]], ["3모드 검증 CAGR MDD40 (11~24)", [["b_h7", 19.5], ["b_h8", 34], ["b_h9", 46.5]]]];
 const ONE_SETS = [["3모드 3종 MDD35 (11~25)", [["b_s6", 60], ["b_s7", 25], ["b_s8", 15]]], ["3모드 3종 MDD40 (11~25)", [["b_s1", 60], ["b_s2", 25], ["b_s3", 15]]], ["3모드 3종 MDD50 (11~25)", [["b_s4", 60], ["b_s5", 25], ["b_s1", 15]]], ["3모드 단독 MDD50 (11~25)", [["b_s4", 100]]], ["3모드 저MDD 고점30 (11~25)", [["b_l1", 27], ["b_l2", 28], ["b_l3", 30]]]];
 const REC_SETS = [["추천① 안정형 (11~26)", [["b_t9", 33.5], ["b_t15", 33.5], ["b_s7", 33]]], ["추천② 균형형 (권장, 11~26)", [["b_t15", 33.5], ["b_c2", 33.5], ["b_s4", 33]]], ["추천③ 수익형 (11~26)", [["b_t5", 33.5], ["b_t15", 33.5], ["b_s4", 33]]]];
-const DPK_SETS = [["동파 고점40 연합 (13~26)", [["b_d1", 21], ["b_d2", 79]]], ["동파 최고수익 단독 (11~25)", [["b_d3", 100]]], ["동파 최고수익 연합 (11~25)", [["b_d4", 64], ["b_d5", 36]]], ["동파 무손실 연합 (11~25)", [["b_d7", 53], ["b_d8", 47]]], ["동파 무손실 단독 (11~25)", [["b_d6", 100]]], ["동파 무손실2 연합 (11~25)", [["b_d10", 51.5], ["b_d11", 48.5]]], ["동파 무손실2 단독 (11~25)", [["b_d9", 100]]], ["동파 무손실 단독 10월시작 (11.10~26.09)", [["b_d12", 100]]], ["동파 월무관 연합A (11~25)", [["b_d13", 44.5], ["b_d14", 55.5]]], ["동파 월무관 연합B (11~25)", [["b_d15", 38], ["b_d16", 62]]], ["동파 월무관 단독 (11~25)", [["b_d17", 100]]], ["3모드 SOXX 연합 (11~26)", [["b_x1", 36], ["b_x2", 42.5], ["b_x3", 21.5]]], ["3모드 SOXX 단독 (11~26)", [["b_x2", 100]]], ["3모드 새균형 MDD30 (11~26)", [["b_y1", 38], ["b_y2", 13], ["b_y3", 49]]], ["3모드 새칼마 MDD17 (11~26)", [["b_y4", 28.5], ["b_y5", 42.5], ["b_y6", 29]]]];
+const DPK_SETS = [["동파 고점40 연합 (13~26)", [["b_d1", 21], ["b_d2", 79]]], ["동파 최고수익 단독 (11~25)", [["b_d3", 100]]], ["동파 최고수익 연합 (11~25)", [["b_d4", 64], ["b_d5", 36]]], ["동파 무손실 연합 (11~25)", [["b_d7", 53], ["b_d8", 47]]], ["동파 무손실 단독 (11~25)", [["b_d6", 100]]], ["동파 무손실2 연합 (11~25)", [["b_d10", 51.5], ["b_d11", 48.5]]], ["동파 무손실2 단독 (11~25)", [["b_d9", 100]]], ["동파 무손실 단독 10월시작 (11.10~26.09)", [["b_d12", 100]]], ["동파 월무관 연합A (11~25)", [["b_d13", 44.5], ["b_d14", 55.5]]], ["동파 월무관 연합B (11~25)", [["b_d15", 38], ["b_d16", 62]]], ["동파 월무관 단독 (11~25)", [["b_d17", 100]]], ["3모드 SOXX 연합 (11~26)", [["b_x1", 36], ["b_x2", 42.5], ["b_x3", 21.5]]], ["3모드 SOXX 단독 (11~26)", [["b_x2", 100]]], ["3모드 새균형 MDD30 (11~26)", [["b_y1", 38], ["b_y2", 13], ["b_y3", 49]]], ["3모드 새칼마 MDD17 (11~26)", [["b_y4", 28.5], ["b_y5", 42.5], ["b_y6", 29]]], ["3모드 MDD15·최저5 (11~26)", [["b_n1", 28], ["b_n2", 31.5], ["b_n3", 29.5]]]];
 const SOXL_SETS = [["3모드 MDD20 (15~25)", [["b_t21", 25], ["b_t22", 38.5], ["b_t23", 24], ["b_t24", 12.5]]], ["3모드 MDD30 (15~25)", [["b_t25", 40], ["b_t26", 10.5], ["b_t27", 49.5]]], ["3모드 MDD20 (15~26)", [["b_t28", 21], ["b_t29", 42.5], ["b_t30", 22.5], ["b_t31", 14]]], ["3모드 MDD30 (15~26)", [["b_t32", 41.5], ["b_t33", 8.5], ["b_t34", 50]]], ["3모드 MDD30 조합", [["b_t15", 45], ["b_t16", 5.5], ["b_t17", 49.5]]], ["3모드+동파 MDD30 조합", [["b_t18", 38], ["b_t19", 10], ["b_t20", 42], ["b_dp3", 10]]], ["3모드 3개 조합", [["b_t8", 28], ["b_t9", 43], ["b_t10", 29]]], ["3모드 4개 조합", [["b_t11", 25.5], ["b_t12", 38], ["b_t13", 23], ["b_t14", 13.5]]]];
 function setOrigin(set) { // 원래 매매법·비중 (내장 조합은 코드 값, 내가 만든 설정은 '기준 저장' 시점)
   if (set.orig) return clone(set.orig);
@@ -2517,12 +2521,18 @@ function seedNh1() { // v3.7: 모드 판정 변경 후 기준 불만족 세트 �
     g.sets.forEach(x => { const sl = NEW[x.name]; if (!sl) return; const ns = sl.map(([p, w]) => mk(p, w)).filter(Boolean); if (ns.length === sl.length) { const cash = x.slots.filter(z => z.type === 'cash'); x.slots = ns.concat(cash); } });
     if (g.cur && !g.sets.some(x => x.id === g.cur)) g.cur = g.sets.length ? g.sets[0].id : null; });
   BT.R = null; saveLocal(); }
+function seedM15() { // 3모드 MDD15·최저5 → 백테스트1·2 (1회)
+  if (TK !== 'SOXL' || ST.seeded.includes('m15a')) return; ST.seeded.push('m15a');
+  const NM = "3모드 MDD15·최저5 (11~26)", SL = [["b_n1", 28], ["b_n2", 31.5], ["b_n3", 29.5]];
+  const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
+  [['bt', 450000], ['bt2', 250000]].forEach(([k, cap]) => { const g = btGroup(k); if (!g || !g.sets || g.sets.some(x => x.name === NM)) return; g.sets.push({ id: uid('bt'), name: NM, cap, sm: 1, y0: 2011, y1: 2026, opts: null, slots: SL.map(([p, w]) => mk(p, w)) }); });
+  BT.R = null; saveLocal(); }
 function seedLw() { // 3모드 저MDD 고점30 추가 (1회, 현금 4.5%는 비중 합 나머지)
   if (TK !== 'SOXL' || ST.seeded.includes('lw1')) return; ST.seeded.push('lw1');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
   ONE_SETS.filter(([nm]) => /저MDD 고점30/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
-const BT2_SETS = [["금액하락20 (11~25)", [["b_m1", 25.5], ["b_m2", 28], ["b_m3", 27]]], ["금액하락20 (11~26)", [["b_m4", 25], ["b_m5", 27.5], ["b_m6", 26.5]]], ["3모드 저MDD 고점30 (11~25)", [["b_l1", 27], ["b_l2", 28], ["b_l3", 30]]], ["3모드 검증 칼마 MDD20 (11~24)", [["b_h1", 29.5], ["b_h2", 43], ["b_h3", 27.5]]], ["3모드 칼마 MDD20 (11~25)", [["b_c1", 26.5], ["b_c2", 38.5], ["b_c3", 35]]]];
+const BT2_SETS = [["금액하락20 (11~25)", [["b_m1", 25.5], ["b_m2", 28], ["b_m3", 27]]], ["금액하락20 (11~26)", [["b_m4", 25], ["b_m5", 27.5], ["b_m6", 26.5]]], ["3모드 저MDD 고점30 (11~25)", [["b_l1", 27], ["b_l2", 28], ["b_l3", 30]]], ["3모드 검증 칼마 MDD20 (11~24)", [["b_h1", 29.5], ["b_h2", 43], ["b_h3", 27.5]]], ["3모드 칼마 MDD20 (11~25)", [["b_c1", 26.5], ["b_c2", 38.5], ["b_c3", 35]]], ["3모드 MDD15·최저5 (11~26)", [["b_n1", 28], ["b_n2", 31.5], ["b_n3", 29.5]]]];
 function seedBt2() { // 백테스트2: 연중 금액하락 기준 세트 (1회)
   if (TK !== 'SOXL' || !BT2_SETS.length) return; if (!ST.bt2) ST.bt2 = { cur: null, sets: [] }; if ((ST.seeded || []).includes('bt2a')) return; ST.seeded.push('bt2a');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
@@ -2534,18 +2544,18 @@ function seedBt0() { if (!ST.bt0) ST.bt0 = { cur: null, sets: [] }; if ((ST.seed
   (ST.live.tabs || []).filter(t => t.slots && t.slots.length).forEach(t => { const nm = t.from || t.name; if (g.sets.some(s => s.name === nm)) return; g.sets.push({ id: uid('bt'), name: nm, cap: +t.cap || 450000, sm: 1, y0: 2011, y1: 2026, opts: clone(t.opts || null), slots: clone(t.slots).map(s => { const x = Object.assign(s, { id: uid('s') }); delete x.open; return x; }) }); });
   if (!g.sets.length) { const s = main.sets.find(x => x.id === main.cur) || main.sets[0]; if (s) { const c = clone(s); c.id = uid('bt'); c.slots.forEach(x => x.id = uid('s')); g.sets.push(c); } }
   g.cur = g.sets.length ? g.sets[0].id : null; saveLocal(); }
-function liveImport(ask) { // 실전 탭에 백테스트 세트의 매매법·비중 가져오기 (v4.2: 드롭다운에서 고르면 바로 적용)
+function liveImport(ask) { // 실전 탭에 백테스트 세트의 매매법·비중 가져오기 (v4.3: 드롭다운에서 고르면 바로 적용)
   const t = curLive(), el = $('#lv-from'); if (!t || !el) return; const v = el.value, k = v.indexOf(':'), src = k < 0 ? null : (btGroup(v.slice(0, k)).sets || []).find(s => s.id === v.slice(k + 1)); if (!src) return;
   if (ask && t.slots.length && !confirm(`'${src.name}' 설정의 매매법·비중으로 다시 바꿀까요? (실전에서 고친 값은 사라져요)`)) return;
   t.slots = clone(src.slots).map(s => Object.assign(s, { id: uid('s'), open: false })); t.opts = clone(src.opts || null); t.from = src.name; saveLocal(); LIVE.cache = {}; render(); toast(`'${src.name}' 설정으로 바꿨어요`); }
 async function boot() {
-  initInputs(); ST = loadState(); if (fixSlotIds()) saveLocal(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedTk2(); seedTk3(); seedFr1(); seedLw(); seedBt2(); seedBt0(); seedNh1(); btSwapTo(ST.page); buildData(ST.manual); render();
-  setSync('☁ 확인 중…'); const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); seedNh1(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); }
+  initInputs(); ST = loadState(); if (fixSlotIds()) saveLocal(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedTk2(); seedTk3(); seedFr1(); seedLw(); seedBt2(); seedBt0(); seedNh1(); seedM15(); btSwapTo(ST.page); buildData(ST.manual); render();
+  setSync('☁ 확인 중…'); const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); seedNh1(); seedM15(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); }
   window.addEventListener('beforeunload', () => { if (!lsNewer()) saveNow(); });
   window.addEventListener('storage', e => { if (e.key === LS_KEY && e.newValue) adoptLocal(); });
   let _visBusy = false; document.addEventListener('visibilitychange', async () => { // 앱으로 돌아오면 클라우드 최신본·주가 다시 확인
     if (document.visibilityState !== 'visible' || _visBusy) return; _visBusy = true; adoptLocal();
-    try { const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); seedNh1(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); if (a) toast('다른 기기에서 저장한 최신본을 불러왔어요'); } } finally { _visBusy = false; } });
+    try { const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); seedNh1(); seedM15(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); if (a) toast('다른 기기에서 저장한 최신본을 불러왔어요'); } } finally { _visBusy = false; } });
   try { const ck = await idbGet('ckpt', 'run'); if (ck && ck.running && ck.cfg) { window._resume = ck; if (ST.page === 'opt') render(); } } catch (e) { }
   let lw = window.innerWidth; window.addEventListener('resize', () => debounce('rs', () => { if (Math.abs(window.innerWidth - lw) < 40) return; lw = window.innerWidth; const a = document.activeElement; if (!a || !a.matches || !a.matches('input')) render(); }, 300));
 }
