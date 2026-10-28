@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>try{localStorage.setItem('lab_tk','TQQQ')}catch(e){}</script>
-<title>트레이딩 랩 TQQQ v5.4</title>
+<title>트레이딩 랩 TQQQ v5.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -114,7 +114,7 @@ input.wr{flex:1;min-width:0;height:16px;accent-color:#5AA9FF;margin:0;cursor:poi
 .memo-ta{width:100%;min-height:calc(100vh - 170px);resize:vertical;background:var(--p1);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;font:13px/1.55 var(--mono);outline:none;box-sizing:border-box;white-space:pre-wrap}.memo-ta:focus{border-color:var(--ac)}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v5.4</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v5.5</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -762,6 +762,11 @@ function nextTradingDay(ymd) { let y = ymd; do { y = nextWeekday(y); } while (NY
 function tradingOnOrBefore(ymd) { if (dateIdxMap[ymd] != null) return ymd; let r = null; for (let i = DATA.length - 1; i >= 0; i--) if (DATA[i][0] <= ymd) { r = DATA[i][0]; break; } return r; }
 function nextWeekday(ymd) { const d = ymdToDate(ymd); do { d.setUTCDate(d.getUTCDate() + 1); } while (d.getUTCDay() === 0 || d.getUTCDay() === 6); return dateToYmd(d); }
 function isoToYmd(iso) { return iso ? iso.replace(/-/g, '').slice(2) : ''; }
+function parseDateIn(s) { // '20261001', '2026-10-01', '26.10.01', '261001' → '261001' (잘못되면 null)
+  s = String(s || '').trim(); if (!s) return ''; let y, m, d; const p = s.split(/[^0-9]+/).filter(Boolean);
+  if (p.length >= 3) { [y, m, d] = p; } else { const x = p.join(''); if (x.length === 8) { y = x.slice(0, 4); m = x.slice(4, 6); d = x.slice(6, 8); } else if (x.length === 6) { y = x.slice(0, 2); m = x.slice(2, 4); d = x.slice(4, 6); } else return null; }
+  y = +y; m = +m; d = +d; if (y < 100) y += 2000; if (y < 2009 || y > 2099 || m < 1 || m > 12 || d < 1 || d > 31) return null;
+  return String(y % 100).padStart(2, '0') + String(m).padStart(2, '0') + String(d).padStart(2, '0'); }
 function ymdToIso(y) { return y ? '20' + y.slice(0, 2) + '-' + y.slice(2, 4) + '-' + y.slice(4, 6) : ''; }
 
 // ===== 주간 지표 (모드표·대시보드) =====
@@ -1295,7 +1300,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v5.4';
+const APP_VER = 'v5.5';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -1751,8 +1756,8 @@ function renderLive() {
   let h = `<div class="sec"><div class="row"><div class="tabs">${ST.live.tabs.map(x => { const c = computeLive(x); return `<button class="tab ${x.id === t.id ? 'on' : ''}" data-act="live-pick" data-id="${x.id}">${esc(x.name)} <span class="mono small">${c.ok ? money(c.total) + ' ' + pct(c.ret) : ''}</span></button>`; }).join('')}<button class="tab" data-act="live-add">+ 새 실전</button></div>
     <span style="margin-left:auto"></span><button class="btn sm" data-act="live-ren">이름</button>${ST.live.tabs.length > 1 ? '<button class="btn sm warn" data-act="live-del">삭제</button>' : ''}</div>
     <div class="grid lvset" style="grid-template-columns:1.2fr 1fr 1fr 1fr 2fr;margin-top:5px">
-      <label class="f">시작일<input class="in" type="date" data-lv="start" value="${ymdToIso(t.start)}"></label>
-      <label class="f">종료일 <span class="dim">(비우면 최신)</span><input class="in" type="date" data-lv="end" value="${ymdToIso(t.end)}"></label>
+      <label class="f">시작일<input class="in mono" type="text" inputmode="numeric" placeholder="20261001" data-lv="start" value="${ymdToIso(t.start)}"></label>
+      <label class="f">종료일 <span class="dim">(비우면 최신)</span><input class="in mono" type="text" inputmode="numeric" placeholder="비우면 최신" data-lv="end" value="${ymdToIso(t.end)}"></label>
       <label class="f" style="grid-column:span 1">자본금${numInput({ v: t.cap, step: 1000, attrs: 'data-lv="cap"' })}</label>
       <label class="f">백테스트 설정<select class="in" id="lv-from">${[['bt0', '백테스트0'], ['bt', '백테스트1'], ['bt11', '백테스트1-1'], ['bt2', '백테스트2'], ['bt4', '백테스트4 (과최적)'], ['bt5', '백테스트5 (동파)']].map(([g, gl]) => { const ss = btGroup(g).sets || []; return ss.length ? `<optgroup label="${gl}">${ss.map(s => `<option value="${g}:${s.id}" ${s.name === t.from ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</optgroup>` : ''; }).join('')}</select></label>
       <div class="row" style="align-self:end"><button class="btn" data-act="live-import">다시 가져오기</button><button class="btn" data-act="live-save0" title="지금 이 실전 탭의 매매법·비중·옵션을 백테스트0에 세트로 저장">백테스트0에 저장</button><span class="small muted">현재: ${esc(t.from || '—')} · 기준일 ${ymdFmt(L.end)}</span></div></div>${optsBox(liveOpts(t), 'live', false, false)}</div>`;
@@ -2321,7 +2326,7 @@ document.addEventListener('click', async e => {
     case 'cmp-del': cmpCfg().items.splice(+b.dataset.i, 1); saveLocal(); render(); return;
     case 'cmp-clear': cmpCfg().items = []; saveLocal(); render(); return;
     case 'cmp-mon': cmpMonCompute(); return;
-    case 'set-pick': { ST.bt.cur = id; BT.R = null; BT.selY = null; saveLocal(); render(); return; } // v5.4: 고른 세트의 수정 내용 유지 (되돌리기는 '원래대로' 버튼)
+    case 'set-pick': { ST.bt.cur = id; BT.R = null; BT.selY = null; saveLocal(); render(); return; } // v5.5: 고른 세트의 수정 내용 유지 (되돌리기는 '원래대로' 버튼)
     case 'set-add': { const nm = prompt('새 설정 이름', '설정 ' + (ST.bt.sets.length + 1)); if (!nm) return; const s = { id: uid('bt'), name: nm, cap: set.cap, sm: 1, y0: set.y0, y1: set.y1, slots: [] }; ST.bt.sets.push(s); ST.bt.cur = s.id; BT.R = null; saveLocal(); render(); return; }
     case 'set-reset': { const o = setOrigin(set); if (!o) return toast('원래 값이 없어요 — 먼저 \'기준 저장\'을 눌러주세요'); if (!confirm(`'${set.name}' 매매법·비중·파라미터를 원래대로 되돌릴까요?`)) return; set.slots = o.map(x => Object.assign(x, { id: uid('s') })); set.opts = null; BT.R = null; saveLocal(); render(); toast('원래대로 되돌렸어요'); return; }
     case 'set-mark': if (!confirm(`지금 '${set.name}' 상태를 '원래대로' 기준으로 저장할까요?`)) return; set.orig = clone(set.slots); saveLocal(); toast('기준 저장 완료'); render(); return;
@@ -2425,7 +2430,7 @@ document.addEventListener('change', e => {
   if (d.preset) { const f = findSlot(d.preset); presetApply(f.slot, t.value); invalidate(); rerenderSlot(d.preset); refreshResults(); return; }
   if (d.opt && (t.type === 'checkbox' || t.tagName === 'SELECT')) { setOpt(d.opt, d.ok, t.type === 'checkbox' ? t.checked : t.value); invalidate(); render(); return; }
   if (d.set && d.set !== 'cap') { const s = curSet(); s[d.set] = +t.value; if (s.y0 > s.y1) { if (d.set === 'y0') s.y1 = s.y0; else s.y0 = s.y1; } saveLocal(); BT.R = null; BT.selY = null; render(); return; }
-  if (d.lv === 'start' || d.lv === 'end') { const v = isoToYmd(t.value); const tb = curLive(); if (d.lv === 'start' && !v) return; tb[d.lv] = v; saveLocal(); render(); return; }
+  if (d.lv === 'start' || d.lv === 'end') { const v = parseDateIn(t.value); const tb = curLive(); if (v === null || (d.lv === 'start' && !v)) { toast('날짜 형식: 20261001 또는 2026-10-01'); t.value = ymdToIso(tb[d.lv]); return; } tb[d.lv] = v; saveLocal(); render(); return; }
   if (d.oset && (t.type === 'checkbox' || t.tagName === 'SELECT')) { const c = optCfg(oKey()); const v = t.type === 'checkbox' ? t.checked : (isNaN(+t.value) ? t.value : +t.value); c.set[d.oset] = v;
     if (d.oset === 'preset') { c.preset = t.value; Object.values(c.rows).forEach(r => delete r.fix); const pr = presetById(t.value);
       if (pr && pr.type === 'three') ['SF', 'Middle', 'AG'].forEach(m => { const q = pr.p[m], n = +q.n, same = a => a.slice(0, n).every(v => +v === +a[0]); c.scope[m] = n > 1 && same(q.buy) && same(q.sell) && same(q.hold) ? 'all' : 't1rest'; }); } saveLocal(); if (['preset', 'obj', 'sm'].includes(d.oset)) render(); else { optSettingsChanged(d.oset); } return; }
@@ -2630,20 +2635,20 @@ function seedBe1() { // 3모드 베이스연합 MDD25 4세트 → 백테스트1 
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; }; const g = btGroup('bt');
   DPK_SETS.filter(([nm]) => /^3모드 베이스연합/.test(nm)).forEach(([nm, sl]) => { if (!g.sets.some(x => x.name === nm)) g.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
-function seedCap1() { // v5.4: 백테스트1 원금 기본 10만 달러로, 13~26 학습 세트 삭제 (1회)
+function seedCap1() { // v5.5: 백테스트1 원금 기본 10만 달러로, 13~26 학습 세트 삭제 (1회)
   if (ST.seeded.includes('cap1')) return; ST.seeded.push('cap1');
   const g = btGroup('bt'); (g.sets || []).forEach(s => s.cap = 100000);
   ['bt', 'bt11'].forEach(k => { const G = btGroup(k); if (!G || !G.sets) return; G.sets = G.sets.filter(s => !/13~26/.test(s.name)); if (G.cur && !G.sets.some(s => s.id === G.cur)) G.cur = G.sets.length ? G.sets[0].id : null; });
   BT.R = null; saveLocal(); }
-function seedRen26() { // v5.4: 2025·2026 검증까지 만족한 '검증' 세트 이름을 (11~24) → (11~26)으로 (백테스트1·2만, 1-1은 3만에서 미달이라 유지)
+function seedRen26() { // v5.5: 2025·2026 검증까지 만족한 '검증' 세트 이름을 (11~24) → (11~26)으로 (백테스트1·2만, 1-1은 3만에서 미달이라 유지)
   if (ST.seeded.includes('ren26')) return; ST.seeded.push('ren26'); const R = {"3모드 검증 칼마 MDD20 (11~24)": "3모드 검증 칼마 MDD20 (11~26)", "3모드 검증 CAGR MDD30 (11~24)": "3모드 검증 CAGR MDD30 (11~26)", "3모드 검증 CAGR MDD40 (11~24)": "3모드 검증 CAGR MDD40 (11~26)"};
   ['bt', 'bt2', 'bt0'].forEach(k => { const g = btGroup(k); (g && g.sets || []).forEach(s => { if (R[s.name]) s.name = R[s.name]; }); });
   (ST.live && ST.live.tabs || []).forEach(t => { if (R[t.from]) t.from = R[t.from]; }); saveLocal(); }
-function seedRen27() { // v5.4: 이름 기간 = 파라미터 선정에 쓴 데이터 기간 (2026 데이터를 조건·학습에 쓰면 26)
+function seedRen27() { // v5.5: 이름 기간 = 파라미터 선정에 쓴 데이터 기간 (2026 데이터를 조건·학습에 쓰면 26)
   if (ST.seeded.includes('ren27')) return; ST.seeded.push('ren27'); const R = Object.assign({"동파 월무관 연합A (11~25)": "동파 월무관 연합A (11~26)", "동파 월무관 연합B (11~25)": "동파 월무관 연합B (11~26)", "동파 월무관 단독 (11~25)": "동파 월무관 단독 (11~26)"}, {"3모드 검증 칼마 MDD20 (11~24·3만)": "3모드 검증 칼마 MDD20 (11~26·3만)", "3모드 검증 CAGR MDD30 (11~24·3만)": "3모드 검증 CAGR MDD30 (11~26·3만)", "3모드 검증 CAGR MDD40 (11~24·3만)": "3모드 검증 CAGR MDD40 (11~26·3만)", "동파 월무관 연합A (11~25·3만)": "동파 월무관 연합A (11~26·3만)", "동파 월무관 연합B (11~25·3만)": "동파 월무관 연합B (11~26·3만)", "동파 월무관 단독 (11~25·3만)": "동파 월무관 단독 (11~26·3만)"});
   ['bt', 'bt2', 'bt0', 'bt11'].forEach(k => { const g = btGroup(k); (g && g.sets || []).forEach(s => { if (R[s.name]) s.name = R[s.name]; }); });
   (ST.live && ST.live.tabs || []).forEach(t => { if (R[t.from]) t.from = R[t.from]; }); saveLocal(); }
-function seedBt5() { // v5.4: 동파 세트를 백테스트1·1-1에서 백테스트5(동파)로 옮김 (SOXL, 1회)
+function seedBt5() { // v5.5: 동파 세트를 백테스트1·1-1에서 백테스트5(동파)로 옮김 (SOXL, 1회)
   if (TK !== 'SOXL') return; if (!ST.bt5) ST.bt5 = { cur: null, sets: [] }; if (ST.seeded.includes('bt5a')) return; ST.seeded.push('bt5a');
   const g5 = btGroup('bt5'); const isDp = s => /^동파/.test(s.name) && (s.slots || []).every(z => z.type === 'dongpa' || z.type === 'cash');
   ['bt', 'bt11'].forEach(k => { const G = btGroup(k); if (!G || !G.sets) return; const mv = G.sets.filter(isDp); if (!mv.length) return;
@@ -2667,7 +2672,7 @@ function seedBt0() { if (!ST.bt0) ST.bt0 = { cur: null, sets: [] }; if ((ST.seed
   (ST.live.tabs || []).filter(t => t.slots && t.slots.length).forEach(t => { const nm = t.from || t.name; if (g.sets.some(s => s.name === nm)) return; g.sets.push({ id: uid('bt'), name: nm, cap: +t.cap || 450000, sm: 1, y0: 2011, y1: 2026, opts: clone(t.opts || null), slots: clone(t.slots).map(s => { const x = Object.assign(s, { id: uid('s') }); delete x.open; return x; }) }); });
   if (!g.sets.length) { const s = main.sets.find(x => x.id === main.cur) || main.sets[0]; if (s) { const c = clone(s); c.id = uid('bt'); c.slots.forEach(x => x.id = uid('s')); g.sets.push(c); } }
   g.cur = g.sets.length ? g.sets[0].id : null; saveLocal(); }
-function liveImport(ask) { // 실전 탭에 백테스트 세트의 매매법·비중 가져오기 (v5.4: 드롭다운에서 고르면 바로 적용)
+function liveImport(ask) { // 실전 탭에 백테스트 세트의 매매법·비중 가져오기 (v5.5: 드롭다운에서 고르면 바로 적용)
   const t = curLive(), el = $('#lv-from'); if (!t || !el) return; const v = el.value, k = v.indexOf(':'), src = k < 0 ? null : (btGroup(v.slice(0, k)).sets || []).find(s => s.id === v.slice(k + 1)); if (!src) return;
   if (ask && t.slots.length && !confirm(`'${src.name}' 설정의 매매법·비중으로 다시 바꿀까요? (실전에서 고친 값은 사라져요)`)) return;
   t.slots = clone(src.slots).map(s => Object.assign(s, { id: uid('s'), open: false })); t.opts = clone(src.opts || null); t.from = src.name; saveLocal(); LIVE.cache = {}; render(); toast(`'${src.name}' 설정으로 바꿨어요`); }
