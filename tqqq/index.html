@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>try{localStorage.setItem('lab_tk','TQQQ')}catch(e){}</script>
-<title>트레이딩 랩 TQQQ v4.9</title>
+<title>트레이딩 랩 TQQQ v5.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -112,7 +112,7 @@ input.wr{flex:1;min-width:0;height:16px;accent-color:#5AA9FF;margin:0;cursor:poi
 .sgrp{margin:2px 0 4px}.sgl{font:700 10.5px var(--mono);color:var(--t3);margin:4px 0 2px;letter-spacing:.02em}.sgl .dim{font-weight:400}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v4.9</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v5.0</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1293,7 +1293,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v4.9';
+const APP_VER = 'v5.0';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -1326,7 +1326,7 @@ function defaultSlots() { return [
   { id: uid('s'), type: 'three', presetId: 'b_t1', w: 25 }, { id: uid('s'), type: 'dual', presetId: 'b_du1', w: 23 }, { id: uid('s'), type: 'three', presetId: 'b_t2', w: 23 },
   { id: uid('s'), type: 'three', presetId: 'b_t3', w: 19 }, { id: uid('s'), type: 'dongpa', presetId: 'b_dp1', w: 10 }].map(s => Object.assign(s, { p: clone(BUILTIN.find(b => b.id === s.presetId).p) })); }
 function defaultState() {
-  const set = { id: uid('bt'), name: '전체매매', cap: 450000, sm: 1, y0: 2016, y1: 2026, slots: defaultSlots(), opts: null };
+  const set = { id: uid('bt'), name: '전체매매', cap: 100000, sm: 1, y0: 2016, y1: 2026, slots: defaultSlots(), opts: null };
   return { ver: 1, page: 'dash', fee: 0, presets: [], bt: { cur: set.id, sets: [set] }, bt2: { cur: null, sets: [] }, bt0: { cur: null, sets: [] },
     live: { cur: null, tabs: [] }, cmp: { items: [], sm: 1, y0: 2011, y1: 2026, cap: 450000 }, opt: { strat: 'dongpa', judge: 'rsi', cfg: {}, history: [] }, manual: [], snapAt: 0, savedAt: 0 };
 }
@@ -2319,7 +2319,7 @@ document.addEventListener('click', async e => {
     case 'cmp-del': cmpCfg().items.splice(+b.dataset.i, 1); saveLocal(); render(); return;
     case 'cmp-clear': cmpCfg().items = []; saveLocal(); render(); return;
     case 'cmp-mon': cmpMonCompute(); return;
-    case 'set-pick': { ST.bt.cur = id; BT.R = null; BT.selY = null; saveLocal(); render(); return; } // v4.9: 고른 세트의 수정 내용 유지 (되돌리기는 '원래대로' 버튼)
+    case 'set-pick': { ST.bt.cur = id; BT.R = null; BT.selY = null; saveLocal(); render(); return; } // v5.0: 고른 세트의 수정 내용 유지 (되돌리기는 '원래대로' 버튼)
     case 'set-add': { const nm = prompt('새 설정 이름', '설정 ' + (ST.bt.sets.length + 1)); if (!nm) return; const s = { id: uid('bt'), name: nm, cap: set.cap, sm: 1, y0: set.y0, y1: set.y1, slots: [] }; ST.bt.sets.push(s); ST.bt.cur = s.id; BT.R = null; saveLocal(); render(); return; }
     case 'set-reset': { const o = setOrigin(set); if (!o) return toast('원래 값이 없어요 — 먼저 \'기준 저장\'을 눌러주세요'); if (!confirm(`'${set.name}' 매매법·비중·파라미터를 원래대로 되돌릴까요?`)) return; set.slots = o.map(x => Object.assign(x, { id: uid('s') })); set.opts = null; BT.R = null; saveLocal(); render(); toast('원래대로 되돌렸어요'); return; }
     case 'set-mark': if (!confirm(`지금 '${set.name}' 상태를 '원래대로' 기준으로 저장할까요?`)) return; set.orig = clone(set.slots); saveLocal(); toast('기준 저장 완료'); render(); return;
@@ -2452,17 +2452,17 @@ function seedSets() { ST.seeded = ST.seeded || [];
   if (TK !== 'SOXL') { seedTk(); return; }
   if (!ST.seeded.includes('s15')) { ST.seeded.push('s15');
     const mk4 = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-    [["3모드 MDD20 (15~25)", [["b_t21", 25], ["b_t22", 38.5], ["b_t23", 24], ["b_t24", 12.5]]], ["3모드 MDD30 (15~25)", [["b_t25", 40], ["b_t26", 10.5], ["b_t27", 49.5]]], ["3모드 MDD20 (15~26)", [["b_t28", 21], ["b_t29", 42.5], ["b_t30", 22.5], ["b_t31", 14]]], ["3모드 MDD30 (15~26)", [["b_t32", 41.5], ["b_t33", 8.5], ["b_t34", 50]]]].forEach(([nm, sl]) => { if (!ST.bt.sets.find(s => s.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk4(p, w)) }); });
+    [["3모드 MDD20 (15~25)", [["b_t21", 25], ["b_t22", 38.5], ["b_t23", 24], ["b_t24", 12.5]]], ["3모드 MDD30 (15~25)", [["b_t25", 40], ["b_t26", 10.5], ["b_t27", 49.5]]], ["3모드 MDD20 (15~26)", [["b_t28", 21], ["b_t29", 42.5], ["b_t30", 22.5], ["b_t31", 14]]], ["3모드 MDD30 (15~26)", [["b_t32", 41.5], ["b_t33", 8.5], ["b_t34", 50]]]].forEach(([nm, sl]) => { if (!ST.bt.sets.find(s => s.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk4(p, w)) }); });
     saveLocal(); }
 
   if (!ST.seeded.includes('m30')) { ST.seeded.push('m30');
     const mk3 = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-    [['3모드 MDD30 조합', [["b_t15", 45], ["b_t16", 5.5], ["b_t17", 49.5]]], ['3모드+동파 MDD30 조합', [["b_t18", 38], ["b_t19", 10], ["b_t20", 42], ["b_dp3", 10]]]].forEach(([nm, sl]) => { if (!ST.bt.sets.find(s => s.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk3(p, w)) }); });
+    [['3모드 MDD30 조합', [["b_t15", 45], ["b_t16", 5.5], ["b_t17", 49.5]]], ['3모드+동파 MDD30 조합', [["b_t18", 38], ["b_t19", 10], ["b_t20", 42], ["b_dp3", 10]]]].forEach(([nm, sl]) => { if (!ST.bt.sets.find(s => s.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk3(p, w)) }); });
     saveLocal(); }
 
   if (!ST.seeded.includes('m3a')) { ST.seeded.push('m3a');
     const mk2 = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-    [['3모드 3개 조합', [["b_t8", 28], ["b_t9", 43], ["b_t10", 29]]], ['3모드 4개 조합', [["b_t11", 25.5], ["b_t12", 38], ["b_t13", 23], ["b_t14", 13.5]]]].forEach(([nm, sl]) => { if (!ST.bt.sets.find(s => s.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk2(p, w)) }); });
+    [['3모드 3개 조합', [["b_t8", 28], ["b_t9", 43], ["b_t10", 29]]], ['3모드 4개 조합', [["b_t11", 25.5], ["b_t12", 38], ["b_t13", 23], ["b_t14", 13.5]]]].forEach(([nm, sl]) => { if (!ST.bt.sets.find(s => s.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk2(p, w)) }); });
     saveLocal(); }
   if (!ST.seeded.includes('del-mdd20')) { ST.seeded.push('del-mdd20'); ST.seeded.push('mdd20e'); const n0 = ST.bt.sets.length; ST.bt.sets = ST.bt.sets.filter(s => s.name !== '저MDD 조합'); if (!ST.bt.sets.length) ST.bt.sets = defaultState().bt.sets; if (!ST.bt.sets.find(s => s.id === ST.bt.cur)) ST.bt.cur = ST.bt.sets[0].id; saveLocal(); }
 }
@@ -2472,7 +2472,7 @@ const CAL_SETS = [["3모드 칼마 MDD20 (11~25)", [["b_c1", 26.5], ["b_c2", 38.
 const HOLD_SETS = [["3모드 검증 칼마 MDD20 (11~24)", [["b_h1", 29.5], ["b_h2", 43], ["b_h3", 27.5]]], ["3모드 검증 CAGR MDD30 (11~24)", [["b_h4", 26.5], ["b_h5", 21], ["b_h6", 52.5]]], ["3모드 검증 CAGR MDD40 (11~24)", [["b_h7", 19.5], ["b_h8", 34], ["b_h9", 46.5]]]];
 const ONE_SETS = [["3모드 3종 MDD35 (11~25)", [["b_s6", 60], ["b_s7", 25], ["b_s8", 15]]], ["3모드 3종 MDD40 (11~25)", [["b_s1", 60], ["b_s2", 25], ["b_s3", 15]]], ["3모드 3종 MDD50 (11~25)", [["b_s4", 60], ["b_s5", 25], ["b_s1", 15]]], ["3모드 단독 MDD50 (11~25)", [["b_s4", 100]]], ["3모드 저MDD 고점30 (11~25)", [["b_l1", 27], ["b_l2", 28], ["b_l3", 30]]]];
 const REC_SETS = [["추천① 안정형 (11~26)", [["b_t9", 33.5], ["b_t15", 33.5], ["b_s7", 33]]], ["추천② 균형형 (권장, 11~26)", [["b_t15", 33.5], ["b_c2", 33.5], ["b_s4", 33]]], ["추천③ 수익형 (11~26)", [["b_t5", 33.5], ["b_t15", 33.5], ["b_s4", 33]]]];
-const DPK_SETS = [["동파 고점40 연합 (13~26)", [["b_d1", 21], ["b_d2", 79]]], ["동파 최고수익 단독 (11~25)", [["b_d3", 100]]], ["동파 최고수익 연합 (11~25)", [["b_d4", 64], ["b_d5", 36]]], ["동파 무손실 연합 (11~25)", [["b_d7", 53], ["b_d8", 47]]], ["동파 무손실 단독 (11~25)", [["b_d6", 100]]], ["동파 무손실2 연합 (11~25)", [["b_d10", 51.5], ["b_d11", 48.5]]], ["동파 무손실2 단독 (11~25)", [["b_d9", 100]]], ["동파 무손실 단독 10월시작 (11.10~26.09)", [["b_d12", 100]]], ["동파 월무관 연합A (11~25)", [["b_d13", 44.5], ["b_d14", 55.5]]], ["동파 월무관 연합B (11~25)", [["b_d15", 38], ["b_d16", 62]]], ["동파 월무관 단독 (11~25)", [["b_d17", 100]]], ["3모드 SOXX 연합 (11~26)", [["b_x1", 36], ["b_x2", 42.5], ["b_x3", 21.5]]], ["3모드 SOXX 단독 (11~26)", [["b_x2", 100]]], ["3모드 새균형 MDD30 (11~26)", [["b_y1", 38], ["b_y2", 13], ["b_y3", 49]]], ["3모드 새칼마 MDD17 (11~26)", [["b_y4", 28.5], ["b_y5", 42.5], ["b_y6", 29]]], ["3모드 MDD15·최저5 (11~26)", [["b_n1", 28], ["b_n2", 31.5], ["b_n3", 29.5]]], ["3모드 베이스연합 M30-A MDD25 (11~25)", [["b_t15", 40.5], ["b_e1", 31], ["b_e2", 28.5]]], ["3모드 베이스연합 M30-A MDD25 (11~26)", [["b_t15", 42.5], ["b_e3", 27.5], ["b_e4", 30]]], ["3모드 베이스연합 S50 MDD25 (11~25)", [["b_s4", 40.5], ["b_e5", 35.5], ["b_e6", 24]]], ["3모드 베이스연합 S50 MDD25 (11~26)", [["b_s4", 44.5], ["b_e7", 26.5], ["b_e8", 29]]]];
+const DPK_SETS = [["동파 최고수익 단독 (11~25)", [["b_d3", 100]]], ["동파 최고수익 연합 (11~25)", [["b_d4", 64], ["b_d5", 36]]], ["동파 무손실 연합 (11~25)", [["b_d7", 53], ["b_d8", 47]]], ["동파 무손실 단독 (11~25)", [["b_d6", 100]]], ["동파 무손실2 연합 (11~25)", [["b_d10", 51.5], ["b_d11", 48.5]]], ["동파 무손실2 단독 (11~25)", [["b_d9", 100]]], ["동파 무손실 단독 10월시작 (11.10~26.09)", [["b_d12", 100]]], ["동파 월무관 연합A (11~25)", [["b_d13", 44.5], ["b_d14", 55.5]]], ["동파 월무관 연합B (11~25)", [["b_d15", 38], ["b_d16", 62]]], ["동파 월무관 단독 (11~25)", [["b_d17", 100]]], ["3모드 SOXX 연합 (11~26)", [["b_x1", 36], ["b_x2", 42.5], ["b_x3", 21.5]]], ["3모드 SOXX 단독 (11~26)", [["b_x2", 100]]], ["3모드 새균형 MDD30 (11~26)", [["b_y1", 38], ["b_y2", 13], ["b_y3", 49]]], ["3모드 새칼마 MDD17 (11~26)", [["b_y4", 28.5], ["b_y5", 42.5], ["b_y6", 29]]], ["3모드 MDD15·최저5 (11~26)", [["b_n1", 28], ["b_n2", 31.5], ["b_n3", 29.5]]], ["3모드 베이스연합 M30-A MDD25 (11~25)", [["b_t15", 40.5], ["b_e1", 31], ["b_e2", 28.5]]], ["3모드 베이스연합 M30-A MDD25 (11~26)", [["b_t15", 42.5], ["b_e3", 27.5], ["b_e4", 30]]], ["3모드 베이스연합 S50 MDD25 (11~25)", [["b_s4", 40.5], ["b_e5", 35.5], ["b_e6", 24]]], ["3모드 베이스연합 S50 MDD25 (11~26)", [["b_s4", 44.5], ["b_e7", 26.5], ["b_e8", 29]]]];
 const SOXL_SETS = [["3모드 MDD20 (15~25)", [["b_t21", 25], ["b_t22", 38.5], ["b_t23", 24], ["b_t24", 12.5]]], ["3모드 MDD30 (15~25)", [["b_t25", 40], ["b_t26", 10.5], ["b_t27", 49.5]]], ["3모드 MDD20 (15~26)", [["b_t28", 21], ["b_t29", 42.5], ["b_t30", 22.5], ["b_t31", 14]]], ["3모드 MDD30 (15~26)", [["b_t32", 41.5], ["b_t33", 8.5], ["b_t34", 50]]], ["3모드 MDD30 조합", [["b_t15", 45], ["b_t16", 5.5], ["b_t17", 49.5]]], ["3모드+동파 MDD30 조합", [["b_t18", 38], ["b_t19", 10], ["b_t20", 42], ["b_dp3", 10]]], ["3모드 3개 조합", [["b_t8", 28], ["b_t9", 43], ["b_t10", 29]]], ["3모드 4개 조합", [["b_t11", 25.5], ["b_t12", 38], ["b_t13", 23], ["b_t14", 13.5]]]];
 function setOrigin(set) { // 원래 매매법·비중 (내장 조합은 코드 값, 내가 만든 설정은 '기준 저장' 시점)
   if (set.orig) return clone(set.orig);
@@ -2483,12 +2483,12 @@ function setOrigin(set) { // 원래 매매법·비중 (내장 조합은 코드 �
 function seedTk() { // TQQQ판 전용 조합만
   if (typeof TK_SETS === 'undefined' || ST.seeded.includes('tk1')) return; ST.seeded.push('tk1');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-  TK_SETS.forEach(([nm, sl]) => { if (!ST.bt.sets.find(s => s.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
+  TK_SETS.forEach(([nm, sl]) => { if (!ST.bt.sets.find(s => s.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   saveLocal(); }
 function seedCal() { // 칼마 조합 3개만 남기고 나머지 백테스트 설정 삭제 (1회)
   if (TK !== 'SOXL' || ST.seeded.includes('clean1')) return; ST.seeded.push('clean1');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-  ST.bt.sets = CAL_SETS.map(([nm, sl]) => ({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }));
+  ST.bt.sets = CAL_SETS.map(([nm, sl]) => ({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }));
   ST.bt.cur = ST.bt.sets[0].id; BT.R = null; saveLocal(); }
 function seedRen2() { // 칼마/CAGR 세트 이름에 학습기간 표기 (1회)
   if (TK !== 'SOXL' || ST.seeded.includes('ren2')) return; ST.seeded.push('ren2');
@@ -2500,7 +2500,7 @@ function seedCg() { // 칼마 MDD30/40 → CAGR MDD30/40 교체 (1회)
   if (TK !== 'SOXL' || ST.seeded.includes('clean2')) return; ST.seeded.push('clean2');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
   ST.bt.sets = ST.bt.sets.filter(x => !/^3모드 칼마 MDD[34]0$/.test(x.name));
-  CAL_SETS.slice(1).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
+  CAL_SETS.slice(1).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   if (!ST.bt.sets.some(x => x.id === ST.bt.cur)) ST.bt.cur = ST.bt.sets[0].id; BT.R = null; saveLocal(); }
 function seedUpd() { // 재최적화 값으로 기본 세트 갱신 (1회)
   if (TK !== 'SOXL' || ST.seeded.includes('upd3')) return; ST.seeded.push('upd3');
@@ -2515,47 +2515,47 @@ function seedFree() { // 자유비중 세트 삭제 + 검증 세트 이름에 �
 function seedHold() { // 검증 3세트 추가 (기존 유지, 1회)
   if (TK !== 'SOXL' || ST.seeded.includes('hold1')) return; ST.seeded.push('hold1');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-  HOLD_SETS.forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
+  HOLD_SETS.forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
 function seedOne() { // 3모드 1개 기반 3세트 추가 (기존 유지, 1회)
   if (TK !== 'SOXL' || ST.seeded.includes('one1')) return; ST.seeded.push('one1');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-  ONE_SETS.forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
+  ONE_SETS.forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
 function seedOne2() { // 3모드 3종 MDD35 추가 (1회)
   if (TK !== 'SOXL' || ST.seeded.includes('one2')) return; ST.seeded.push('one2');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-  const [nm, sl] = ONE_SETS[0]; if (!ST.bt.sets.some(x => x.name === nm)) { const i = ST.bt.sets.findIndex(x => /^3모드 3종 MDD40/.test(x.name)); const s = { id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }; if (i >= 0) ST.bt.sets.splice(i, 0, s); else ST.bt.sets.push(s); }
+  const [nm, sl] = ONE_SETS[0]; if (!ST.bt.sets.some(x => x.name === nm)) { const i = ST.bt.sets.findIndex(x => /^3모드 3종 MDD40/.test(x.name)); const s = { id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }; if (i >= 0) ST.bt.sets.splice(i, 0, s); else ST.bt.sets.push(s); }
   BT.R = null; saveLocal(); }
 function seedRec() { // 추천 3세트를 맨 앞에 추가 (1회)
   if (TK !== 'SOXL' || ST.seeded.includes('rec1')) return; ST.seeded.push('rec1');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-  const add = REC_SETS.filter(([nm]) => !ST.bt.sets.some(x => x.name === nm)).map(([nm, sl]) => ({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }));
+  const add = REC_SETS.filter(([nm]) => !ST.bt.sets.some(x => x.name === nm)).map(([nm, sl]) => ({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }));
   ST.bt.sets = add.concat(ST.bt.sets); ST.bt.cur = (ST.bt.sets.find(x => x.name === REC_SETS[1][0]) || ST.bt.sets[0]).id; BT.R = null; saveLocal(); }
 function seedDpk() { // 동파 고점40 연합 추가 (1회)
   if (TK !== 'SOXL' || ST.seeded.includes('dpk1')) return; ST.seeded.push('dpk1');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-  DPK_SETS.filter(([nm]) => /고점40/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2013, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
+  DPK_SETS.filter(([nm]) => /고점40/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2013, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
 function seedDpk2() { // 동파 최고수익 2세트 추가 (1회)
   if (TK !== 'SOXL' || ST.seeded.includes('dpk2')) return; ST.seeded.push('dpk2');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-  DPK_SETS.filter(([nm]) => /^동파 최고수익/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
+  DPK_SETS.filter(([nm]) => /^동파 최고수익/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
 function seedDpk3() { // 동파 무손실 2세트 추가 (1회)
   if (TK !== 'SOXL' || ST.seeded.includes('dpk3')) return; ST.seeded.push('dpk3');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-  DPK_SETS.filter(([nm]) => /^동파 무손실 (연합|단독) \(/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
+  DPK_SETS.filter(([nm]) => /^동파 무손실 (연합|단독) \(/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
 function seedDpk4() { // 동파 무손실2 (v2.0 엔진 재최적화) 2세트 추가 (1회)
   if (TK !== 'SOXL' || ST.seeded.includes('dpk4')) return; ST.seeded.push('dpk4');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-  DPK_SETS.filter(([nm]) => /^동파 무손실2/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
+  DPK_SETS.filter(([nm]) => /^동파 무손실2/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
 function seedDpk5() { // 동파 무손실 10월 시작 세트 (회계연도 10월~, 1회)
   if (TK !== 'SOXL' || ST.seeded.includes('dpk5')) return; ST.seeded.push('dpk5');
   const b = BUILTIN.find(x => x.id === 'b_d12'), nm = '동파 무손실 단독 10월시작 (11.10~26.09)';
-  if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 10, y0: 2011, y1: 2026, opts: null, slots: [{ id: uid('s'), type: b.type, presetId: b.id, w: 100, p: clone(b.p) }] });
+  if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 10, y0: 2011, y1: 2026, opts: null, slots: [{ id: uid('s'), type: b.type, presetId: b.id, w: 100, p: clone(b.p) }] });
   BT.R = null; saveLocal(); }
 function seedDpk6() { // 동파 첫 정산일 수정(v2.4) 후 NN10 재최적화 값으로 교체 (1회)
   if (TK !== 'SOXL' || ST.seeded.includes('dpk6')) return; ST.seeded.push('dpk6');
@@ -2564,32 +2564,32 @@ function seedDpk6() { // 동파 첫 정산일 수정(v2.4) 후 NN10 재최적화
 function seedDpk7() { // 동파 시작월 무관 3세트 (1회)
   if (TK !== 'SOXL' || ST.seeded.includes('dpk7')) return; ST.seeded.push('dpk7');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-  DPK_SETS.filter(([nm]) => /^동파 월무관/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
+  DPK_SETS.filter(([nm]) => /^동파 월무관/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
 function seedSx1() { // 3모드 SOXX RSI 2세트 (1회)
   if (TK !== 'SOXL' || ST.seeded.includes('sx1')) return; ST.seeded.push('sx1');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-  DPK_SETS.filter(([nm]) => /^3모드 SOXX/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
+  DPK_SETS.filter(([nm]) => /^3모드 SOXX/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
 function seedCy1() { // 3모드 새균형·새칼마 (1회)
   if (TK !== 'SOXL' || ST.seeded.includes('cy1')) return; ST.seeded.push('cy1');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-  DPK_SETS.filter(([nm]) => /^3모드 새(균형|칼마)/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
+  DPK_SETS.filter(([nm]) => /^3모드 새(균형|칼마)/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
 function seedTk2() { // TQQQ 3모드 MDD20·최저10 2세트 (1회)
   if (typeof TK_SETS === 'undefined' || TK !== 'TQQQ' || ST.seeded.includes('tk2')) return; ST.seeded.push('tk2');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-  TK_SETS.filter(([nm]) => /최저10/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
+  TK_SETS.filter(([nm]) => /최저10/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
 function seedTk3() { // TQQQ 3모드 MDD30·최저10 2세트 (1회)
   if (typeof TK_SETS === 'undefined' || TK !== 'TQQQ' || ST.seeded.includes('tk3')) return; ST.seeded.push('tk3');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-  TK_SETS.filter(([nm]) => /MDD30·최저10/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
+  TK_SETS.filter(([nm]) => /MDD30·최저10/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
 function seedFr1() { // 페라리 (TQQQ) 1세트
   if (typeof TK_SETS === 'undefined' || TK !== 'TQQQ' || ST.seeded.includes('fr1')) return; ST.seeded.push('fr1');
   const b = BUILTIN.find(x => x.id === 'b_fr1'); if (!b || ST.bt.sets.some(x => x.name === '페라리 (시트)')) return;
-  ST.bt.sets.push({ id: uid('bt'), name: '페라리 (시트)', cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: [{ id: uid('s'), type: b.type, presetId: b.id, w: 100, p: clone(b.p) }] }); BT.R = null; saveLocal(); }
+  ST.bt.sets.push({ id: uid('bt'), name: '페라리 (시트)', cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: [{ id: uid('s'), type: b.type, presetId: b.id, w: 100, p: clone(b.p) }] }); BT.R = null; saveLocal(); }
 function seedNh1() { // v3.7: 모드 판정 변경 후 기준 불만족 세트 삭제 + 재최적화 세트 교체 (1회, 백테스트0·1·2 모두)
   if (ST.seeded.includes('nh1')) return; ST.seeded.push('nh1');
   const DROP = ["TQQQ 3모드 MDD20", "TQQQ 3모드 MDD30 (참고)"], NEW = {"TQQQ 3모드 MDD20·최저10 (11~25)": [["b_q7", 57], ["b_q8", 19.5], ["b_q9", 23.5]], "TQQQ 3모드 MDD20·최저10 (11~26)": [["b_q10", 61.5], ["b_q11", 15.5], ["b_q12", 23]], "TQQQ 3모드 MDD30·최저10 (11~26)": [["b_q16", 56.5], ["b_q17", 26.5], ["b_q18", 17]], "3모드 새균형 MDD30 (11~26)": [["b_y1", 38], ["b_y2", 13], ["b_y3", 49]], "3모드 저MDD 고점30 (11~25)": [["b_l1", 27], ["b_l2", 28], ["b_l3", 30]], "3모드 검증 CAGR MDD40 (11~24)": [["b_h7", 19.5], ["b_h8", 34], ["b_h9", 46.5]]};
@@ -2603,7 +2603,7 @@ function seedM15() { // 3모드 MDD15·최저5 → 백테스트1·2 (1회)
   if (TK !== 'SOXL' || ST.seeded.includes('m15a')) return; ST.seeded.push('m15a');
   const NM = "3모드 MDD15·최저5 (11~26)", SL = [["b_n1", 28], ["b_n2", 31.5], ["b_n3", 29.5]];
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-  [['bt', 450000], ['bt2', 250000]].forEach(([k, cap]) => { const g = btGroup(k); if (!g || !g.sets || g.sets.some(x => x.name === NM)) return; g.sets.push({ id: uid('bt'), name: NM, cap, sm: 1, y0: 2011, y1: 2026, opts: null, slots: SL.map(([p, w]) => mk(p, w)) }); });
+  [['bt', 100000], ['bt2', 250000]].forEach(([k, cap]) => { const g = btGroup(k); if (!g || !g.sets || g.sets.some(x => x.name === NM)) return; g.sets.push({ id: uid('bt'), name: NM, cap, sm: 1, y0: 2011, y1: 2026, opts: null, slots: SL.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
 // ===== 백테스트1-1: 백테스트1 세트를 3만 달러 시작으로 (이름 괄호에 '3만' 표기, 3만에서 기준을 못 맞춘 세트는 3만 기준 재최적화 값) =====
 const B11_OVR = {"3모드 새균형 MDD30 (11~26)": [["b_k1", 27], ["b_k2", 14], ["b_k3", 59]], "3모드 MDD30 (15~26)": [["b_k4", 32], ["b_k5", 38.5], ["b_k6", 29.5]], "3모드 검증 CAGR MDD40 (11~24)": [["b_k7", 19.5], ["b_k8", 41], ["b_k9", 39.5]]}; // 3만 기준 재최적화로 바꾼 세트: 원래 이름 → [[presetId, w]...]
@@ -2627,10 +2627,15 @@ function seedBe1() { // 3모드 베이스연합 MDD25 4세트 → 백테스트1 
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; }; const g = btGroup('bt');
   DPK_SETS.filter(([nm]) => /^3모드 베이스연합/.test(nm)).forEach(([nm, sl]) => { if (!g.sets.some(x => x.name === nm)) g.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
+function seedCap1() { // v5.0: 백테스트1 원금 기본 10만 달러로, 13~26 학습 세트 삭제 (1회)
+  if (ST.seeded.includes('cap1')) return; ST.seeded.push('cap1');
+  const g = btGroup('bt'); (g.sets || []).forEach(s => s.cap = 100000);
+  ['bt', 'bt11'].forEach(k => { const G = btGroup(k); if (!G || !G.sets) return; G.sets = G.sets.filter(s => !/13~26/.test(s.name)); if (G.cur && !G.sets.some(s => s.id === G.cur)) G.cur = G.sets.length ? G.sets[0].id : null; });
+  BT.R = null; saveLocal(); }
 function seedLw() { // 3모드 저MDD 고점30 추가 (1회, 현금 4.5%는 비중 합 나머지)
   if (TK !== 'SOXL' || ST.seeded.includes('lw1')) return; ST.seeded.push('lw1');
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
-  ONE_SETS.filter(([nm]) => /저MDD 고점30/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 450000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
+  ONE_SETS.filter(([nm]) => /저MDD 고점30/.test(nm)).forEach(([nm, sl]) => { if (!ST.bt.sets.some(x => x.name === nm)) ST.bt.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
 const BT2_SETS = [["금액하락20 (11~25)", [["b_m1", 25.5], ["b_m2", 28], ["b_m3", 27]]], ["금액하락20 (11~26)", [["b_m4", 25], ["b_m5", 27.5], ["b_m6", 26.5]]], ["3모드 저MDD 고점30 (11~25)", [["b_l1", 27], ["b_l2", 28], ["b_l3", 30]]], ["3모드 검증 칼마 MDD20 (11~24)", [["b_h1", 29.5], ["b_h2", 43], ["b_h3", 27.5]]], ["3모드 칼마 MDD20 (11~25)", [["b_c1", 26.5], ["b_c2", 38.5], ["b_c3", 35]]], ["3모드 MDD15·최저5 (11~26)", [["b_n1", 28], ["b_n2", 31.5], ["b_n3", 29.5]]]];
 function seedBt2() { // 백테스트2: 연중 금액하락 기준 세트 (1회)
@@ -2644,18 +2649,18 @@ function seedBt0() { if (!ST.bt0) ST.bt0 = { cur: null, sets: [] }; if ((ST.seed
   (ST.live.tabs || []).filter(t => t.slots && t.slots.length).forEach(t => { const nm = t.from || t.name; if (g.sets.some(s => s.name === nm)) return; g.sets.push({ id: uid('bt'), name: nm, cap: +t.cap || 450000, sm: 1, y0: 2011, y1: 2026, opts: clone(t.opts || null), slots: clone(t.slots).map(s => { const x = Object.assign(s, { id: uid('s') }); delete x.open; return x; }) }); });
   if (!g.sets.length) { const s = main.sets.find(x => x.id === main.cur) || main.sets[0]; if (s) { const c = clone(s); c.id = uid('bt'); c.slots.forEach(x => x.id = uid('s')); g.sets.push(c); } }
   g.cur = g.sets.length ? g.sets[0].id : null; saveLocal(); }
-function liveImport(ask) { // 실전 탭에 백테스트 세트의 매매법·비중 가져오기 (v4.9: 드롭다운에서 고르면 바로 적용)
+function liveImport(ask) { // 실전 탭에 백테스트 세트의 매매법·비중 가져오기 (v5.0: 드롭다운에서 고르면 바로 적용)
   const t = curLive(), el = $('#lv-from'); if (!t || !el) return; const v = el.value, k = v.indexOf(':'), src = k < 0 ? null : (btGroup(v.slice(0, k)).sets || []).find(s => s.id === v.slice(k + 1)); if (!src) return;
   if (ask && t.slots.length && !confirm(`'${src.name}' 설정의 매매법·비중으로 다시 바꿀까요? (실전에서 고친 값은 사라져요)`)) return;
   t.slots = clone(src.slots).map(s => Object.assign(s, { id: uid('s'), open: false })); t.opts = clone(src.opts || null); t.from = src.name; saveLocal(); LIVE.cache = {}; render(); toast(`'${src.name}' 설정으로 바꿨어요`); }
 async function boot() {
-  initInputs(); ST = loadState(); if (fixSlotIds()) saveLocal(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedTk2(); seedTk3(); seedFr1(); seedLw(); seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); btSwapTo(ST.page); buildData(ST.manual); render();
-  setSync('☁ 확인 중…'); const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); }
+  initInputs(); ST = loadState(); if (fixSlotIds()) saveLocal(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedTk2(); seedTk3(); seedFr1(); seedLw(); seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); seedCap1(); btSwapTo(ST.page); buildData(ST.manual); render();
+  setSync('☁ 확인 중…'); const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); seedCap1(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); }
   window.addEventListener('beforeunload', () => { if (!lsNewer()) saveNow(); });
   window.addEventListener('storage', e => { if (e.key === LS_KEY && e.newValue) adoptLocal(); });
   let _visBusy = false; document.addEventListener('visibilitychange', async () => { // 앱으로 돌아오면 클라우드 최신본·주가 다시 확인
     if (document.visibilityState !== 'visible' || _visBusy) return; _visBusy = true; adoptLocal();
-    try { const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); if (a) toast('다른 기기에서 저장한 최신본을 불러왔어요'); } } finally { _visBusy = false; } });
+    try { const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); seedCap1(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); if (a) toast('다른 기기에서 저장한 최신본을 불러왔어요'); } } finally { _visBusy = false; } });
   try { const ck = await idbGet('ckpt', 'run'); if (ck && ck.running && ck.cfg) { window._resume = ck; if (ST.page === 'opt') render(); } } catch (e) { }
   let lw = window.innerWidth; window.addEventListener('resize', () => debounce('rs', () => { if (Math.abs(window.innerWidth - lw) < 40) return; lw = window.innerWidth; const a = document.activeElement; if (!a || !a.matches || !a.matches('input')) render(); }, 300));
 }
