@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>try{localStorage.setItem('lab_tk','TQQQ')}catch(e){}</script>
-<title>트레이딩 랩 TQQQ v6.2</title>
+<title>트레이딩 랩 TQQQ v6.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -114,9 +114,11 @@ input.wr{flex:1;min-width:0;height:16px;accent-color:#5AA9FF;margin:0;cursor:poi
 .memo-ta{width:100%;min-height:calc(100vh - 170px);resize:vertical;background:var(--p1);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;font:13px/1.55 var(--mono);outline:none;box-sizing:border-box;white-space:pre-wrap}.memo-ta:focus{border-color:var(--ac)}
 
 tr.clk:hover td{background:var(--p3)}tr.clk.on td{background:var(--acb)}
+
+.rshelp{width:100%;margin-top:2px}.rshelp summary{cursor:pointer;color:var(--ac2);font-size:11px;list-style:none;display:inline}.rshelp summary::-webkit-details-marker{display:none}.rshelp[open]{background:var(--p2);border:1px solid var(--ln);border-radius:6px;padding:4px 8px}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v6.2</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v6.3</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -255,7 +257,7 @@ function fThree(T, md, cap, fee, out) { // T={N:[3], BUY,SELL,HOLD,W: [3][N], co
     ninv = k;
     if (buyQty > 0 && close <= buyTarget) { const gr = buyQty * close, cs = gr + gr * FB; if (cs <= cash) { cf -= cs; bp[ninv] = close; qty[ninv] = buyQty; cost[ninv] = cs; pm[ninv] = cm; pt[ninv] = tier; pd[ninv] = 0; ninv++; } }
     cash = Math.trunc((cash + cf + EPS) * 100) / 100; const plf = Math.trunc((pl + EPS) * 100) / 100;
-    dcnt++; pend += plf; if (dcnt % CYC === 0) { if (pend > 0) base += pend * comp; else if (pend < 0) base += pend * loss; pend = 0; } base = Math.trunc((base + EPS) * 100) / 100;
+    dcnt++; pend += plf; if (T.simple) { if (ninv === 0) base = cash < init ? cash : init; pend = 0; } else if (dcnt % CYC === 0) { if (pend > 0) base += pend * comp; else if (pend < 0) base += pend * loss; pend = 0; } base = Math.trunc((base + EPS) * 100) / 100;
     let eq = 0; for (let j = 0; j < ninv; j++) eq += qty[j] * close; eq = Math.trunc((eq + EPS) * 100) / 100;
     const tot = Math.trunc((cash + eq + EPS) * 100) / 100; if (tot > peak) peak = tot; const dd = peak > 0 ? (peak - tot) / peak : 0; if (dd > ymdd) ymdd = dd;
   }
@@ -663,7 +665,8 @@ function runThree(rows, P){
     cash=trunc2(cash+cf+EPS3);
     const plf=trunc2(pl+EPS3);
     dcnt++; pend+=plf;
-    if(dcnt%CYC===0){ if(pend>0) base+=pend*(MODES[cm].comp_rate||0.811); else if(pend<0) base+=pend*(MODES[cm].loss_rate||0.291); pend=0; }
+    if(P.simple){ if(!inv.length) base=Math.min(cash, running); pend=0; }
+    else if(dcnt%CYC===0){ if(pend>0) base+=pend*(MODES[cm].comp_rate||0.811); else if(pend<0) base+=pend*(MODES[cm].loss_rate||0.291); pend=0; }
     base=trunc2(base+EPS3);
     let eq=0; inv.forEach(p=>eq+=p.qty*close); eq=trunc2(eq+EPS3);
     const total=trunc2(cash+eq+EPS3);
@@ -1107,7 +1110,7 @@ function engineP(type, p, cap, fee) {
   if (type === 'dual') return { nAtk: +p.nAtk, holdA: +p.holdA, atkBuy: +p.atkBuy, atkBuyNeg: +(p.atkBuyNeg ?? -0.1), sellA: +p.sellA, nDef: +p.nDef, defHold: +p.defHold, defBuy1: +p.defBuy1, defBuy2: +p.defBuy2, defSell: +p.defSell, maN: +p.maN, atkW: p.atkW || '', defW: p.defW || '', initCap: cap, fee };
   const st = {}; ['SF', 'Middle', 'AG'].forEach(m => { const t = p[m], n = +t.n; const ext = (a, d) => { const r = []; for (let i = 0; i < n; i++) r.push(+(a[i] ?? a[a.length - 1] ?? d)); return r; };
     st[m] = { buy: ext(t.buy, 0).map(v => v / 100), sell: ext(t.sell, 0).map(v => v / 100), hold: ext(t.hold, 1), weight: ext(t.weight, 0).map(v => v / 100), comp_rate: p.comp / 100, loss_rate: p.loss / 100, fix: !!t.fix }; });
-  return { settings: st, rsiMin: +p.rsiMin, rsiMax: +p.rsiMax, modeMethod: p.modeMethod, maN: +p.maN || 120, cyc: +p.cyc || 1, xr: (+p.xr || 0) / 100, xn: +p.xn || 4, initCap: cap, fee };
+  return { settings: st, rsiMin: +p.rsiMin, rsiMax: +p.rsiMax, modeMethod: p.modeMethod, maN: +p.maN || 120, cyc: +p.cyc || 1, simple: !!p.simple, xr: (+p.xr || 0) / 100, xn: +p.xn || 4, initCap: cap, fee };
 }
 function runEngine(type, P, rows) { rows = rows || DATA; return type === 'dongpa' ? runDongpa(rows, P) : type === 'dual' ? runDual(rows, P) : runThree(rows, P); }
 function presetSummary(type, p) {
@@ -1273,7 +1276,7 @@ function fThree(T, md, cap, fee, out) { // T={N:[3], BUY,SELL,HOLD,W: [3][N], co
     ninv = k;
     if (buyQty > 0 && close <= buyTarget) { const gr = buyQty * close, cs = gr + gr * FB; if (cs <= cash) { cf -= cs; bp[ninv] = close; qty[ninv] = buyQty; cost[ninv] = cs; pm[ninv] = cm; pt[ninv] = tier; pd[ninv] = 0; ninv++; } }
     cash = Math.trunc((cash + cf + EPS) * 100) / 100; const plf = Math.trunc((pl + EPS) * 100) / 100;
-    dcnt++; pend += plf; if (dcnt % CYC === 0) { if (pend > 0) base += pend * comp; else if (pend < 0) base += pend * loss; pend = 0; } base = Math.trunc((base + EPS) * 100) / 100;
+    dcnt++; pend += plf; if (T.simple) { if (ninv === 0) base = cash < init ? cash : init; pend = 0; } else if (dcnt % CYC === 0) { if (pend > 0) base += pend * comp; else if (pend < 0) base += pend * loss; pend = 0; } base = Math.trunc((base + EPS) * 100) / 100;
     let eq = 0; for (let j = 0; j < ninv; j++) eq += qty[j] * close; eq = Math.trunc((eq + EPS) * 100) / 100;
     const tot = Math.trunc((cash + eq + EPS) * 100) / 100; if (tot > peak) peak = tot; const dd = peak > 0 ? (peak - tot) / peak : 0; if (dd > ymdd) ymdd = dd;
   }
@@ -1318,7 +1321,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v6.2';
+const APP_VER = 'v6.3';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -1591,12 +1594,21 @@ function presetApply(slot, id) { const p = presetById(id); if (!p) return; slot.
 function presetSave(slot) { const nm = prompt('프리셋 이름', slotName(slot).replace('*', '') + ' 수정'); if (!nm) return; const id = uid('u'); ST.presets.push({ id, type: slot.type, name: nm, p: clone(slot.p) }); slot.presetId = id; slot.modified = false; slot.name = ''; saveLocal(); toast('프리셋 저장: ' + nm); }
 
 // ===== 옵션 박스 (백테스트·실전 공용) =====
+function resetExample(t, r) { // 익절 리셋 예시 (현재 목표·재투입 값으로 계산)
+  t = +t || 100; r = +r || 40; const f = v => (Math.round(v * 10) / 10).toLocaleString(); let inv = 100, cash = 0; const rows = [];
+  for (let k = 1; k <= 3; k++) { const hit = inv * (1 + t / 100), re = hit * r / 100, out = hit - re; cash += out;
+    rows.push(`<tr><td class="l">${k}회째</td><td>${f(inv)} → <b>${f(hit)}</b></td><td>${f(re)}</td><td>+${f(out)}</td><td>${f(cash)}</td><td><b>${f(cash + re)}</b></td></tr>`); inv = re; }
+  return `<div class="small" style="margin:4px 0 2px;line-height:1.5">연초 투자금 <b>100</b> 기준 · 목표 <b>${t}%</b> · 재투입 <b>${r}%</b><br>
+    ① 투자 중인 금액이 <b>그 구간 시작 금액 대비 +${t}%</b>가 되는 날 종가에 전량 매도<br>② 매도금의 ${r}%만 다음 거래일부터 각 매매법에 비중대로 처음(티어 0)부터 다시 투입, 나머지 ${100 - r}%는 현금으로 보관<br>
+    ③ 다음 목표는 <b>재투입한 금액 대비 +${t}%</b> (빼둔 현금은 그해 끝까지 그대로) · ④ 다음 해 1월엔 현금 포함 전체로 새로 시작</div>
+    <table class="t" style="font-size:11px;margin:2px 0 4px"><tr><th class="l">리셋</th><th>투자금 → 목표 도달</th><th>재투입</th><th>현금으로</th><th>쌓인 현금</th><th>총자산</th></tr>${rows.join('')}</table>
+    <div class="small dim">목표에 못 닿으면 그 구간은 그대로 연말까지 갑니다. 현금 슬롯은 리셋 계산에서 빠집니다.</div>`; }
 function defOpts() { return { rebal: 'none', reset: { on: false, target: 100, reinv: 40 }, stop: { on: false, pct: 20 }, maf: { on: false, n: 200 } }; }
 function optsBox(o, scope, withStop, withRebal) { if (withRebal === undefined) withRebal = true; o = Object.assign(defOpts(), o || {}); const chk = (k, on, lab) => `<label class="row small" style="gap:4px"><input type="checkbox" data-opt="${scope}" data-ok="${k}.on" ${on ? 'checked' : ''}>${lab}</label>`;
   const ni = (k, v, st, w) => numInput({ v, step: st, w: w || '62px', attrs: `data-opt="${scope}" data-ok="${k}"` });
   return `<div class="grid" style="margin-top:6px;padding-top:5px;border-top:1px dashed var(--ln);gap:4px">
     ${withRebal ? '' : '<!--'}<div class="row small"><span class="muted" style="width:62px">리밸런싱</span><select class="in" style="width:auto" data-opt="${scope}" data-ok="rebal">${[['none', '없음 (연초 비중 고정)'], ['Q', '분기별'], ['H', '반기별'], ['M', '월별']].map(([v, l]) => `<option value="${v}" ${o.rebal === v ? 'selected' : ''}>${l}</option>`).join('')}</select>${o.reset.on && o.rebal !== 'none' ? '<span class="orc">리셋 켜면 미적용</span>' : ''}</div>${withRebal ? '' : '-->'}
-    <div class="row small">${chk('reset', o.reset.on, '💰 익절 리셋')}${o.reset.on ? `<span class="muted">목표</span>${ni('reset.target', o.reset.target, 5)}<span class="muted">% 도달 → 재투입</span>${ni('reset.reinv', o.reset.reinv, 5)}<span class="muted">% (나머지 현금)</span>` : '<span class="dim">목표 수익 도달 시 전량 현금화 후 일부만 다시 시작</span>'}</div>
+    <div class="row small">${chk('reset', o.reset.on, '💰 익절 리셋')}${o.reset.on ? `<span class="muted">목표</span>${ni('reset.target', o.reset.target, 5)}<span class="muted">% 도달 → 재투입</span>${ni('reset.reinv', o.reset.reinv, 5)}<span class="muted">% (나머지 현금)</span>` : '<span class="dim">목표 수익 도달 시 전량 현금화 후 일부만 다시 시작</span>'}<details class="rshelp"><summary>ⓘ 예시</summary>${resetExample(o.reset.target, o.reset.reinv)}</details></div>
     ${withStop ? `<div class="row small">${chk('stop', o.stop.on, '🛑 MDD 손절')}${o.stop.on ? `<span class="muted">그해 고점 대비</span>${ni('stop.pct', o.stop.pct, 1)}<span class="muted">% 하락하면 전량매도·그해 종료</span>` : '<span class="dim">그해 낙폭이 기준에 닿으면 남은 기간 현금</span>'}</div>` : ''}
   </div>`; }
 function wSlider(s) { if (!ST.slider) return ''; return `<div class="row" style="gap:6px;flex-wrap:nowrap"><input type="range" class="wr" min="0" max="100" step="0.5" value="${+s.w || 0}" data-slotw="${s.id}" aria-label="${esc(slotName(s))} 비중"><span class="small dim" style="width:34px;text-align:right">${+(+s.w).toFixed(1)}</span></div>`; }
@@ -2351,7 +2363,7 @@ document.addEventListener('click', async e => {
     case 'cmp-del': cmpCfg().items.splice(+b.dataset.i, 1); saveLocal(); render(); return;
     case 'cmp-clear': cmpCfg().items = []; saveLocal(); render(); return;
     case 'cmp-mon': cmpMonCompute(); return;
-    case 'set-pick': { ST.bt.cur = id; BT.R = null; BT.selY = null; saveLocal(); render(); return; } // v6.2: 고른 세트의 수정 내용 유지 (되돌리기는 '원래대로' 버튼)
+    case 'set-pick': { ST.bt.cur = id; BT.R = null; BT.selY = null; saveLocal(); render(); return; } // v6.3: 고른 세트의 수정 내용 유지 (되돌리기는 '원래대로' 버튼)
     case 'set-add': { const nm = prompt('새 설정 이름', '설정 ' + (ST.bt.sets.length + 1)); if (!nm) return; const s = { id: uid('bt'), name: nm, cap: set.cap, sm: 1, y0: set.y0, y1: set.y1, slots: [] }; ST.bt.sets.push(s); ST.bt.cur = s.id; BT.R = null; saveLocal(); render(); return; }
     case 'set-reset': { const o = setOrigin(set); if (!o) return toast('원래 값이 없어요 — 먼저 \'기준 저장\'을 눌러주세요'); if (!confirm(`'${set.name}' 매매법·비중·파라미터를 원래대로 되돌릴까요?`)) return; set.slots = o.map(x => Object.assign(x, { id: uid('s') })); set.opts = null; BT.R = null; saveLocal(); render(); toast('원래대로 되돌렸어요'); return; }
     case 'set-mark': if (!confirm(`지금 '${set.name}' 상태를 '원래대로' 기준으로 저장할까요?`)) return; set.orig = clone(set.slots); saveLocal(); toast('기준 저장 완료'); render(); return;
@@ -2660,20 +2672,20 @@ function seedBe1() { // 3모드 베이스연합 MDD25 4세트 → 백테스트1 
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; }; const g = btGroup('bt');
   DPK_SETS.filter(([nm]) => /^3모드 베이스연합/.test(nm)).forEach(([nm, sl]) => { if (!g.sets.some(x => x.name === nm)) g.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
-function seedCap1() { // v6.2: 백테스트1 원금 기본 10만 달러로, 13~26 학습 세트 삭제 (1회)
+function seedCap1() { // v6.3: 백테스트1 원금 기본 10만 달러로, 13~26 학습 세트 삭제 (1회)
   if (ST.seeded.includes('cap1')) return; ST.seeded.push('cap1');
   const g = btGroup('bt'); (g.sets || []).forEach(s => s.cap = 100000);
   ['bt', 'bt11'].forEach(k => { const G = btGroup(k); if (!G || !G.sets) return; G.sets = G.sets.filter(s => !/13~26/.test(s.name)); if (G.cur && !G.sets.some(s => s.id === G.cur)) G.cur = G.sets.length ? G.sets[0].id : null; });
   BT.R = null; saveLocal(); }
-function seedRen26() { // v6.2: 2025·2026 검증까지 만족한 '검증' 세트 이름을 (11~24) → (11~26)으로 (백테스트1·2만, 1-1은 3만에서 미달이라 유지)
+function seedRen26() { // v6.3: 2025·2026 검증까지 만족한 '검증' 세트 이름을 (11~24) → (11~26)으로 (백테스트1·2만, 1-1은 3만에서 미달이라 유지)
   if (ST.seeded.includes('ren26')) return; ST.seeded.push('ren26'); const R = {"3모드 검증 칼마 MDD20 (11~24)": "3모드 검증 칼마 MDD20 (11~26)", "3모드 검증 CAGR MDD30 (11~24)": "3모드 검증 CAGR MDD30 (11~26)", "3모드 검증 CAGR MDD40 (11~24)": "3모드 검증 CAGR MDD40 (11~26)"};
   ['bt', 'bt2', 'bt0'].forEach(k => { const g = btGroup(k); (g && g.sets || []).forEach(s => { if (R[s.name]) s.name = R[s.name]; }); });
   (ST.live && ST.live.tabs || []).forEach(t => { if (R[t.from]) t.from = R[t.from]; }); saveLocal(); }
-function seedRen27() { // v6.2: 이름 기간 = 파라미터 선정에 쓴 데이터 기간 (2026 데이터를 조건·학습에 쓰면 26)
+function seedRen27() { // v6.3: 이름 기간 = 파라미터 선정에 쓴 데이터 기간 (2026 데이터를 조건·학습에 쓰면 26)
   if (ST.seeded.includes('ren27')) return; ST.seeded.push('ren27'); const R = Object.assign({"동파 월무관 연합A (11~25)": "동파 월무관 연합A (11~26)", "동파 월무관 연합B (11~25)": "동파 월무관 연합B (11~26)", "동파 월무관 단독 (11~25)": "동파 월무관 단독 (11~26)"}, {"3모드 검증 칼마 MDD20 (11~24·3만)": "3모드 검증 칼마 MDD20 (11~26·3만)", "3모드 검증 CAGR MDD30 (11~24·3만)": "3모드 검증 CAGR MDD30 (11~26·3만)", "3모드 검증 CAGR MDD40 (11~24·3만)": "3모드 검증 CAGR MDD40 (11~26·3만)", "동파 월무관 연합A (11~25·3만)": "동파 월무관 연합A (11~26·3만)", "동파 월무관 연합B (11~25·3만)": "동파 월무관 연합B (11~26·3만)", "동파 월무관 단독 (11~25·3만)": "동파 월무관 단독 (11~26·3만)"});
   ['bt', 'bt2', 'bt0', 'bt11'].forEach(k => { const g = btGroup(k); (g && g.sets || []).forEach(s => { if (R[s.name]) s.name = R[s.name]; }); });
   (ST.live && ST.live.tabs || []).forEach(t => { if (R[t.from]) t.from = R[t.from]; }); saveLocal(); }
-function seedBt5() { // v6.2: 동파 세트를 백테스트1·1-1에서 백테스트5(동파)로 옮김 (SOXL, 1회)
+function seedBt5() { // v6.3: 동파 세트를 백테스트1·1-1에서 백테스트5(동파)로 옮김 (SOXL, 1회)
   if (TK !== 'SOXL') return; if (!ST.bt5) ST.bt5 = { cur: null, sets: [] }; if (ST.seeded.includes('bt5a')) return; ST.seeded.push('bt5a');
   const g5 = btGroup('bt5'); const isDp = s => /^동파/.test(s.name) && (s.slots || []).every(z => z.type === 'dongpa' || z.type === 'cash');
   ['bt', 'bt11'].forEach(k => { const G = btGroup(k); if (!G || !G.sets) return; const mv = G.sets.filter(isDp); if (!mv.length) return;
@@ -2690,16 +2702,16 @@ function seedNb1() { // 3모드 신베이스연합 MDD25 4세트 → 백테스�
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; }; const g = btGroup('bt');
   DPK_SETS.filter(([nm]) => /^3모드 신베이스연합/.test(nm)).forEach(([nm, sl]) => { if (!g.sets.some(x => x.name === nm)) g.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
-function seedRen28() { // v6.2: 베이스가 2026까지 학습한 M30-A라서 (11~25) → (11~26)
+function seedRen28() { // v6.3: 베이스가 2026까지 학습한 M30-A라서 (11~25) → (11~26)
   if (ST.seeded.includes('ren28')) return; ST.seeded.push('ren28'); const R = {"3모드 베이스연합 M30-A MDD25 (11~25)": "3모드 베이스연합 M30-A MDD25 B (11~26)"};
   ['bt', 'bt2', 'bt0', 'bt11', 'bt4', 'bt5'].forEach(k => { const g = btGroup(k); (g && g.sets || []).forEach(s => { if (R[s.name]) s.name = R[s.name]; }); });
   (ST.live && ST.live.tabs || []).forEach(t => { if (R[t.from]) t.from = R[t.from]; }); saveLocal(); }
-function seedFull1() { // v6.2: 백테스트1에 '전체매매' (처음 비율: 2티RSI 25 · 로켓 23 · 2티평4 23 · 쪼꼬프렌 19 · 6분할v1 10, 원금 10만)
+function seedFull1() { // v6.3: 백테스트1에 '전체매매' (처음 비율: 2티RSI 25 · 로켓 23 · 2티평4 23 · 쪼꼬프렌 19 · 6분할v1 10, 원금 10만)
   if (ST.seeded.includes('full1')) return; ST.seeded.push('full1'); const g = btGroup('bt'); if (!g || !g.sets) return;
   if (!g.sets.some(s => s.name === '전체매매')) g.sets.unshift({ id: uid('bt'), name: '전체매매', cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: defaultSlots() });
   else g.sets.filter(s => s.name === '전체매매').forEach(s => s.cap = 100000);
   BT.R = null; saveLocal(); }
-function seedFull2() { // v6.2: 전체매매 비율 고정 2티RSI 16 · 로켓 30 · 2티평4 16 · 쪼꼬프렌 24 · 6분할v1 14 (1회)
+function seedFull2() { // v6.3: 전체매매 비율 고정 2티RSI 16 · 로켓 30 · 2티평4 16 · 쪼꼬프렌 24 · 6분할v1 14 (1회)
   if (ST.seeded.includes('full2')) return; ST.seeded.push('full2'); const g = btGroup('bt'); if (!g || !g.sets) return;
   g.sets.filter(s => s.name === '전체매매').forEach(s => { s.slots = defaultSlots(); s.orig = null; }); BT.R = null; saveLocal(); }
 function seedLw() { // 3모드 저MDD 고점30 추가 (1회, 현금 4.5%는 비중 합 나머지)
@@ -2719,7 +2731,7 @@ function seedBt0() { if (!ST.bt0) ST.bt0 = { cur: null, sets: [] }; if ((ST.seed
   (ST.live.tabs || []).filter(t => t.slots && t.slots.length).forEach(t => { const nm = t.from || t.name; if (g.sets.some(s => s.name === nm)) return; g.sets.push({ id: uid('bt'), name: nm, cap: +t.cap || 450000, sm: 1, y0: 2011, y1: 2026, opts: clone(t.opts || null), slots: clone(t.slots).map(s => { const x = Object.assign(s, { id: uid('s') }); delete x.open; return x; }) }); });
   if (!g.sets.length) { const s = main.sets.find(x => x.id === main.cur) || main.sets[0]; if (s) { const c = clone(s); c.id = uid('bt'); c.slots.forEach(x => x.id = uid('s')); g.sets.push(c); } }
   g.cur = g.sets.length ? g.sets[0].id : null; saveLocal(); }
-function liveImport(ask) { // 실전 탭에 백테스트 세트의 매매법·비중 가져오기 (v6.2: 드롭다운에서 고르면 바로 적용)
+function liveImport(ask) { // 실전 탭에 백테스트 세트의 매매법·비중 가져오기 (v6.3: 드롭다운에서 고르면 바로 적용)
   const t = curLive(), el = $('#lv-from'); if (!t || !el) return; const v = el.value, k = v.indexOf(':'), src = k < 0 ? null : (btGroup(v.slice(0, k)).sets || []).find(s => s.id === v.slice(k + 1)); if (!src) return;
   if (ask && t.slots.length && !confirm(`'${src.name}' 설정의 매매법·비중으로 다시 바꿀까요? (실전에서 고친 값은 사라져요)`)) return;
   t.slots = clone(src.slots).map(s => Object.assign(s, { id: uid('s'), open: false })); t.opts = clone(src.opts || null); t.from = src.name; saveLocal(); LIVE.cache = {}; render(); toast(`'${src.name}' 설정으로 바꿨어요`); }
