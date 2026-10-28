@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>try{localStorage.setItem('lab_tk','TQQQ')}catch(e){}</script>
-<title>트레이딩 랩 TQQQ v4.8</title>
+<title>트레이딩 랩 TQQQ v4.9</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -108,9 +108,11 @@ input.wr{flex:1;min-width:0;height:16px;accent-color:#5AA9FF;margin:0;cursor:poi
 .mbox{background:var(--bg2,#101a2e);border:1px solid #2a3a55;border-radius:10px;padding:10px 13px;max-width:calc(100vw - 16px);box-shadow:0 10px 40px rgba(0,0,0,.5)}
 
 .tksw{display:flex;gap:0;margin-right:6px;border:1px solid var(--ln);border-radius:6px;overflow:hidden;flex:none}.tksw button{background:transparent;border:0;color:var(--t3);font:700 11px var(--mono);padding:3px 8px;cursor:pointer}.tksw button.on{background:#1f6f43;color:#fff}
+
+.sgrp{margin:2px 0 4px}.sgl{font:700 10.5px var(--mono);color:var(--t3);margin:4px 0 2px;letter-spacing:.02em}.sgl .dim{font-weight:400}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v4.8</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v4.9</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1291,7 +1293,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v4.8';
+const APP_VER = 'v4.9';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -1518,6 +1520,13 @@ const PF = {
   dongpa: [['nPos', '분할수', 1], ['cycle', '복리 정산주기', 1], ['safeBuy', '안전 매수%', 0.1, 1], ['safeProfit', '안전 익절%', 0.1], ['safeHold', '안전 보유일', 1], ['aggBuy', '공세 매수%', 0.1, 1], ['aggProfit', '공세 익절%', 0.1], ['aggHold', '공세 보유일', 1]],
   dual: [['nAtk', '공격 분할수', 1], ['holdA', '공격 보유 α', 0.1], ['atkBuy', '공격 매수%', 0.1, 1], ['atkBuyNeg', '하락일 매수%', 0.1, 1], ['sellA', '공격 매도 α', 0.1], ['nDef', '방어 분할수', 1], ['defHold', '방어 보유일', 1], ['defBuy1', '조건1 MA%', 0.1, 1], ['defBuy2', '조건2 종가%', 0.1, 1], ['defSell', '방어 매도 MA%', 0.1, 1], ['maN', 'MA 일수', 1]],
 };
+// 세트 목록: 최적화(학습) 기간별로 묶고, 묶음 안에서는 MDD 기준 순으로 정렬
+function setPeriod(nm) { const m = String(nm).match(/(\d{2}(?:\.\d{2})?)~(\d{2}(?:\.\d{2})?)/); return m ? m[1] + '~' + m[2] : ''; }
+function setMddKey(nm) { const m = String(nm).match(/MDD\s?(\d+)/); if (m) return +m[1]; if (/안정형/.test(nm)) return 25; if (/균형형/.test(nm)) return 30; if (/수익형/.test(nm)) return 35; if (/저MDD 고점30/.test(nm)) return 15; if (/금액하락(\d+)/.test(nm)) return +nm.match(/금액하락(\d+)/)[1]; if (/[34]개 조합/.test(nm)) return 20; if (/^동파/.test(nm)) return 90; return 99; }
+function setGroupsHtml(sets, curId) { const G = new Map(); sets.forEach(s => { const k = setPeriod(s.name); if (!G.has(k)) G.set(k, []); G.get(k).push(s); });
+  const pk = k => k ? k.split('~').map(parseFloat) : [999, 999]; const keys = Array.from(G.keys()).sort((a, b) => { const x = pk(a), y = pk(b); return x[0] - y[0] || x[1] - y[1]; });
+  return keys.map(k => { const arr = G.get(k).slice().sort((a, b) => setMddKey(a.name) - setMddKey(b.name) || a.name.localeCompare(b.name));
+    return `<div class="sgrp"><div class="sgl">${k ? esc(k) + ' 학습' : '기간 표기 없음'} <span class="dim">${arr.length}</span></div><div class="tabs">${arr.map(s => `<button class="tab ${s.id === curId ? 'on' : ''}" data-act="set-pick" data-id="${s.id}">${esc(s.name)}</button>`).join('')}</div></div>`; }).join(''); }
 function paramPanel(slot) {
   const ps = allPresets(slot.type); const p = slot.p; const sid = slot.id;
   let h = `<div class="pp" data-pp="${sid}"><div class="row"><select class="in" style="width:auto;flex:1" data-preset="${sid}">${ps.map(x => `<option value="${x.id}" ${x.id === slot.presetId ? 'selected' : ''}>${esc(x.name)}${x.id.startsWith('b_') ? '' : ' (내 프리셋)'}</option>`).join('')}</select>
@@ -1585,7 +1594,7 @@ function yearOpts(sel, from, to) { let h = ''; for (let y = from; y <= to; y++) 
 function renderBacktest() {
   const set = curSet(); const ly = fiscalYear(lastYmd(), 1);
   const left = `<div class="sec"><h3>설정<span class="sp"></span><button class="btn sm" data-act="set-add">+ 새 설정</button><button class="btn sm" data-act="set-reset" title="매매법·비중·파라미터를 처음 값으로">↺ 원래대로</button><button class="btn sm" data-act="set-mark" title="지금 상태를 원래대로 기준으로 저장">기준 저장</button><button class="btn sm" data-act="set-copy">복제</button><button class="btn sm" data-act="set-ren">이름</button>${ST.bt.sets.length > 1 ? '<button class="btn sm warn" data-act="set-del">삭제</button>' : ''}</h3>
-    <div class="tabs">${ST.bt.sets.map(s => `<button class="tab ${s.id === set.id ? 'on' : ''}" data-act="set-pick" data-id="${s.id}" title="누르면 저장된 원래 값(매매법·비중·파라미터)으로 불러옴">${esc(s.name)}</button>`).join('')}</div>
+    ${setGroupsHtml(ST.bt.sets, set.id)}
     <div class="grid" style="grid-template-columns:repeat(5,minmax(0,1fr));margin-top:5px">
       <label class="f" style="grid-column:span 2">총 자본금${numInput({ v: set.cap, step: 1000, attrs: 'data-set="cap"' })}</label>
       <label class="f">시작월<select class="in" data-set="sm">${Array.from({ length: 12 }, (_, i) => `<option value="${i + 1}" ${set.sm === i + 1 ? 'selected' : ''}>${i + 1}월</option>`).join('')}</select></label>
@@ -2310,7 +2319,7 @@ document.addEventListener('click', async e => {
     case 'cmp-del': cmpCfg().items.splice(+b.dataset.i, 1); saveLocal(); render(); return;
     case 'cmp-clear': cmpCfg().items = []; saveLocal(); render(); return;
     case 'cmp-mon': cmpMonCompute(); return;
-    case 'set-pick': { ST.bt.cur = id; BT.R = null; BT.selY = null; saveLocal(); render(); return; } // v4.8: 고른 세트의 수정 내용 유지 (되돌리기는 '원래대로' 버튼)
+    case 'set-pick': { ST.bt.cur = id; BT.R = null; BT.selY = null; saveLocal(); render(); return; } // v4.9: 고른 세트의 수정 내용 유지 (되돌리기는 '원래대로' 버튼)
     case 'set-add': { const nm = prompt('새 설정 이름', '설정 ' + (ST.bt.sets.length + 1)); if (!nm) return; const s = { id: uid('bt'), name: nm, cap: set.cap, sm: 1, y0: set.y0, y1: set.y1, slots: [] }; ST.bt.sets.push(s); ST.bt.cur = s.id; BT.R = null; saveLocal(); render(); return; }
     case 'set-reset': { const o = setOrigin(set); if (!o) return toast('원래 값이 없어요 — 먼저 \'기준 저장\'을 눌러주세요'); if (!confirm(`'${set.name}' 매매법·비중·파라미터를 원래대로 되돌릴까요?`)) return; set.slots = o.map(x => Object.assign(x, { id: uid('s') })); set.opts = null; BT.R = null; saveLocal(); render(); toast('원래대로 되돌렸어요'); return; }
     case 'set-mark': if (!confirm(`지금 '${set.name}' 상태를 '원래대로' 기준으로 저장할까요?`)) return; set.orig = clone(set.slots); saveLocal(); toast('기준 저장 완료'); render(); return;
@@ -2635,7 +2644,7 @@ function seedBt0() { if (!ST.bt0) ST.bt0 = { cur: null, sets: [] }; if ((ST.seed
   (ST.live.tabs || []).filter(t => t.slots && t.slots.length).forEach(t => { const nm = t.from || t.name; if (g.sets.some(s => s.name === nm)) return; g.sets.push({ id: uid('bt'), name: nm, cap: +t.cap || 450000, sm: 1, y0: 2011, y1: 2026, opts: clone(t.opts || null), slots: clone(t.slots).map(s => { const x = Object.assign(s, { id: uid('s') }); delete x.open; return x; }) }); });
   if (!g.sets.length) { const s = main.sets.find(x => x.id === main.cur) || main.sets[0]; if (s) { const c = clone(s); c.id = uid('bt'); c.slots.forEach(x => x.id = uid('s')); g.sets.push(c); } }
   g.cur = g.sets.length ? g.sets[0].id : null; saveLocal(); }
-function liveImport(ask) { // 실전 탭에 백테스트 세트의 매매법·비중 가져오기 (v4.8: 드롭다운에서 고르면 바로 적용)
+function liveImport(ask) { // 실전 탭에 백테스트 세트의 매매법·비중 가져오기 (v4.9: 드롭다운에서 고르면 바로 적용)
   const t = curLive(), el = $('#lv-from'); if (!t || !el) return; const v = el.value, k = v.indexOf(':'), src = k < 0 ? null : (btGroup(v.slice(0, k)).sets || []).find(s => s.id === v.slice(k + 1)); if (!src) return;
   if (ask && t.slots.length && !confirm(`'${src.name}' 설정의 매매법·비중으로 다시 바꿀까요? (실전에서 고친 값은 사라져요)`)) return;
   t.slots = clone(src.slots).map(s => Object.assign(s, { id: uid('s'), open: false })); t.opts = clone(src.opts || null); t.from = src.name; saveLocal(); LIVE.cache = {}; render(); toast(`'${src.name}' 설정으로 바꿨어요`); }
