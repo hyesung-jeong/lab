@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>try{localStorage.setItem('lab_tk','TQQQ')}catch(e){}</script>
-<title>트레이딩 랩 TQQQ v6.8</title>
+<title>트레이딩 랩 TQQQ v6.9</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -118,7 +118,7 @@ tr.clk:hover td{background:var(--p3)}tr.clk.on td{background:var(--acb)}
 .rshelp{width:100%;margin-top:2px}.rshelp summary{cursor:pointer;color:var(--ac2);font-size:11px;list-style:none;display:inline}.rshelp summary::-webkit-details-marker{display:none}.rshelp[open]{background:var(--p2);border:1px solid var(--ln);border-radius:6px;padding:4px 8px}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v6.8</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v6.9</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -892,7 +892,7 @@ const BUILTIN = [
     Middle: { n: 4, buy: [1.5, 3.5, 3.5, 3.5], sell: [2, 2.5, 2.5, 2.5], hold: [5, 3, 3, 3], weight: [1, 33, 33, 33] },
     AG: { n: 4, buy: [5.5, 6.5, 6.5, 6.5], sell: [10, -0.5, -0.5, -0.5], hold: [14, 5, 5, 5], weight: [6, 7, 8, 29] } } },
   { id: 'b_t4', type: 'three', name: '2티어이평라임AS', p: { modeMethod: 'ma', maN: 120, rsiMin: -0.5, rsiMax: 6, comp: 88, loss: 84, SF: tw2([4.5, 4.5], [1, 3], [25, 1]), Middle: tw2([5, 6.5], [7.5, 0.01], [21, 1]), AG: tw2([1, 7], [1, 2.5], [17, 1]) } },
-  { id: 'b_t4x', tk: 'SOXL', type: 'three', name: '이평1', p: { modeMethod: 'ma', maN: 120, rsiMin: -0.5, rsiMax: 6, comp: 88, loss: 84, xr: -20, xn: 5, SF: tw2([4.5, 4.5], [1, 3], [25, 1]), Middle: tw2([5, 6.5], [7.5, 0.01], [21, 1]), AG: tw2([1, 7], [1, 2.5], [17, 1]) } }, // 이평1 = 2티어이평라임AS + 추가주문(범위 -20%, 건수 고정 5) — 만능 스위치 시트값
+  { id: 'b_t4x', tk: 'SOXL', type: 'three', name: '2티이평1', p: { modeMethod: 'ma', maN: 120, rsiMin: -0.5, rsiMax: 6, comp: 88, loss: 84, xr: -20, xn: 5, SF: tw2([4.5, 4.5], [1, 3], [25, 1]), Middle: tw2([5, 6.5], [7.5, 0.01], [21, 1]), AG: tw2([1, 7], [1, 2.5], [17, 1]) } }, // 2티이평1 = 2티어이평라임AS + 추가주문(범위 -20%, 건수 고정 5) — 만능 스위치 시트값
   // 저MDD 조합(2026-10 최적화): A 28% · B 51% · 저MDD듀얼 8% · 현금 13% → 수수료 0.07% 기준 2011~25 CAGR 56.7%, MDD −17.0%, 매년 +18% 이상 (비중 0.5 단위 · 듀얼 공격 ≤6 균등 · 방어 ≤5 등차 합100 = 엑셀 시트 호환)
   { id: 'b_t6', tk: 'SOXL', type: 'three', name: '저MDD-A', p: {modeMethod: 'rsi', maN: 120, rsiMin: 50, rsiMax: 63, comp: 75, loss: 75, SF: {n: 5, buy: [9, 3.5, 3.5, 3.5, 3.5], sell: [-1, 1, 1, 1, 1], hold: [28, 35, 35, 35, 35], weight: [3, 6.5, 13, 26, 51.5]}, Middle: {n: 9, buy: [10.5, 3, 3, 3, 3, 3, 3, 3, 3], sell: [7, 9.5, 9.5, 9.5, 9.5, 9.5, 9.5, 9.5, 9.5], hold: [19, 5, 5, 5, 5, 5, 5, 5, 5], weight: [0.5, 0.5, 1, 1.5, 3, 6.5, 12.5, 25, 49.5]}, AG: {n: 4, buy: [7.5, -2, -2, -2], sell: [-1.5, 0.5, 0.5, 0.5], hold: [60, 8, 8, 8], weight: [40, 30, 20, 10]}} },
   { id: 'b_t7', tk: 'SOXL', type: 'three', name: '저MDD-B', p: {modeMethod: 'rsi', maN: 120, rsiMin: 33, rsiMax: 55, comp: 80, loss: 70, SF: {n: 4, buy: [-1.5, 9.5, 9.5, 9.5], sell: [10, 6.5, 6.5, 6.5], hold: [60, 5, 5, 5], weight: [40, 30, 20, 10]}, Middle: {n: 4, buy: [2, 2.5, 2.5, 2.5], sell: [1.5, 2.5, 2.5, 2.5], hold: [3, 3, 3, 3], weight: [1, 33, 33, 33]}, AG: {n: 4, buy: [9.5, 6.5, 6.5, 6.5], sell: [10, 0, 0, 0], hold: [14, 5, 5, 5], weight: [6, 7, 8, 29]}} },
@@ -1335,7 +1335,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v6.8';
+const APP_VER = 'v6.9';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -2730,11 +2730,15 @@ function seedBt6b() { // v6.6: 백테스트6에 잠수함+3모드 MDD20 강건 (
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; }; const g = btGroup('bt6'), nm = "잠수함+3모드 MDD20 강건 (11~25)", sl = [["b_gs1", 50], ["b_gs2", 24], ["b_du5", 26]];
   if (!g.sets.some(x => x.name === nm)) g.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) });
   BT.R = null; saveLocal(); }
-function seedFull3() { // v6.8: 전체매매에서 2티평4 → 이평1 (추가주문 -20%·5건) 교체한 세트 (백테스트1, 원금 10만, 1회)
-  if (TK !== 'SOXL' || ST.seeded.includes('full3')) return; ST.seeded.push('full3'); const g = btGroup('bt'); if (!g || !g.sets) return; const nm = '전체매매 (이평1)';
+function seedFull3() { // v6.8: 전체매매에서 2티평4 → 2티이평1 (추가주문 -20%·5건) 교체한 세트 (백테스트1, 원금 10만, 1회)
+  if (TK !== 'SOXL' || ST.seeded.includes('full3')) return; ST.seeded.push('full3'); const g = btGroup('bt'); if (!g || !g.sets) return; const nm = '전체매매 (2티이평1)';
   const sl = defaultSlots().map(s => s.presetId === 'b_t2' ? Object.assign(s, { presetId: 'b_t4x', p: clone(BUILTIN.find(b => b.id === 'b_t4x').p) }) : s);
   if (!g.sets.some(s => s.name === nm)) { const i = g.sets.findIndex(s => s.name === '전체매매'); g.sets.splice(i + 1, 0, { id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl }); }
   BT.R = null; saveLocal(); }
+function seedRen29() { // v6.9: 이평1 → 2티이평1 (세트·슬롯 이름)
+  if (ST.seeded.includes('ren29')) return; ST.seeded.push('ren29');
+  ['bt', 'bt2', 'bt0', 'bt11', 'bt4', 'bt5', 'bt6'].forEach(k => { const g = btGroup(k); (g && g.sets || []).forEach(s => { if (s.name === '전체매매 (이평1)') s.name = '전체매매 (2티이평1)'; (s.slots || []).forEach(z => { if (z.name === '이평1') z.name = '2티이평1'; }); }); });
+  ((ST.live && ST.live.tabs) || []).forEach(t => (t.slots || []).forEach(z => { if (z.name === '이평1') z.name = '2티이평1'; })); BT.R = null; saveLocal(); }
 function seedRen28() { // v6.3: 베이스가 2026까지 학습한 M30-A라서 (11~25) → (11~26)
   if (ST.seeded.includes('ren28')) return; ST.seeded.push('ren28'); const R = {"3모드 베이스연합 M30-A MDD25 (11~25)": "3모드 베이스연합 M30-A MDD25 B (11~26)"};
   ['bt', 'bt2', 'bt0', 'bt11', 'bt4', 'bt5', 'bt6'].forEach(k => { const g = btGroup(k); (g && g.sets || []).forEach(s => { if (R[s.name]) s.name = R[s.name]; }); });
@@ -2773,13 +2777,13 @@ function memoInfo() { const t = ST.memoAt ? new Date(ST.memoAt) : null; return (
 function renderMemo() { return `<div class="sec memo"><h3>메모장<span class="sp"></span><span class="dim" id="memo-info">${esc(memoInfo())}</span></h3>
   <textarea id="memo-ta" class="memo-ta" spellcheck="false" placeholder="이력·정리할 내용을 자유롭게 적으세요. 입력하면 바로 저장되고, ☁ 전체 저장을 누르면 다른 기기에서도 보여요.">${esc(ST.memo || '')}</textarea></div>`; }
 async function boot() {
-  initInputs(); ST = loadState(); if (fixSlotIds()) saveLocal(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedTk2(); seedTk3(); seedFr1(); seedLw(); seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); seedCap1(); seedRen26(); seedRen27(); seedBt5(); seedB11b(); seedNb1(); seedRen28(); seedFull1(); seedFull2(); seedT40(); seedBt6(); seedBt6b(); seedFull3(); btSwapTo(ST.page); buildData(ST.manual); render();
-  setSync('☁ 확인 중…'); const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); seedCap1(); seedRen26(); seedRen27(); seedBt5(); seedB11b(); seedNb1(); seedRen28(); seedFull1(); seedFull2(); seedT40(); seedBt6(); seedBt6b(); seedFull3(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); }
+  initInputs(); ST = loadState(); if (fixSlotIds()) saveLocal(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedTk2(); seedTk3(); seedFr1(); seedLw(); seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); seedCap1(); seedRen26(); seedRen27(); seedBt5(); seedB11b(); seedNb1(); seedRen28(); seedFull1(); seedFull2(); seedT40(); seedBt6(); seedBt6b(); seedFull3(); seedRen29(); btSwapTo(ST.page); buildData(ST.manual); render();
+  setSync('☁ 확인 중…'); const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); seedCap1(); seedRen26(); seedRen27(); seedBt5(); seedB11b(); seedNb1(); seedRen28(); seedFull1(); seedFull2(); seedT40(); seedBt6(); seedBt6b(); seedFull3(); seedRen29(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); }
   window.addEventListener('beforeunload', () => { if (!lsNewer()) saveNow(); });
   window.addEventListener('storage', e => { if (e.key === LS_KEY && e.newValue) adoptLocal(); });
   let _visBusy = false; document.addEventListener('visibilitychange', async () => { // 앱으로 돌아오면 클라우드 최신본·주가 다시 확인
     if (document.visibilityState !== 'visible' || _visBusy) return; _visBusy = true; adoptLocal();
-    try { const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); seedCap1(); seedRen26(); seedRen27(); seedBt5(); seedB11b(); seedNb1(); seedRen28(); seedFull1(); seedFull2(); seedT40(); seedBt6(); seedBt6b(); seedFull3(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); if (a) toast('다른 기기에서 저장한 최신본을 불러왔어요'); } } finally { _visBusy = false; } });
+    try { const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); seedCap1(); seedRen26(); seedRen27(); seedBt5(); seedB11b(); seedNb1(); seedRen28(); seedFull1(); seedFull2(); seedT40(); seedBt6(); seedBt6b(); seedFull3(); seedRen29(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); if (a) toast('다른 기기에서 저장한 최신본을 불러왔어요'); } } finally { _visBusy = false; } });
   try { const ck = await idbGet('ckpt', 'run'); if (ck && ck.running && ck.cfg) { window._resume = ck; if (ST.page === 'opt') render(); } } catch (e) { }
   let lw = window.innerWidth; window.addEventListener('resize', () => debounce('rs', () => { if (Math.abs(window.innerWidth - lw) < 40) return; lw = window.innerWidth; const a = document.activeElement; if (!a || !a.matches || !a.matches('input')) render(); }, 300));
 }
