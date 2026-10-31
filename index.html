@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>(function(){try{var h=location.hash.toLowerCase();if(h==='#tqqq')localStorage.setItem('lab_tk','TQQQ');else if(h==='#soxl')localStorage.setItem('lab_tk','SOXL');if(localStorage.getItem('lab_tk')==='TQQQ')location.replace('tqqq/');}catch(e){}})();</script>
-<title>트레이딩 랩 v7.7</title>
+<title>트레이딩 랩 v7.8</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -118,7 +118,7 @@ tr.clk:hover td{background:var(--p3)}tr.clk.on td{background:var(--acb)}
 .rshelp{width:100%;margin-top:2px}.rshelp summary{cursor:pointer;color:var(--ac2);font-size:11px;list-style:none;display:inline}.rshelp summary::-webkit-details-marker{display:none}.rshelp[open]{background:var(--p2);border:1px solid var(--ln);border-radius:6px;padding:4px 8px}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v7.7</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v7.8</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1371,7 +1371,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v7.7';
+const APP_VER = 'v7.8';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -2134,10 +2134,12 @@ function cmpMonCompute() { const c = cmpCfg(); if (CMP.busy || !c.items.length) 
 // ===== 위대리 5구간 (+최소주식비중) · NATAS v6.0 시트 수식 그대로 (TQQQ 주간, QQQ 성장추세 평가) =====
 // 매주 마지막 거래일 종가: 기대평가금 = 직전평가금×(1+주간등락) → 변동분 × (상승이면 매도율, 하락이면 매수율, QQQ 평가 구간별)
 // 첫 주는 원금×초기투입 매수. 매도는 최소주식비중 아래로는 안 함. 추세 = QQQ 주간종가(2010-02-12~그 주) 지수회귀(GROWTH)
-const WDR_PRESETS = { neo: { name: '네오최적화 (시트 1번 탭)', thr: [9.5, 6, -10, -13], sell: [386, 142, 35, 10, 10], buy: [333, 459, 177, 468, 11], init: 50, minw: 10 },
+const WDR_PRESETS = { safe: { name: '★ 저MDD 강건 (11~26, 추천·실전)', thr: [7.5, 7, -13, -22], sell: [105, 120, 265, 5, 10], buy: [95, 210, 210, 395, 10], init: 30, minw: 15 },
+  ret30: { name: '저MDD 수익형 (11~26)', thr: [9, 5.5, -12.5, -15.5], sell: [295, 235, 425, 30, 0], buy: [55, 435, 435, 490, 40], init: 40, minw: 0 },
+  neo: { name: '네오최적화 (시트 1번 탭)', thr: [9.5, 6, -10, -13], sell: [386, 142, 35, 10, 10], buy: [333, 459, 177, 468, 11], init: 50, minw: 10 },
   nyong: { name: '뇽뇽최적화 (시트 2번 탭)', thr: [9.5, 7, -5, -10], sell: [280, 240, 35, 10, 80], buy: [165, 100, 130, 320, 125], init: 50, minw: 10 } };
 const WDR_ZN = ['초고평', '고평가', '저평가', '초저평', '중간가'], WDR_ZC = ['#F87171', '#FB923C', '#60A5FA', '#3B82F6', '#9CA3AF'];
-function wdrCfg() { if (!ST.wdr) ST.wdr = {}; const d = WDR_PRESETS.neo; return Object.assign(ST.wdr, Object.assign({ preset: 'neo', thr: d.thr.slice(), sell: d.sell.slice(), buy: d.buy.slice(), init: d.init, minw: d.minw, cap: 100000, start: '2026-11-01', y0: 2011, y1: +('20' + lastYmd().slice(0, 2)), estT: '', estQ: '' }, Object.assign({}, ST.wdr))); }
+function wdrCfg() { if (!ST.wdr) ST.wdr = {}; if (!ST.wdr.mig1) { ST.wdr.mig1 = 1; if (!ST.wdr.preset || ST.wdr.preset === 'neo') { const s = WDR_PRESETS.safe; Object.assign(ST.wdr, { preset: 'safe', thr: s.thr.slice(), sell: s.sell.slice(), buy: s.buy.slice(), init: s.init, minw: s.minw }); } } const d = WDR_PRESETS.safe; return Object.assign(ST.wdr, Object.assign({ preset: 'safe', thr: d.thr.slice(), sell: d.sell.slice(), buy: d.buy.slice(), init: d.init, minw: d.minw, cap: 100000, start: '2026-11-01', y0: 2011, y1: +('20' + lastYmd().slice(0, 2)), estT: '', estQ: '' }, Object.assign({}, ST.wdr))); }
 function wdrP(c) { return { thr: c.thr.map(v => v / 100), sell: c.sell.map(v => v / 100), buy: c.buy.map(v => v / 100), init: c.init / 100, minw: c.minw / 100 }; }
 const wdrDn = s => Math.round(Date.UTC(2000 + +s.slice(0, 2), +s.slice(2, 4) - 1, +s.slice(4, 6)) / 864e5) + 25569; // 시트 일련번호
 let WDRC = null;
@@ -2156,7 +2158,7 @@ function wdrStep(st, P, c, p, z) { // 한 주 매매 (시트 AE~BE)
   const AE = st.AJ * (1 + p), AF = AE - st.AJ, rate = p > 0 ? P.sell[z] : P.buy[z];
   let AI; if (st.sh === 0) AI = -st.cap * P.init; else { const AH = AF * rate; AI = p < 0 ? -Math.min(Math.abs(AH), st.cash) : AH; if (AF === 0) AI = 0; }
   const AJ = AI > 0 ? AE - AI : AE + Math.min(-AI, st.cash); let sold = 0, bought = 0, minQ = null;
-  if (AI > 0) { minQ = Math.floor((st.sh * c + st.cash) * P.minw / c); sold = Math.max(Math.min(Math.floor(AI / c), st.sh - minQ), 0); } else if (AI < 0) bought = Math.floor(-AI / c);
+  if (AI > 0) { minQ = Math.floor((st.sh * c + st.cash) * P.minw / c); sold = Math.max(Math.min(Math.floor(AI / c), st.sh - minQ), 0); } else if (AI < 0) bought = Math.floor(Math.min(-AI, st.cash) / c);
   return { AJ, sh: st.sh - sold + bought, cash: st.cash + c * sold - c * bought, sold, bought, AI, rate, minQ, cap: st.cap }; }
 function wdrRun(W, QW, P, cap) { // W[0] = 기준주(매매 없음)
   let st = { AJ: 0, sh: 0, cash: cap, cap }; const out = [];
@@ -2183,7 +2185,7 @@ function wdrLiveCard(compact) {
   const nextFri = (() => { const t = Date.UTC(2000 + +L.last.d.slice(0, 2), +L.last.d.slice(2, 4) - 1, +L.last.d.slice(4, 6)) + 7 * 864e5; const dd = new Date(t), dow = dd.getUTCDay(); const f = new Date(t + (5 - dow) * 864e5); const nf = f.toISOString().slice(2, 10).replace(/-/g, ''); const s = new Date(c.start + 'T00:00:00Z'), sd = s.getUTCDay(), sf = new Date(s.getTime() + ((5 - sd + 7) % 7) * 864e5).toISOString().slice(2, 10).replace(/-/g, ''); return nf > sf ? nf : sf; })();
   const o = wdrOrder(L, D, P, c, T, Qp, nextFri);
   const ladder = (compact ? [-10, -5, 0, 5, 10] : [-15, -10, -7.5, -5, -2.5, 0, 2.5, 5, 7.5, 10, 15]).map(pp => { const T2 = L.last.c * (1 + pp / 100), Q2 = Qp * (1 + pp / 300); const o2 = wdrOrder(L, D, P, c, T2, Q2, nextFri); return `<tr${Math.abs(T2 / T - 1) < 0.0125 ? ' class="on"' : ''}><td>${pct(pp, 1)}</td><td>${nfmt(T2)}</td><td>${wdrZChip(o2.z)}</td><td class="l">${wdrOrderTxt(o2)}</td></tr>`; }).join('');
-  const head = `<h3>위대리 이번 주 주문 <span class="small muted">TQQQ · ${ymdFmt(nextFri)}(금) 종가 매매 · 시작 ${c.start} · 원금 ${money(c.cap)}</span><span class="sp"></span>${compact ? '<button class="btn sm" data-act="nav" data-p="wdr">위대리 탭 →</button>' : ''}</h3>`;
+  const head = `<h3>위대리 이번 주 주문 <span class="small muted">TQQQ · ${ymdFmt(nextFri)}(금) 종가 매매 · 시작 ${c.start} · 원금 ${money(c.cap)} · ${esc((WDR_PRESETS[c.preset] || { name: '직접 수정' }).name)}</span><span class="sp"></span>${compact ? '<button class="btn sm" data-act="nav" data-p="wdr">위대리 탭 →</button>' : ''}</h3>`;
   const stat = `<div class="kpis">
     <div class="kpi"><div class="k">QQQ 평가율 (추세 대비)</div><div class="v">${pct(evNow * 100, 1)}</div><div class="s">${wdrZChip(wdrZone(P, evNow))} · 경계 ${c.thr.map(v => pct(v, 1)).join(' / ')}</div></div>
     <div class="kpi"><div class="k">${started ? '계산상 보유' : '시작 전'}</div><div class="v">${started ? st.sh.toLocaleString() + '주' : '—'}</div><div class="s">${started ? '예수금 ' + money(st.cash) + ' · 평가 ' + money(st.cash + st.sh * L.last.c) : '첫 주에 원금×' + c.init + '% 매수'}</div></div>
@@ -2198,7 +2200,7 @@ function wdrLiveCard(compact) {
 function renderWdr() {
   const c = wdrCfg(), P = wdrP(c), D = wdrData(), ly = +('20' + lastYmd().slice(0, 2));
   const inp = (k, v, st, ng) => numInput({ v, step: st, neg: !!ng, attrs: `data-wdr="${k}"`, w: ng ? '84px' : '64px' });
-  const form = `<div class="sec"><h3>위대리 설정 <span class="small muted">NATAS v6.0 시트와 같은 계산 (시트 2018~2025 417주 전부 일치 확인)</span></h3>
+  const form = `<div class="sec"><h3>위대리 설정 <span class="small muted">NATAS v6.0 시트와 같은 계산 (시트 2018~2025 417주 전부 일치 확인) · ★ 저MDD 강건 = 연도별 독립·시작시점 30가지 모두 MDD 35% 안쪽 + 흔들기 강건으로 찾은 값</span></h3>
     <div class="row" style="gap:6px;flex-wrap:wrap;align-items:end"><label class="f">파라미터<select class="in" data-wdr="preset">${Object.entries(WDR_PRESETS).map(([k, v]) => `<option value="${k}" ${c.preset === k ? 'selected' : ''}>${v.name}</option>`).concat(c.preset === 'custom' ? ['<option value="custom" selected>직접 수정</option>'] : []).join('')}</select></label>
       <label class="f">원금 ($)${numInput({ v: c.cap, step: 1000, attrs: 'data-wdr="cap"' })}</label><label class="f">실전 시작일<input class="in" type="date" data-wdr="start" value="${c.start}"></label>
       <label class="f">초기투입 %${inp('init', c.init, 5)}</label><label class="f">최소주식비중 %${inp('minw', c.minw, 1)}</label></div>
