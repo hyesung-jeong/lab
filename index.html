@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>(function(){try{var h=location.hash.toLowerCase();if(h==='#tqqq')localStorage.setItem('lab_tk','TQQQ');else if(h==='#soxl')localStorage.setItem('lab_tk','SOXL');if(localStorage.getItem('lab_tk')==='TQQQ')location.replace('tqqq/');}catch(e){}})();</script>
-<title>트레이딩 랩 v7.5</title>
+<title>트레이딩 랩 v7.6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -118,7 +118,7 @@ tr.clk:hover td{background:var(--p3)}tr.clk.on td{background:var(--acb)}
 .rshelp{width:100%;margin-top:2px}.rshelp summary{cursor:pointer;color:var(--ac2);font-size:11px;list-style:none;display:inline}.rshelp summary::-webkit-details-marker{display:none}.rshelp[open]{background:var(--p2);border:1px solid var(--ln);border-radius:6px;padding:4px 8px}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v7.5</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v7.6</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1371,7 +1371,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v7.5';
+const APP_VER = 'v7.6';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -2003,6 +2003,7 @@ function renderSig() {
     <div class="kpi"><div class="k">QQQ 슬로우 스토캐스틱 (${c.stK},${c.stS},${c.stD})</div><div class="v">${K.toFixed(1)} <span class="small muted">/ ${D.toFixed(1)}</span></div><div class="s">%K / %D · ${K < 20 ? '<span class="neg">과매도 (<20)</span>' : K > 80 ? '<span class="orc">과매수 (>80)</span>' : '중립'}</div><div class="s">${Kp <= Dp && K > D ? '<span class="pos">%K가 %D 상향돌파</span>' : Kp >= Dp && K < D ? '<span class="neg">%K가 %D 하향돌파</span>' : (K > D ? '%K > %D' : '%K < %D')}</div></div>
     <div class="kpi"><div class="k">SOXX RSI · 이평</div><div class="v">${ss.r.toFixed(1)} <span class="small muted">/ ${ss.a.toFixed(1)}</span></div><div class="s">신호선까지 ${ss.gap > 0 ? '이미 아래' : (-ss.gap).toFixed(1) + ' 남음'}</div></div>
     <div class="kpi"><div class="k">${TK} 종가</div><div class="v">${nfmt(DATA[DATA.length - 1][1])}</div><div class="s">QQQ ${nfmt(PRICES[PRICES.length - 1][8])} · SOXX ${nfmt(PRICES[PRICES.length - 1][10])}</div></div></div></div>`;
+  h += sigAccHtml(R);
   // 차트
   const rng = { '6M': 126, '1Y': 252, '3Y': 756, ALL: 99999 }[c.range] || 252; const d0 = DATA.length - Math.min(rng, DATA.length - 210);
   const xs = DATA.slice(d0).map(r => r[0]); const px = xs.map((y, i) => [i, Math.log10(soxlAt(y))]);
@@ -2031,6 +2032,42 @@ function renderSig() {
       <div class="small dim" style="margin-top:3px">스토캐스틱은 QQQ 고가·저가 기준${R.noH ? ` · <span class="orc">최근 60일 중 ${R.noH}일은 고가가 없어 종가로 대신 (주가 입력에서 QQQ 고가 채우기)</span>` : ''}</div></div>
       <div class="sec"><h3>연도별 신호 횟수 <span class="small muted">연도를 누르면 신호일 주가</span></h3><table class="t"><tr><th class="l">연도</th><th>SOXX</th><th>QQQ</th></tr>${Object.keys(byY).sort().reverse().map(y => `<tr class="clk${SIG_Y === y ? ' on' : ''}" data-act="sig-year" data-y="${y}" style="cursor:pointer"><td class="l">${y}${SIG_Y === y ? ' ▾' : ''}</td><td>${byY[y].s}</td><td>${byY[y].q}</td></tr>${SIG_Y === y ? `<tr><td colspan="3" style="padding:0">${sigYearHtml(y, all)}</td></tr>` : ''}`).join('')}</table></div></div></div>`;
   return h;
+}
+// ===== 신호 적립 시뮬레이터: 신호일 종가에 정액 매수 → 종료연도 말 평가 =====
+const SGA_COL = { TQQQ: 5, QLD: 12, QQQ: 8, SOXX: 10, SOXL: 2 };
+function sgaCfg() { const ly = +('20' + lastYmd().slice(0, 2)); return ST.sigAcc = Object.assign({ y0: 2011, y1: ly, amt: 1000, tk: 'TQQQ', sg: 'QQQ' }, ST.sigAcc || {}); }
+function xirr(cf) { // cf: [[ymd, 금액]] (매수 −, 평가 +) → 연환산 %
+  const t = d => Date.UTC(2000 + +d.slice(0, 2), +d.slice(2, 4) - 1, +d.slice(4, 6)) / 864e5 / 365.25, t0 = t(cf[0][0]); const f = r => cf.reduce((s, [d, v]) => s + v / Math.pow(1 + r, t(d) - t0), 0);
+  let lo = -0.99, hi = 20; if (f(lo) * f(hi) > 0) return null; for (let k = 0; k < 200; k++) { const m = (lo + hi) / 2; if (f(lo) * f(m) <= 0) hi = m; else lo = m; } return (lo + hi) / 2 * 100; }
+function sigAccHtml(R) {
+  const A = sgaCfg(), col = SGA_COL[A.tk], yr = d => +('20' + d.slice(0, 2)); const pm = {}; PRICES.forEach(r => pm[r[0]] = r);
+  const ly = +('20' + lastYmd().slice(0, 2)), y0 = Math.min(A.y0, A.y1), y1 = Math.max(A.y0, A.y1);
+  const src = A.sg === 'SOXX' ? R.S.sig : A.sg === 'QQQ' ? R.Q.sig : Array.from(new Set(R.S.sig.concat(R.Q.sig))).sort();
+  const buys = src.filter(d => yr(d) >= y0 && yr(d) <= y1 && pm[d] && pm[d][col] != null).map(d => ({ d, p: pm[d][col], sh: A.amt / pm[d][col] }));
+  const rowsIn = PRICES.filter(r => r[col] != null && yr(r[0]) >= y0 && yr(r[0]) <= y1); const yEnd = {}; rowsIn.forEach(r => yEnd[yr(r[0])] = r); const last = rowsIn[rowsIn.length - 1];
+  const opt = (v, cur) => `<option value="${v}" ${String(v) === String(cur) ? 'selected' : ''}>${v}</option>`, yrs = []; for (let y = 2011; y <= ly; y++) yrs.push(y);
+  const form = `<div class="row" style="gap:6px;flex-wrap:wrap;align-items:end">
+    <label class="f">신호<select class="in" data-sga="sg">${[['QQQ', 'QQQ 바닥잡기'], ['SOXX', 'SOXX 바닥잡기'], ['ALL', '둘 다 (같은 날은 1번)']].map(([v, t]) => `<option value="${v}" ${A.sg === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+    <label class="f">매수 종목<select class="in" data-sga="tk">${Object.keys(SGA_COL).map(k => opt(k, A.tk)).join('')}</select></label>
+    <label class="f">1회 매수금액 ($)${numInput({ v: A.amt, step: 100, attrs: 'data-sga="amt"' })}</label>
+    <label class="f">시작연도<select class="in" data-sga="y0">${yrs.map(y => opt(y, A.y0)).join('')}</select></label>
+    <label class="f">종료연도<select class="in" data-sga="y1">${yrs.map(y => opt(y, A.y1)).join('')}</select></label></div>`;
+  if (!buys.length || !last) return `<div class="sec"><h3>신호 적립 시뮬레이터</h3>${form}<div class="small muted" style="margin-top:6px">이 기간에 신호가 없어요</div></div>`;
+  const pe = last[col], inv = buys.length * A.amt, sh = buys.reduce((s, b) => s + b.sh, 0), val = sh * pe, ret = (val / inv - 1) * 100;
+  const ir = xirr(buys.map(b => [b.d, -A.amt]).concat([[last[0], val]]));
+  // 비교: 같은 총액을 시작일 일시매수 / 매월 첫 거래일 분할매수
+  const first = rowsIn[0], lump = (inv / first[col] * pe / inv - 1) * 100; const mo = []; let pmon = ''; rowsIn.forEach(r => { const m = r[0].slice(0, 4); if (m !== pmon) { mo.push(r); pmon = m; } }); const per = inv / mo.length, msh = mo.reduce((s, r) => s + per / r[col], 0), mret = (msh * pe / inv - 1) * 100;
+  const mir = xirr(mo.map(r => [r[0], -per]).concat([[last[0], msh * pe]]));
+  // 연도별
+  let cI = 0, cS = 0; const ytab = []; for (let y = y0; y <= y1; y++) { const e = yEnd[y]; if (!e) continue; const b = buys.filter(x => yr(x.d) === y), iy = b.length * A.amt, sy = b.reduce((s, x) => s + x.sh, 0); cI += iy; cS += sy;
+    ytab.push(`<tr><td class="l">${y}${y === ly ? '*' : ''}</td><td>${b.length}</td><td>${money(iy)}</td><td class="${cls(iy ? sy * e[col] / iy - 1 : null)}">${iy ? pc0((sy * e[col] / iy - 1) * 100) : '<span class="dim">—</span>'}</td><td>${money(cI)}</td><td>${money(cS * e[col])}</td><td class="${cls(cI ? cS * e[col] / cI - 1 : null)}">${cI ? pc0((cS * e[col] / cI - 1) * 100) : '—'}</td></tr>`); }
+  const k = (t, v, s, c) => `<div class="kpi"><div class="k">${t}</div><div class="v ${c || ''}">${v}</div>${s ? `<div class="s">${s}</div>` : ''}</div>`;
+  const sgN = A.sg === 'ALL' ? 'SOXX·QQQ' : A.sg;
+  return `<div class="sec"><h3>신호 적립 시뮬레이터 <span class="small muted">${sgN} 바닥잡기 신호일 종가에 ${A.tk}를 ${money(A.amt)}씩 매수 → ${ymdFmt(last[0])} 종가로 평가 · 수수료 없음, 소수점 주식</span></h3>${form}
+    <div class="kpis" style="margin-top:6px">${k('매수 횟수', buys.length + '회', `${ymdFmt(buys[0].d)} ~ ${ymdFmt(buys[buys.length - 1].d)}`)}${k('총 투자금', money(inv), `평단 ${nfmt(inv / sh)} · 현재가 ${nfmt(pe)}`)}${k('평가액', money(val), `손익 ${money(val - inv)}`, cls(ret))}${k('총 수익률', pc0(ret), `연환산(XIRR) ${ir == null ? '—' : pc0(ir)}`, cls(ret))}
+    ${k('비교: 매월 분할매수', pc0(mret), `같은 총액 ${mo.length}개월 나눠 · XIRR ${mir == null ? '—' : pc0(mir)}`, cls(mret))}${k('비교: 시작일 일시매수', pc0(lump), `${ymdFmt(first[0])}에 총액 한 번에`, cls(lump))}</div>
+    <div class="tw" style="margin-top:6px"><table class="t"><tr><th class="l">연도</th><th>매수</th><th>그해 투자금</th><th>그해 매수분 연말 수익</th><th>누적 투자금</th><th>연말 평가액</th><th>누적 수익률</th></tr>${ytab.reverse().join('')}</table></div>
+    <div class="small dim">* 진행 중인 해는 ${ymdFmt(last[0])} 종가 기준 · 신호 조건(기준 RSI·기간)은 아래 '조건 설정'을 따름</div></div>`;
 }
 
 // ===== 비교 탭: 세트·프리셋 2개 이상을 같은 조건(시작월·기간·원금·수수료)으로 연도별 독립 비교 =====
@@ -2483,6 +2520,7 @@ document.addEventListener('input', e => {
   if (d.sp) { const r = applyParamInput(t); if (r && !r.struct) { invalidate(); refreshResults(); } return; }
   if (d.slotw) { const f = findSlot(d.slotw); const v = parseNum(t.value); if (!isFinite(v) || v < 0) { t.classList.add('bad'); return; } t.classList.remove('bad'); f.slot.w = v; syncWInputs(f.owner.slots, t); saveLocal(); invalidate(); refreshResults(); debounce('wsum', () => { const sec = t.closest('.grid'); if (!sec) return; const rows = sec.querySelectorAll('.row.small'); const last = rows[rows.length - 1]; if (last) { const tmp = document.createElement('div'); tmp.innerHTML = slotList(f.owner.slots, f.kind); const nr = tmp.querySelectorAll('.row.small'); last.replaceWith(nr[nr.length - 1]); } }, 300); return; }
   if (d.opt && t.tagName === 'INPUT' && t.type !== 'checkbox') { const v = parseNum(t.value); if (!isFinite(v)) return t.classList.add('bad'); t.classList.remove('bad'); setOpt(d.opt, d.ok, v); invalidate(); refreshResults(); return; }
+  if (d.sga && t.tagName === 'INPUT') { const v = parseNum(t.value); if (!isFinite(v) || v <= 0) return t.classList.add('bad'); t.classList.remove('bad'); sgaCfg().amt = v; saveLocal(); debounce('sga', () => { render(); const e2 = $('[data-sga="amt"]'); if (e2) { e2._noSel = true; e2.focus(); } }, 400); return; }
   if (d.sig) { const v = parseNum(t.value); if (!isFinite(v) || v <= 0) return t.classList.add('bad'); t.classList.remove('bad'); sigCfg()[d.sig] = v; saveLocal(); debounce('sig', () => { SIGC = null; const a = document.activeElement; const k = a && a.dataset ? a.dataset.sig : null; render(); if (k) { const e2 = $(`[data-sig="${k}"]`); if (e2) { e2._noSel = true; e2.focus(); } } }, 500); return; }
   if (d.set === 'cap') { const v = parseNum(t.value); if (!isFinite(v) || v <= 0) return t.classList.add('bad'); t.classList.remove('bad'); curSet().cap = v; saveLocal(); refreshResults(); return; }
   if (d.fee) { const v = parseNum(t.value); if (!isFinite(v) || v < 0) return t.classList.add('bad'); t.classList.remove('bad'); ST.fee = v; saveLocal(); invalidate(); refreshResults(); return; }
@@ -2513,6 +2551,7 @@ function optSettingsChanged(key) { if (RUN && RUN.done && RUN.k === oKey() && ['
 document.addEventListener('change', e => {
   if (e.target.matches && e.target.matches('[data-act="live-day"]')) { LIVE.daySel = e.target.value; const el = document.getElementById('lv-res'); if (el) el.innerHTML = liveResHtml(curLive()); return; }
   const t = e.target, d = t.dataset || {};
+  if (d.sga && t.tagName === 'SELECT') { const A = sgaCfg(); A[d.sga] = /^y/.test(d.sga) ? +t.value : t.value; saveLocal(); render(); return; }
   if (d.cmp) { const c = cmpCfg(); const v = +String(t.value).replace(/[^0-9.]/g, ''); if (!isFinite(v) || !v) return; c[d.cmp] = v; if (+c.y0 > +c.y1) { if (d.cmp === 'y0') c.y1 = c.y0; else c.y0 = c.y1; } saveLocal(); render(); return; }
   if (d.sp) { const r = applyParamInput(t); if (r && r.struct) { invalidate(); rerenderSlot(d.sp); refreshResults(); } else if (r && (t.type === 'checkbox' || t.tagName === 'SELECT')) { invalidate(); refreshResults(); } return; }
   if (d.preset) { const f = findSlot(d.preset); presetApply(f.slot, t.value); invalidate(); rerenderSlot(d.preset); refreshResults(); return; }
