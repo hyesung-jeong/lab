@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>try{localStorage.setItem('lab_tk','TQQQ')}catch(e){}</script>
-<title>트레이딩 랩 TQQQ v8.3</title>
+<title>트레이딩 랩 TQQQ v8.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -118,7 +118,7 @@ tr.clk:hover td{background:var(--p3)}tr.clk.on td{background:var(--acb)}
 .rshelp{width:100%;margin-top:2px}.rshelp summary{cursor:pointer;color:var(--ac2);font-size:11px;list-style:none;display:inline}.rshelp summary::-webkit-details-marker{display:none}.rshelp[open]{background:var(--p2);border:1px solid var(--ln);border-radius:6px;padding:4px 8px}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v8.3</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v8.4</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -707,12 +707,15 @@ function manualToRow(p) { const g = (t, k) => (p[t] && p[t][k] != null && p[t][k
   return [p.d, g('SOXL', 'o'), g('SOXL', 'c'), g('SOXL', 'l'), g('SOXL', 'h'), g('TQQQ', 'c'), g('TQQQ', 'l'), g('TQQQ', 'h'), g('QQQ', 'c'), g('QQQ', 'l'), g('SOXX', 'c'), g('SOXX', 'l'), g('QLD', 'c'), g('QLD', 'l'), g('QQQ', 'h')]; }
 // 내장 주가 + 직접 입력 주가(내장 마지막 날짜 이후만) → DATA/OPENS/QQQ_CLOSE 재구성, 신규 행 모드 자동계산
 
+function basePlus(manual, baseLast) { // 내장 데이터에 빈 칸(예: TQQQ 고가·저가)이 있으면 직접 입력값으로 채움
+  const mm = {}; (manual || []).forEach(p => { if (p && p.d && p.d <= baseLast) mm[p.d] = manualToRow(p); });
+  return Object.keys(mm).length ? BASE.map(r => { const m = mm[r[0]]; return m ? r.map((v, i) => v == null && m[i] != null ? m[i] : v) : r; }) : BASE; }
 // TQQQ판: 종가는 TQQQ, 듀얼 모드·일/주간 RSI는 TQQQ로 계산, 동파·3모드는 QQQ 기준(종목 무관)
 function buildDataTk(manual) {
   const ci = 5, baseLast = BASE[BASE.length - 1][0];
   const add = (manual || []).filter(p => p && p.d > baseLast && p.TQQQ && p.TQQQ.c != null && p.QQQ && p.QQQ.c != null)
     .sort((a, b) => a.d.localeCompare(b.d)).filter((p, i, a) => i === 0 || a[i - 1].d !== p.d);
-  PRICES = BASE.concat(add.map(manualToRow));
+  PRICES = basePlus(manual, baseLast).concat(add.map(manualToRow));
   const pm = {}; PRICES.forEach(r => pm[r[0]] = r);
   const warm = {}; MODES0.forEach(m => warm[m[0]] = m[5]);
   const rows = MODES0.filter(m => pm[m[0]] && pm[m[0]][ci] != null).map(m => ({ ymd: m[0], c: pm[m[0]][ci], warm: m[5] })).concat(add.map(p => ({ ymd: p.d, c: +p.TQQQ.c, warm: 0 })));
@@ -733,7 +736,7 @@ function buildData(manual) { if (TK !== 'SOXL') return buildDataTk(manual);
   const baseLast = BASE[BASE.length - 1][0];
   const add = (manual || []).filter(p => p && p.d > baseLast && p.SOXL && p.SOXL.c != null && p.QQQ && p.QQQ.c != null)
     .sort((a, b) => a.d.localeCompare(b.d)).filter((p, i, a) => i === 0 || a[i - 1].d !== p.d);
-  PRICES = BASE.concat(add.map(manualToRow));
+  PRICES = basePlus(manual, baseLast).concat(add.map(manualToRow));
   const pm = {}; PRICES.forEach(r => pm[r[0]] = r);
   DATA = MODES0.map(m => [m[0], pm[m[0]][2], m[1], m[2], m[3], m[4], m[5]]);
   QQQ_CLOSE = PRICES.filter(r => r[8] != null).map(r => [r[0], r[8]]);
@@ -1385,7 +1388,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v8.3';
+const APP_VER = 'v8.4';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -1936,9 +1939,9 @@ function renderPrice() {
     <div class="row" style="margin-top:5px"><button class="btn pri" data-act="pr-save">저장</button><span class="small muted">SOXL·QQQ 종가만 있어도 모드 계산 가능</span></div></div>
     <div class="sec"><h3>한 줄 붙여넣기</h3><input class="in" id="pr-line" placeholder="날짜 SOXL종가 시가 고가 저가 QQQ종가 시가 고가 저가 TQQQ… SOXX… QLD…"><div class="row" style="margin-top:4px"><button class="btn" data-act="pr-parse">칸에 채우기</button><span class="small muted">탭·공백·쉼표 구분 · ${PF_ORDER} · 없는 값은 빈칸 대신 - 로</span></div></div>
     <div class="sec"><h3>엑셀 일괄 업로드</h3><input type="file" id="pr-xlsx" accept=".xlsx,.xls,.csv" class="small"><div class="small muted" style="margin-top:3px">열 순서: 날짜, 그다음 ${PF_ORDER} — 총 21열 (첫 줄 제목 있어도 됨, 빈 칸은 건너뜀)</div></div></div>
-    <div class="grid" style="align-content:start"><div class="sec"><h3>최근 데이터 <span class="small muted">강조 = 직접 입력</span></h3><div class="tw"><table class="t"><tr><th class="l">날짜</th><th>SOXL 종/시/고/저</th><th>QQQ 종/고/저</th><th>TQQQ</th><th>SOXX</th><th>QLD</th><th>동파</th><th>듀얼</th><th></th></tr>
+    <div class="grid" style="align-content:start"><div class="sec"><h3>최근 데이터 <span class="small muted">강조 = 직접 입력</span></h3><div class="tw"><table class="t"><tr><th class="l">날짜</th><th>SOXL 종/시/고/저</th><th>QQQ 종/고/저</th><th>TQQQ 종/고/저</th><th>SOXX</th><th>QLD</th><th>동파</th><th>듀얼</th><th></th></tr>
     ${PRICES.slice(-14).reverse().map(r => { const di = dateIdxMap[r[0]], d = di != null ? DATA[di] : null; const m = man.has(r[0]);
-      return `<tr style="${m ? 'background:#1B2F5A' : ''}"><td class="l">${ymdFmt(r[0])}</td><td>${[2, 1, 4, 3].map(i => r[i] == null ? '—' : nfmt(r[i])).join(' / ')}</td><td>${[8, 14, 9].map(i => r[i] == null ? '—' : nfmt(r[i])).join(' / ')}</td><td>${nfmt(r[5])}</td><td>${nfmt(r[10])}</td><td>${nfmt(r[12])}</td><td>${d ? modeChip('dongpa', d[5]) : ''}</td><td>${d ? modeChip('dual', d[2]) : ''}</td><td>${m ? `<button class="btn sm warn" data-act="pr-del" data-d="${r[0]}">삭제</button>` : ''}</td></tr>`; }).join('')}</table></div></div>
+      return `<tr style="${m ? 'background:#1B2F5A' : ''}"><td class="l">${ymdFmt(r[0])}</td><td>${[2, 1, 4, 3].map(i => r[i] == null ? '—' : nfmt(r[i])).join(' / ')}</td><td>${[8, 14, 9].map(i => r[i] == null ? '—' : nfmt(r[i])).join(' / ')}</td><td>${[5, 7, 6].map(i => r[i] == null ? '—' : nfmt(r[i])).join(' / ')}</td><td>${nfmt(r[10])}</td><td>${nfmt(r[12])}</td><td>${d ? modeChip('dongpa', d[5]) : ''}</td><td>${d ? modeChip('dual', d[2]) : ''}</td><td>${m ? `<button class="btn sm warn" data-act="pr-del" data-d="${r[0]}">삭제</button>` : ''}</td></tr>`; }).join('')}</table></div></div>
     <div class="sec"><h3>데이터 범위</h3><table class="t"><tr><th class="l">종목</th><th class="l">시작</th><th class="l">마지막</th><th>일수</th></tr>
     ${[['SOXL', 2], ['QQQ', 8], ['QQQ 고가', 14], ['TQQQ', 5], ['SOXX', 10], ['QLD', 12]].map(([n, c]) => { const rs = PRICES.filter(r => r[c] != null); return `<tr><td class="l">${n}</td><td class="l">${rs.length ? ymdFmt(rs[0][0]) : '—'}</td><td class="l">${rs.length ? ymdFmt(rs[rs.length - 1][0]) : '—'}</td><td>${rs.length.toLocaleString()}</td></tr>`; }).join('')}</table>
     <div class="small dim">가상 구간 없이 실제 주가만 사용 · SOXL 2010년은 지표 준비 기간이라 백테스트는 2011년부터</div></div></div></div>`;
