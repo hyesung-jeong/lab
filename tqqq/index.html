@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>try{localStorage.setItem('lab_tk','TQQQ')}catch(e){}</script>
-<title>트레이딩 랩 TQQQ v8.5</title>
+<title>트레이딩 랩 TQQQ v8.6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -118,7 +118,7 @@ tr.clk:hover td{background:var(--p3)}tr.clk.on td{background:var(--acb)}
 .rshelp{width:100%;margin-top:2px}.rshelp summary{cursor:pointer;color:var(--ac2);font-size:11px;list-style:none;display:inline}.rshelp summary::-webkit-details-marker{display:none}.rshelp[open]{background:var(--p2);border:1px solid var(--ln);border-radius:6px;padding:4px 8px}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v8.5</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v8.6</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1388,7 +1388,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v8.5';
+const APP_VER = 'v8.6';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -2289,15 +2289,26 @@ function ibsLiveCard(compact, live) {
     if (tiers < c.n) orders += `<div><b class="pos">LOC 매수 ${qB != null ? qB.toLocaleString() + '주' : (tiers + 1) + '티어'} @ ${pB ? nfmt(pB) : '고가·저가 입력'}</b> <span class="small muted">종가 ≤ 저가 + ${bt}% × (고가−저가) · IBS ≤ ${bt} · 총자산÷${c.n}</span></div>`;
     else orders += `<div class="muted">${c.n}티어 다 찼음 — 매수 없음</div>`;
   }
-  const head = `<h3>IBS 다음 거래일 주문 <span class="small muted">TQQQ · ${ymdFmt(nx)} 종가 매매 · 시작 ${c.start} · 원금 ${money(c.cap)}</span><span class="sp"></span>${compact || live ? '<button class="btn sm" data-act="nav" data-p="ibs">IBS 탭 →</button>' : ''}</h3>`;
+  const pv = R[L.i1 - 1], upT = pv && pv.ma != null ? pv.q >= pv.ma : true, btT = upT ? c.bU : c.bD, stT = upT ? c.sU : c.sD, lg = S && S.log.length && S.log[S.log.length - 1].d === last.d ? S.log[S.log.length - 1] : null;
+  let td;
+  if (last.ibs == null) td = `<span class="neg">${ymdFmt(last.d)} TQQQ 고가·저가가 없어요 — 주가 데이터 탭이나 아래 표에 넣으면 바로 나와요</span>`;
+  else if (lg) { const why = `IBS ${last.ibs.toFixed(2)} · ${upT ? '상승장' : '하락장'} 기준 매수 ≤${btT} / 매도 ≥${stT}`;
+    td = lg.act ? `<b class="${lg.act[1] === '수' ? 'pos' : 'neg'}" style="font-size:16px">${lg.act[1] === '수' ? '매수' : '전량 매도'} ${lg.k.toLocaleString()}주</b> <span class="small muted">@ 종가 ${nfmt(last.c)} ≈ ${money(lg.k * last.c)} · ${lg.act} · ${why}</span>` : `<b style="font-size:16px">매매 없음</b> <span class="small muted">${why}${lg.q && lg.tiers >= c.n ? ' · ' + c.n + '티어 다 참' : ''}</span>`;
+    td += `<div style="margin-top:3px">→ 매매 후 <b>보유 ${lg.q.toLocaleString()}주</b>${lg.q ? ` (${lg.tiers}/${c.n}티어 · 평단 ${nfmt(avg)} · ${heldNow}일째)` : ''} · 예수금 ${money(lg.cash)} · 평가 ${money(lg.v)}</div>`; }
+  else if (!L.started) { const k0 = last.ibs <= btT ? Math.floor(c.cap / c.n / last.c) : 0; td = `<span class="muted">시작 전 (${c.start}부터) · 참고: ${ymdFmt(last.d, true)} IBS ${last.ibs.toFixed(2)} → 시작했다면 ${k0 ? '매수 ' + k0 + '주' : '매매 없음'}</span>`; }
+  else td = '<span class="muted">—</span>';
+  const nxt = q > 0 && heldNow + 1 >= c.hold ? `<b class="neg">${ymdFmt(nx)}은 ${c.hold}일째 → IBS와 상관없이 장 종료 후 전량 매도 ${q.toLocaleString()}주</b>` : `${ymdFmt(nx)} 기준: ${up ? '상승장' : '하락장'} · 매수 IBS ≤${bt} · 매도 IBS ≥${st}${q > 0 ? ` · 보유 ${heldNow + 1}/${c.hold}일째` : ''}`;
+  const todayBox = `<div style="margin-top:5px;padding:7px 9px;border:1px solid #8B5CF6;border-radius:8px"><div class="small muted">${ymdFmt(last.d)} 장 종료 후 할 일 (종가 체결 기준)</div><div style="line-height:1.6">${td}</div><div class="small" style="margin-top:4px;border-top:1px solid rgba(127,127,127,.2);padding-top:3px">다음 거래일 ${nxt}</div></div>`;
+  const head = `<h3>IBS 매매 <span class="small muted">TQQQ · 주가 입력 후 장 종료 후 매매 · 시작 ${c.start} · 원금 ${money(c.cap)}</span><span class="sp"></span>${compact || live ? '<button class="btn sm" data-act="nav" data-p="ibs">IBS 탭 →</button>' : ''}</h3>`;
   const kp = `<div class="kpis">
     <div class="kpi"><div class="k">레짐 (${ymdFmt(last.d, true)} QQQ vs 200일선)</div><div class="v ${up ? 'pos' : 'neg'}">${up ? '상승장' : '하락장'}</div><div class="s">QQQ ${nfmt(last.q)} / 200일 ${nfmt(last.ma)} · 매수 ≤${bt} · 매도 ≥${st}</div></div>
     <div class="kpi"><div class="k">${L.started ? '계산상 보유' : '시작 전'}</div><div class="v">${q ? q.toLocaleString() + '주 · ' + tiers + '/' + c.n + '티어' : L.started ? '없음' : '—'}</div><div class="s">${q ? `평단 ${nfmt(avg)} · 보유 ${heldNow}일째 (다음날 ${heldNow + 1}/${c.hold})` : '예수금 ' + money(cash)}</div></div>
     <div class="kpi"><div class="k">평가 (${ymdFmt(last.d, true)} 종가 ${nfmt(last.c)})</div><div class="v">${money(cash + q * last.c)}</div><div class="s">${L.started ? '수익 ' + pct((cash + q * last.c) / c.cap * 100 - 100, 1) : '시작일 이후부터 계산'} · 최근 IBS ${last.ibs != null ? last.ibs.toFixed(2) : '—'}</div></div>
 </div>
-    <div style="margin-top:5px;padding:6px 8px;border:1px solid #8B5CF6;border-radius:8px"><div class="small muted">${ymdFmt(nx)} 주문</div><div style="font-size:13px;line-height:1.6">${orders}</div></div>
+    ${todayBox}
+    <details style="margin-top:5px"><summary class="small muted">장중 미리 보기 (LOC로 장중에 걸 때만) — ${ymdFmt(nx)}</summary><div style="margin-top:4px;padding:6px 8px;border:1px dashed var(--line,#444);border-radius:8px;font-size:12px;line-height:1.6">${orders}</div>
     <div class="row" style="gap:6px;margin-top:5px;align-items:end"><label class="f">${ymdFmt(nx, true)} 장중 고가${numInput({ v: c.estH, step: 0.01, attrs: 'data-ibs="estH"' })}</label><label class="f">장중 저가${numInput({ v: c.estL, step: 0.01, attrs: 'data-ibs="estL"' })}</label>${ok ? `<div class="small" style="padding-bottom:4px">매수 LOC ${nfmt(pB)} 이하 · 매도 LOC ${nfmt(pS)} 이상</div>` : ''}</div>
-    <div class="small dim" style="margin-top:3px">IBS는 그날 고가·저가가 있어야 정해져서, 장 마감 직전 고가·저가를 넣으면 LOC 가격이 나와요 (마감 전 고가·저가가 더 바뀌면 조건도 바뀜). 레짐은 전날 종가로 이미 정해져 있어요.</div>`;
+    <div class="small dim" style="margin-top:3px">IBS는 그날 고가·저가가 있어야 정해져서, 장 마감 직전 고가·저가를 넣으면 LOC 가격이 나와요 (마감 전 고가·저가가 더 바뀌면 조건도 바뀜). 레짐은 전날 종가로 이미 정해져 있어요.</div></details>`;
   const rec = R.slice(Math.max(L.i0 < 0 ? R.length - 8 : Math.min(L.i0, R.length - 8), 0)).filter(r => r.c != null).slice(-(compact ? 5 : 12));
   const hl = `<div class="small muted" style="margin-top:6px">최근 TQQQ 고가·저가 (주가 데이터 탭에서 TQQQ 고가·저가를 같이 넣으면 자동, 빠진 날만 여기 입력)</div><div class="tw"><table class="t"><tr><th class="l">날짜</th><th>종가</th><th>고가</th><th>저가</th><th>IBS</th></tr>${rec.slice().reverse().map(r => { const o = c.hl[r.d] || [], has = !!PRICES.find(x => x[0] === r.d && x[7] != null);
     return `<tr><td class="l">${ymdFmt(r.d)}</td><td>${nfmt(r.c)}</td><td>${has ? nfmt(r.h) : numInput({ v: o[0] || '', step: 0.01, attrs: `data-ibs="hl.${r.d}.0"`, w: '74px' })}</td><td>${has ? nfmt(r.l) : numInput({ v: o[1] || '', step: 0.01, attrs: `data-ibs="hl.${r.d}.1"`, w: '74px' })}</td><td>${r.ibs != null ? r.ibs.toFixed(2) : '—'}</td></tr>`; }).join('')}</table></div>`;
