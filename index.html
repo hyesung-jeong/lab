@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>(function(){try{var h=location.hash.toLowerCase();if(h==='#tqqq')localStorage.setItem('lab_tk','TQQQ');else if(h==='#soxl')localStorage.setItem('lab_tk','SOXL');if(localStorage.getItem('lab_tk')==='TQQQ')location.replace('tqqq/');}catch(e){}})();</script>
-<title>트레이딩 랩 v8.7</title>
+<title>트레이딩 랩 v8.8</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -118,7 +118,7 @@ tr.clk:hover td{background:var(--p3)}tr.clk.on td{background:var(--acb)}
 .rshelp{width:100%;margin-top:2px}.rshelp summary{cursor:pointer;color:var(--ac2);font-size:11px;list-style:none;display:inline}.rshelp summary::-webkit-details-marker{display:none}.rshelp[open]{background:var(--p2);border:1px solid var(--ln);border-radius:6px;padding:4px 8px}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v8.7</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v8.8</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1388,7 +1388,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v8.7';
+const APP_VER = 'v8.8';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -2252,12 +2252,16 @@ function wdrSet(k, v) { const c = wdrCfg(); if (k === 'preset') { if (WDR_PRESET
 // 하루 1티어(총자산/3, 정수 주) 매수 · 매도 조건 또는 첫 매수 후 N거래일이면 전량 청산 · 청산한 날은 재매수 안 함
 const IBS_DEF = { bU: 27.57, sU: 95.09, bD: 37.10, sD: 60.19, n: 3, hold: 6, fee: 0 };
 function ibsCfg() { if (!ST.ibs) ST.ibs = {}; return Object.assign(ST.ibs, Object.assign({ cap: 100000, start: '2026-11-02', hl: {}, estH: '', estL: '' }, IBS_DEF, Object.assign({}, ST.ibs))); }
-let IBSC = null;
-function ibsData() { // TQQQ 종가·고가·저가 + QQQ 200일선 (사용자가 넣은 고가·저가로 빈 날 보충)
-  const c = ibsCfg(), key = PRICES.length + '|' + lastYmd() + '|' + JSON.stringify(c.hl); if (IBSC && IBSC.key === key) return IBSC;
-  const R = PRICES.filter(r => r[8] != null).map(r => { const o = c.hl[r[0]]; const h = r[7] != null ? r[7] : o && +o[0] > 0 ? +o[0] : null, l = r[6] != null ? r[6] : o && +o[1] > 0 ? +o[1] : null; return { d: r[0], q: r[8], c: r[5], h, l, user: r[7] == null && h != null }; });
-  let s = 0; R.forEach((r, i) => { s += r.q; if (i >= 200) s -= R[i - 200].q; if (i >= 199) r.ma = s / 200; r.ibs = r.c != null && r.h != null && r.l != null && r.h > r.l ? Math.round((r.c - r.l) / (r.h - r.l) * 10000) / 100 : null; });
-  IBSC = { key, R }; return IBSC; }
+let IBSC = {};
+const IBS_TK = { T: 'TQQQ', Q: 'QQQ', QT: 'QQQ 신호 → TQQQ 매매' };
+function ibsData(mode) { // T: TQQQ / Q: QQQ / QT: QQQ IBS로 TQQQ 매매 (TQQQ 빈 고가·저가는 직접 입력값으로 보충)
+  mode = mode || 'T'; const c = ibsCfg(), key = PRICES.length + '|' + lastYmd() + '|' + JSON.stringify(c.hl); if (IBSC[mode] && IBSC[mode].key === key) return IBSC[mode];
+  const ib = (cc, h, l) => cc != null && h != null && l != null && h > l ? Math.round((cc - l) / (h - l) * 10000) / 100 : null;
+  const R = PRICES.filter(r => r[8] != null).map(r => { const o = c.hl[r[0]]; const h = r[7] != null ? r[7] : o && +o[0] > 0 ? +o[0] : null, l = r[6] != null ? r[6] : o && +o[1] > 0 ? +o[1] : null;
+    const x = { d: r[0], q: r[8], c: r[5], h, l, user: r[7] == null && h != null };
+    if (mode === 'Q') { x.c = r[8]; x.h = r[14]; x.l = r[9]; x.user = false; x.ibs = ib(x.c, x.h, x.l); } else x.ibs = mode === 'QT' ? ib(r[8], r[14], r[9]) : ib(x.c, x.h, x.l); return x; });
+  let s = 0; R.forEach((r, i) => { s += r.q; if (i >= 200) s -= R[i - 200].q; if (i >= 199) r.ma = s / 200; });
+  IBSC[mode] = { key, R, mode }; return IBSC[mode]; }
 function ibsSim(R, i0, i1, p, cap) { // R[i0..i1] 동안 매매 (i0 이전 행은 레짐 판단용)
   let cash = cap, q = 0, tiers = 0, t0 = -1, cost = 0, pk = cap, mdd = 0, nT = 0, win = 0, days = 0, nd = 0; const log = [], tr = []; const fee = (p.fee || 0) / 100;
   for (let i = i0; i <= i1; i++) { const r = R[i]; if (r.c == null) continue; nd++; const pr = R[i - 1], up = pr && pr.ma != null ? pr.q >= pr.ma : true; const bt = up ? p.bU : p.bD, st = up ? p.sU : p.sD;
@@ -2268,8 +2272,8 @@ function ibsSim(R, i0, i1, p, cap) { // R[i0..i1] 동안 매매 (i0 이전 행�
     log.push({ d: r.d, c: r.c, ibs: r.ibs, up, act, k, q, tiers, cash, v, held: q > 0 ? i - t0 : 0 }); }
   return { cash, q, tiers, t0, cost, mdd, nT, win, expo: nd ? days / nd * 100 : 0, log, tr, end: log.length ? log[log.length - 1].v : cap }; }
 function ibsYear(D, p, y, cap) { const ys = String(y).slice(2), R = D.R; const i0 = R.findIndex(r => r.d.slice(0, 2) === ys && r.c != null); if (i0 < 1) return null; let i1 = i0; while (i1 + 1 < R.length && R[i1 + 1].d.slice(0, 2) === ys) i1++;
-  const S = ibsSim(R, i0, i1, p, cap); const c0 = R[i0].c, c1 = R.slice(i0, i1 + 1).filter(r => r.c != null).slice(-1)[0].c; const miss = R.slice(i0, i1 + 1).filter(r => r.c != null && r.ibs == null).length;
-  return { y, r: (S.end / cap - 1) * 100, md: S.mdd, nT: S.nT, win: S.win, expo: S.expo, bh: (c1 / c0 - 1) * 100, miss, tr: S.tr }; }
+  const S = ibsSim(R, i0, i1, p, cap); const c0 = R[i0].c, c1 = R.slice(i0, i1 + 1).filter(r => r.c != null).slice(-1)[0].c; const miss = R.slice(i0, i1 + 1).filter(r => r.c != null && r.ibs == null).length; let bp = c0, bmd = 0; R.slice(i0, i1 + 1).forEach(r => { if (r.c == null) return; bp = Math.max(bp, r.c); bmd = Math.min(bmd, (r.c / bp - 1) * 100); });
+  return { y, r: (S.end / cap - 1) * 100, md: S.mdd, nT: S.nT, win: S.win, expo: S.expo, bh: (c1 / c0 - 1) * 100, bmd, miss, tr: S.tr }; }
 function ibsNextDay(d) { let t = Date.UTC(2000 + +d.slice(0, 2), +d.slice(2, 4) - 1, +d.slice(4, 6)); do { t += 864e5; } while ([0, 6].includes(new Date(t).getUTCDay())); return new Date(t).toISOString().slice(2, 10).replace(/-/g, ''); }
 function ibsLive(D, p, c) { const s = c.start.replace(/-/g, '').slice(2), R = D.R; let i1 = R.length - 1; while (i1 > 0 && R[i1].c == null) i1--; const i0 = R.findIndex(r => r.d >= s && r.c != null);
   const S = i0 < 0 || i0 > i1 ? null : ibsSim(R, i0, i1, p, c.cap); return { S, last: R[i1], i1, i0, started: !!S, miss: i0 < 0 ? [] : R.slice(i0, i1 + 1).filter(r => r.c != null && r.ibs == null).map(r => r.d) }; }
@@ -2316,25 +2320,25 @@ function ibsLiveCard(compact, live) {
   return `<div class="sec">${head}${setr}${kp}${compact && !L.started ? '' : hl}${hist}</div>`;
 }
 function renderIbs() {
-  const c = ibsCfg(), D = ibsData(), ly = +('20' + lastYmd().slice(0, 2));
+  const c = ibsCfg(), md = IBS_TK[c.btk] ? c.btk : 'T', D = ibsData(md), tn = md === 'Q' ? 'QQQ' : 'TQQQ', ly = +('20' + lastYmd().slice(0, 2));
   const inp = (k, st) => numInput({ v: c[k], step: st, attrs: `data-ibs="${k}"`, w: '68px' });
-  const form = `<div class="sec"><h3>IBS 설정 <span class="small muted">TQQQ · 종가 신호·종가 체결 · 레짐 = 전일 QQQ 종가 vs 200일선 · 백테스트 전용 (실전 주문은 실전현황 → IBS)</span><span class="sp"></span><button class="btn sm" data-act="ibs-reset">기본값</button></h3>
-    <div class="row" style="gap:6px;flex-wrap:wrap;align-items:end"><label class="f">분할 수${inp('n', 1)}</label><label class="f">최대 보유 (거래일)${inp('hold', 1)}</label><label class="f">수수료 % (편도)${inp('fee', 0.01)}</label></div>
+  const form = `<div class="sec"><h3>IBS 설정 <span class="small muted">${IBS_TK[md]} · 종가 신호·종가 체결 · 레짐 = 전일 QQQ 종가 vs 200일선 · 백테스트 전용 (실전 주문은 실전현황 → IBS)</span><span class="sp"></span><button class="btn sm" data-act="ibs-reset">기본값</button></h3>
+    <div class="row" style="gap:6px;flex-wrap:wrap;align-items:end"><label class="f">종목<select class="in" data-ibs="btk">${Object.entries(IBS_TK).map(([k, v]) => `<option value="${k}" ${md === k ? 'selected' : ''}>${v}</option>`).join('')}</select></label><label class="f">분할 수${inp('n', 1)}</label><label class="f">최대 보유 (거래일)${inp('hold', 1)}</label><label class="f">수수료 % (편도)${inp('fee', 0.01)}</label></div>
     <div class="tw" style="margin-top:5px"><table class="t"><tr><th class="l"></th><th>매수 IBS ≤</th><th>매도 IBS ≥</th></tr><tr><td class="l pos">상승장</td><td>${inp('bU', 0.5)}</td><td>${inp('sU', 0.5)}</td></tr><tr><td class="l neg">하락장</td><td>${inp('bD', 0.5)}</td><td>${inp('sD', 0.5)}</td></tr></table></div>
     <div class="small dim">하루 1티어만 매수 (그때 총자산 ÷ 분할 수, 정수 주) · 매도 조건이나 최대 보유일(첫 매수 다음날부터 셈)이면 전량 청산 · 청산한 날은 재매수 안 함</div></div>`;
   const rs = []; for (let y = 2011; y <= ly; y++) { const r = ibsYear(D, c, y, 100000); if (r) rs.push(r); }
   const full = rs.filter(r => r.y < ly), g = full.reduce((a, r) => a * (1 + r.r / 100), 1), cg = (Math.pow(g, 1 / full.length) - 1) * 100, gb = full.reduce((a, r) => a * (1 + r.bh / 100), 1), cb = (Math.pow(gb, 1 / full.length) - 1) * 100;
   const T = rs.reduce((a, r) => a + r.nT, 0), W = rs.reduce((a, r) => a + r.win, 0), wm = rs.slice().sort((a, b) => a.md - b.md)[0], wr = rs.slice().sort((a, b) => a.r - b.r)[0];
   const yt = `<div class="sec"><h3>연도별 독립 <span class="small muted">매년 첫 거래일 원금 $100,000로 새로 시작 · MDD는 일별 평가</span></h3>
-    <div class="kpis"><div class="kpi"><div class="k">CAGR 11–${String(ly - 1).slice(2)}</div><div class="v ${cls(cg)}">${pct(cg, 1)}</div><div class="s">TQQQ 보유 ${pct(cb, 1)}</div></div><div class="kpi"><div class="k">최악 MDD</div><div class="v neg">${pct(wm.md, 1)}</div><div class="s">${wm.y}</div></div><div class="kpi"><div class="k">최악 연도</div><div class="v ${cls(wr.r)}">${pct(wr.r, 1)}</div><div class="s">${wr.y}</div></div><div class="kpi"><div class="k">승률</div><div class="v">${(W / T * 100).toFixed(0)}%</div><div class="s">거래 ${T}회</div></div></div>
-    <div class="tw"><table class="t"><tr><th class="l">연도</th><th>수익</th><th>MDD</th><th>TQQQ 보유</th><th>거래</th><th>승</th><th>보유비율</th></tr>${rs.slice().reverse().map(r => `<tr><td class="l">${r.y}${r.y === ly ? '*' : ''}</td><td class="${cls(r.r)}">${pct(r.r, 1)}</td><td class="neg">${pct(r.md, 1)}</td><td class="${cls(r.bh)}">${pct(r.bh, 1)}</td><td>${r.nT}</td><td>${r.win}</td><td>${r.expo.toFixed(0)}%</td></tr>`).join('')}</table></div>
+    <div class="kpis"><div class="kpi"><div class="k">CAGR 11–${String(ly - 1).slice(2)}</div><div class="v ${cls(cg)}">${pct(cg, 1)}</div><div class="s">${tn} 보유 ${pct(cb, 1)}</div></div><div class="kpi"><div class="k">최악 MDD</div><div class="v neg">${pct(wm.md, 1)}</div><div class="s">${wm.y} · ${tn} 보유 ${pct(Math.min(...rs.map(r => r.bmd)), 1)}</div></div><div class="kpi"><div class="k">최악 연도</div><div class="v ${cls(wr.r)}">${pct(wr.r, 1)}</div><div class="s">${wr.y}</div></div><div class="kpi"><div class="k">승률</div><div class="v">${(W / T * 100).toFixed(0)}%</div><div class="s">거래 ${T}회</div></div></div>
+    <div class="tw"><table class="t"><tr><th class="l">연도</th><th>수익</th><th>MDD</th><th>${tn} 보유</th><th>보유 MDD</th><th>거래</th><th>승</th><th>보유비율</th></tr>${rs.slice().reverse().map(r => `<tr><td class="l">${r.y}${r.y === ly ? '*' : ''}</td><td class="${cls(r.r)}">${pct(r.r, 1)}</td><td class="neg">${pct(r.md, 1)}</td><td class="${cls(r.bh)}">${pct(r.bh, 1)}</td><td class="neg">${pct(r.bmd, 1)}</td><td>${r.nT}</td><td>${r.win}</td><td>${r.expo.toFixed(0)}%</td></tr>`).join('')}</table></div>
     <div class="small dim">* 진행 중 (${ymdFmt(lastYmd())}까지)${rs.some(r => r.miss) ? ` · 고가·저가 없는 날 ${rs.reduce((a, r) => a + r.miss, 0)}일은 신호 없음 처리` : ''}</div></div>`;
   const hs = [3, 4, 5, 6, 7, 8].map(h => { const p = Object.assign({}, c, { hold: h }); const a = []; for (let y = 2011; y < ly; y++) { const r = ibsYear(D, p, y, 100000); if (r) a.push(r); } const g2 = a.reduce((x, r) => x * (1 + r.r / 100), 1); return `<tr${h === c.hold ? ' class="on"' : ''}><td class="l">${h}일</td><td>${pct((Math.pow(g2, 1 / a.length) - 1) * 100, 1)}</td><td class="neg">${pct(Math.min(...a.map(r => r.md)), 1)}</td><td class="${cls(Math.min(...a.map(r => r.r)))}">${pct(Math.min(...a.map(r => r.r)), 1)}</td></tr>`; }).join('');
   const ht = `<div class="sec"><h3>최대 보유일 민감도 <span class="small muted">11–${String(ly - 1).slice(2)} · 나머지 설정 그대로</span></h3><div class="tw"><table class="t"><tr><th class="l">보유일</th><th>CAGR</th><th>최악 MDD</th><th>최악 연도</th></tr>${hs}</table></div><div class="small dim">6일에서만 특히 좋음 — 보유일 세는 방식이 시트와 다르면 결과가 크게 달라져요</div></div>`;
   const G = 'class="grid m1" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start"';
   return `<div ${G}><div>${form}${ht}</div>${yt}</div>`;
 }
-function ibsSet(k, v) { const c = ibsCfg(); if (k === 'start') { c.start = v; return; } if (k === 'estH' || k === 'estL') { c[k] = v; return; }
+function ibsSet(k, v) { const c = ibsCfg(); if (k === 'start' || k === 'btk') { c[k] = v; return; } if (k === 'estH' || k === 'estL') { c[k] = v; return; }
   if (k.startsWith('hl.')) { const [, d, j] = k.split('.'); const o = (c.hl[d] || ['', '']).slice(); o[+j] = v; if (o.every(x => x === '' || x == null)) delete c.hl[d]; else c.hl[d] = o; return; }
   c[k] = +v; }
 
@@ -2762,7 +2766,7 @@ function optSettingsChanged(key) { if (RUN && RUN.done && RUN.k === oKey() && ['
 document.addEventListener('change', e => {
   if (e.target.matches && e.target.matches('[data-act="live-day"]')) { LIVE.daySel = e.target.value; const el = document.getElementById('lv-res'); if (el) el.innerHTML = liveResHtml(curLive()); return; }
   const t = e.target, d = t.dataset || {};
-  if (d.ibs && t.type === 'date') { ibsSet(d.ibs, t.value); saveLocal(); render(); return; }
+  if (d.ibs && (t.type === 'date' || t.tagName === 'SELECT')) { ibsSet(d.ibs, t.value); saveLocal(); render(); return; }
   if (d.wdr && (t.tagName === 'SELECT' || t.type === 'date')) { wdrSet(d.wdr, t.value); saveLocal(); render(); return; }
   if (d.sga && t.tagName === 'SELECT') { const A = sgaCfg(); A[d.sga] = /^y/.test(d.sga) ? +t.value : t.value; saveLocal(); render(); return; }
   if (d.cmp) { const c = cmpCfg(); const v = +String(t.value).replace(/[^0-9.]/g, ''); if (!isFinite(v) || !v) return; c[d.cmp] = v; if (+c.y0 > +c.y1) { if (d.cmp === 'y0') c.y1 = c.y0; else c.y0 = c.y1; } saveLocal(); render(); return; }
