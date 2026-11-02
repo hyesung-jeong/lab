@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>try{localStorage.setItem('lab_tk','TQQQ')}catch(e){}</script>
-<title>트레이딩 랩 TQQQ v9.1</title>
+<title>트레이딩 랩 TQQQ v9.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -118,7 +118,7 @@ tr.clk:hover td{background:var(--p3)}tr.clk.on td{background:var(--acb)}
 .rshelp{width:100%;margin-top:2px}.rshelp summary{cursor:pointer;color:var(--ac2);font-size:11px;list-style:none;display:inline}.rshelp summary::-webkit-details-marker{display:none}.rshelp[open]{background:var(--p2);border:1px solid var(--ln);border-radius:6px;padding:4px 8px}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v9.1</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v9.2</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1409,7 +1409,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v9.1';
+const APP_VER = 'v9.2';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -2272,7 +2272,7 @@ function wdrSet(k, v) { const c = wdrCfg(); if (k === 'preset') { if (WDR_PRESET
 // 레짐: 전일 QQQ 종가 ≥ 전일 QQQ 200일선 → 상승장. IBS = (종가−저가)/(고가−저가)×100 (소수 둘째 자리)
 // 하루 1티어(총자산/3, 정수 주) 매수 · 매도 조건 또는 첫 매수 후 N거래일이면 전량 청산 · 청산한 날은 재매수 안 함
 const IBS_DEF = { bU: 27.57, sU: 95.09, bD: 37.10, sD: 60.19, n: 3, hold: 6, fee: 0 };
-const IBS_PRESETS = { orig: { name: '원본 · 처음 주신 조건', bU: 27.57, sU: 95.09, bD: 37.10, sD: 60.19, n: 3, hold: 6 } };
+const IBS_PRESETS = { orig: { name: '원본 · 처음 주신 조건', bU: 27.57, sU: 95.09, bD: 37.10, sD: 60.19, n: 3, hold: 6 }, rA: { name: '★ 추천 안정형 · 흔들기 강건 (26)', bU: 25, sU: 92.5, bD: 20, sD: 60, n: 3, hold: 6 }, rB: { name: '추천 공격형 · 2분할 강건 (26)', bU: 25, sU: 92.5, bD: 20, sD: 60, n: 2, hold: 6 } };
 function ibsCfg() { if (!ST.ibs) ST.ibs = {}; return Object.assign(ST.ibs, Object.assign({ cap: 100000, start: '2026-11-02', hl: {}, estH: '', estL: '' }, IBS_DEF, Object.assign({}, ST.ibs))); }
 let IBSC = {};
 const IBS_TK = { T: 'TQQQ', Q: 'QQQ', QT: 'QQQ 신호 → TQQQ 매매', K: 'QQQ 신호 → 449190 (다음날 시가, 연금)' };
@@ -2355,7 +2355,7 @@ function renderIbs() {
   const form = `<div class="sec"><h3>IBS 설정 <span class="small muted">${IBS_TK[md]} · ${md === 'K' ? 'QQQ 종가 신호 → 다음날 시가 체결' : '종가 신호·종가 체결'} · 레짐 = 전일 QQQ 종가 vs 200일선 · 백테스트 전용 (실전 주문은 실전현황 → IBS)</span></h3>
     <div class="row" style="gap:6px;flex-wrap:wrap;align-items:end"><label class="f">파라미터<select class="in" data-ibs="ipre">${Object.entries(IBS_PRESETS).map(([k, v]) => `<option value="${k}" ${(c.ipre || 'orig') === k ? 'selected' : ''}>${v.name}</option>`).join('')}${c.ipre === 'custom' ? '<option value="custom" selected>직접 수정</option>' : ''}</select></label><label class="f">종목<select class="in" data-ibs="btk">${Object.entries(IBS_TK).map(([k, v]) => `<option value="${k}" ${md === k ? 'selected' : ''}>${v}</option>`).join('')}</select></label><label class="f">분할 수${inp('n', 1)}</label><label class="f">최대 보유 (거래일)${inp('hold', 1)}</label><label class="f">수수료 % (편도)${inp('fee', 0.01)}</label></div>
     <div class="tw" style="margin-top:5px"><table class="t"><tr><th class="l"></th><th>매수 IBS ≤</th><th>매도 IBS ≥</th></tr><tr><td class="l pos">상승장</td><td>${inp('bU', 0.5)}</td><td>${inp('sU', 0.5)}</td></tr><tr><td class="l neg">하락장</td><td>${inp('bD', 0.5)}</td><td>${inp('sD', 0.5)}</td></tr></table></div>
-    <div class="small dim">원본 = 상승장 매수 IBS ≤27.57 · 매도 ≥95.09 / 하락장 매수 ≤37.10 · 매도 ≥60.19 / 3분할 · 최대 6거래일 (처음 주신 조건)</div><div class="small dim">하루 1티어만 매수 (그때 총자산 ÷ 분할 수, 정수 주) · 매도 조건이나 최대 보유일(첫 매수 다음날부터 셈)이면 전량 청산 · 청산한 날은 재매수 안 함</div></div>`;
+    <div class="small dim">원본 = 상승 ≤27.57/≥95.09 · 하락 ≤37.10/≥60.19 · 3분할 · 6일 (처음 주신 조건) · ★추천 안정형 = 상승 ≤25/≥92.5 · 하락 ≤20/≥60 · 3분할 · 6일 · 추천 공격형 = 같은 기준 2분할 — 11~26 TQQQ 그리드 17만 개 중 기준값 ±3·보유일 ±1로 흔들어도 MDD가 거의 안 커지는 값</div><div class="small dim">하루 1티어만 매수 (그때 총자산 ÷ 분할 수, 정수 주) · 매도 조건이나 최대 보유일(첫 매수 다음날부터 셈)이면 전량 청산 · 청산한 날은 재매수 안 함</div></div>`;
   const rs = []; for (let y = y0; y <= ly; y++) { const r = yr(c, y); if (r) rs.push(r); }
   const full = rs.filter(r => r.y < ly), g = full.reduce((a, r) => a * (1 + r.r / 100), 1), cg = (Math.pow(g, 1 / full.length) - 1) * 100, gb = full.reduce((a, r) => a * (1 + r.bh / 100), 1), cb = (Math.pow(gb, 1 / full.length) - 1) * 100;
   const T = rs.reduce((a, r) => a + r.nT, 0), W = rs.reduce((a, r) => a + r.win, 0), wm = rs.slice().sort((a, b) => a.md - b.md)[0], wr = rs.slice().sort((a, b) => a.r - b.r)[0];
