@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>(function(){try{var h=location.hash.toLowerCase();if(h==='#tqqq')localStorage.setItem('lab_tk','TQQQ');else if(h==='#soxl')localStorage.setItem('lab_tk','SOXL');if(localStorage.getItem('lab_tk')==='TQQQ')location.replace('tqqq/');}catch(e){}})();</script>
-<title>트레이딩 랩 v9.5</title>
+<title>트레이딩 랩 v9.6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -118,7 +118,7 @@ tr.clk:hover td{background:var(--p3)}tr.clk.on td{background:var(--acb)}
 .rshelp{width:100%;margin-top:2px}.rshelp summary{cursor:pointer;color:var(--ac2);font-size:11px;list-style:none;display:inline}.rshelp summary::-webkit-details-marker{display:none}.rshelp[open]{background:var(--p2);border:1px solid var(--ln);border-radius:6px;padding:4px 8px}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v9.5</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v9.6</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -556,6 +556,14 @@ function momModeRows(rows, N, floorPct, ceilPct){ // 모멘텀 판정(페라리�
   const q=QQQ_CLOSE, wl={}, order=[]; for(let i=N;i<q.length;i++){ const k=_isoWeek(q[i][0]); if(!(k in wl)) order.push(k); wl[k]=(q[i][1]/q[i-N][1]-1)*100; }
   const wm={}; order.forEach((k,idx)=>{ const pv= idx>0 ? wl[order[idx-1]] : null; wm[k]= pv==null ? 'Middle' : pv<floorPct ? 'SF' : pv<=ceilPct ? 'Middle' : 'AG'; });
   return rows.map(r=>{ const k=_isoWeek(r[0]); if(k in wm) return wm[k]; let best='Middle'; for(const w of order){ if(w<=k) best=wm[w]; else break; } return best; }); }
+function ctrPrice(ymd){ // 만능 시트 중심주가(QQQ): 100.31 × 1.0132^(월수, 2016-01=0) — 주말 날짜의 연·월
+  return 100.31*Math.pow(1.0132, 12*(2000+ +ymd.slice(0,2)-2016)+(+ymd.slice(2,4)-1)); }
+function ctrModeRows(rows, floorPct, ceilPct){ // 중심주가 판정: 전주 마지막 QQQ 종가 / 중심주가 - 1 (%) → 바닥 < F ≤ 중간 ≤ C < 천장 (히스테리시스 없음, 만능 시트와 동일)
+  const ck='ctrmode_'+floorPct+'_'+ceilPct+'_'+QQQ_CLOSE.length; let c=_maCache[ck];
+  if(!c){ const q=QQQ_CLOSE, wl={}, order=[]; for(let i=0;i<q.length;i++){ const k=_isoWeek(q[i][0]); if(!(k in wl)) order.push(k); wl[k]=(q[i][1]/ctrPrice(q[i][0])-1)*100; }
+    const wm={}; order.forEach((k,idx)=>{ const pv= idx>0 ? wl[order[idx-1]] : null; wm[k]= pv==null ? 'Middle' : pv<floorPct ? 'SF' : pv<=ceilPct ? 'Middle' : 'AG'; });
+    c=_maCache[ck]={wm,order}; }
+  return rows.map(r=>{ const k=_isoWeek(r[0]); if(k in c.wm) return c.wm[k]; let best='Middle'; for(const w of c.order){ if(w<=k) best=c.wm[w]; else break; } return best; }); }
 function maModeRows(rows, maN, floorPct, ceilPct){
   // QQQ_CLOSE 자체 주간(ISO주 마지막거래일)으로 이평이격→전주기준 히스테리시스 모드 산출(엑셀과 동일), SOXL 날짜에 매핑
   const cacheKey='mamode'+maN+'_'+floorPct+'_'+ceilPct;
@@ -601,7 +609,7 @@ function runThree(rows, P){
   const n=rows.length;
   const closes=rows.map(r=>r[1]);
   const dailyRsi=rows.map(r=>r[3]);
-  const Rs=(P.modeMethod==='mom') ? momModeRows(rows, P.maN||80, P.rsiMin, P.rsiMax) : (P.modeMethod==='ma') ? maModeRows(rows, P.maN||120, P.rsiMin, P.rsiMax) : rsiModeRows(rows, P.rsiMin, P.rsiMax, P.modeMethod==='srsi'?'SOXX':undefined); // 이평선/RSI 히스테리시스 모드
+  const Rs=(P.modeMethod==='ctr') ? ctrModeRows(rows, P.rsiMin, P.rsiMax) : (P.modeMethod==='mom') ? momModeRows(rows, P.maN||80, P.rsiMin, P.rsiMax) : (P.modeMethod==='ma') ? maModeRows(rows, P.maN||120, P.rsiMin, P.rsiMax) : rsiModeRows(rows, P.rsiMin, P.rsiMax, P.modeMethod==='srsi'?'SOXX':undefined); // 이평선/RSI 히스테리시스 모드
   const years=rows.map(r=>fyOf(r[0]));
   const MODES=P.settings, rsiMin=P.rsiMin, rsiMax=P.rsiMax;
   const FEE=0.0000278, initCash=P.initCap;
@@ -804,6 +812,7 @@ function nextDayModes(threeSlots) {
 }
 function threeModeOn(P, ymd) { // ymd(다음 거래일) 기준 3모드 판정: 임시로 QQQ 행을 붙여 같은 로직으로 계산
   if (P.modeMethod === 'mom') { const pushed = ymd > QQQ_CLOSE[QQQ_CLOSE.length - 1][0]; if (pushed) QQQ_CLOSE.push([ymd, QQQ_CLOSE[QQQ_CLOSE.length - 1][1]]); try { return momModeRows([[ymd]], P.maN || 80, P.rsiMin, P.rsiMax)[0]; } finally { if (pushed) QQQ_CLOSE.pop(); } }
+  if (P.modeMethod === 'ctr') { const pushed = ymd > QQQ_CLOSE[QQQ_CLOSE.length - 1][0]; if (pushed) QQQ_CLOSE.push([ymd, QQQ_CLOSE[QQQ_CLOSE.length - 1][1]]); try { return ctrModeRows([[ymd]], P.rsiMin, P.rsiMax)[0]; } finally { if (pushed) QQQ_CLOSE.pop(); } }
   if (P.modeMethod === 'srsi') { const sx = PRICES.filter(r => r[10] != null); const last = sx[sx.length - 1]; if (last && ymd > last[0]) SX_EXTRA = [ymd, last[10]]; _maCache = {};
     try { return rsiModeRows([[ymd]], P.rsiMin, P.rsiMax, 'SOXX')[0]; } finally { SX_EXTRA = null; _maCache = {}; } }
   const pushed = ymd > QQQ_CLOSE[QQQ_CLOSE.length - 1][0];
@@ -811,7 +820,7 @@ function threeModeOn(P, ymd) { // ymd(다음 거래일) 기준 3모드 판정: �
   try { const rows = [[ymd]]; return (P.modeMethod === 'ma' ? maModeRows(rows, P.maN || 120, P.rsiMin, P.rsiMax) : rsiModeRows(rows, P.rsiMin, P.rsiMax))[0]; }
   finally { if (pushed) { QQQ_CLOSE.pop(); _maCache = {}; } }
 }
-function threeModeRows(P) { const k = 'm3|' + P.modeMethod + '|' + P.maN + '|' + P.rsiMin + '|' + P.rsiMax + '|' + DATA.length; if (!_maCache[k]) _maCache[k] = P.modeMethod === 'mom' ? momModeRows(DATA, P.maN || 80, P.rsiMin, P.rsiMax) : P.modeMethod === 'ma' ? maModeRows(DATA, P.maN || 120, P.rsiMin, P.rsiMax) : rsiModeRows(DATA, P.rsiMin, P.rsiMax, P.modeMethod === 'srsi' ? 'SOXX' : undefined); return _maCache[k]; }
+function threeModeRows(P) { const k = 'm3|' + P.modeMethod + '|' + P.maN + '|' + P.rsiMin + '|' + P.rsiMax + '|' + DATA.length; if (!_maCache[k]) _maCache[k] = P.modeMethod === 'ctr' ? ctrModeRows(DATA, P.rsiMin, P.rsiMax) : P.modeMethod === 'mom' ? momModeRows(DATA, P.maN || 80, P.rsiMin, P.rsiMax) : P.modeMethod === 'ma' ? maModeRows(DATA, P.maN || 120, P.rsiMin, P.rsiMax) : rsiModeRows(DATA, P.rsiMin, P.rsiMax, P.modeMethod === 'srsi' ? 'SOXX' : undefined); return _maCache[k]; }
 
 // ===== 다음 거래일 주문 (엔진 종료상태 기준) =====
 const c2 = v => Math.round(v * 100) / 100, ceilC = v => Math.ceil(v * 100 - 1e-7) / 100, floorC = v => Math.floor(v * 100 + 1e-7) / 100, belowC = v => { const f = Math.floor(v * 100 + 1e-7) / 100; return Math.abs(f - v) < 1e-7 ? c2(f - 0.01) : f; };
@@ -1207,7 +1216,7 @@ function presetSummary(type, p) {
   if (type === 'dongpa') return p.nPos + '분할·' + p.cycle + ' / 안전 ' + p.safeBuy + '·' + p.safeProfit + '·' + p.safeHold + ' / 공세 ' + p.aggBuy + '·' + p.aggProfit + '·' + p.aggHold;
   if (type === 'dual') return '공격 ' + p.nAtk + '·a' + p.holdA + '·' + p.atkBuy + '·a' + p.sellA + ' / 방어 ' + p.nDef + '·' + p.defHold + '일·' + p.defBuy1 + '·' + p.defBuy2 + '·' + p.defSell + (p.defW ? ' · ' + p.defW : '');
   const f = m => { const t = p[m]; return t.n + '티'; };
-  return (p.modeMethod === 'ma' ? '이격 ' : p.modeMethod === 'mom' ? '모멘텀' + (p.maN || 80) + ' ' : p.modeMethod === 'srsi' ? 'SOXX RSI ' : 'RSI ') + p.rsiMin + '/' + p.rsiMax + ' · 복리' + p.comp + '/손실' + p.loss + (+p.cyc > 1 ? ' · 갱신' + p.cyc + '일' : '') + ' · ' + f('SF') + '/' + f('Middle') + '/' + f('AG');
+  return (p.modeMethod === 'ctr' ? '중심주가 ' : p.modeMethod === 'ma' ? '이격 ' : p.modeMethod === 'mom' ? '모멘텀' + (p.maN || 80) + ' ' : p.modeMethod === 'srsi' ? 'SOXX RSI ' : 'RSI ') + p.rsiMin + '/' + p.rsiMax + ' · 복리' + p.comp + '/손실' + p.loss + (+p.cyc > 1 ? ' · 갱신' + p.cyc + '일' : '') + ' · ' + f('SF') + '/' + f('Middle') + '/' + f('AG');
 }
 
 // ===== 워커용 데이터 준비 =====
@@ -1410,7 +1419,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v9.5';
+const APP_VER = 'v9.6';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -1654,11 +1663,11 @@ function paramPanel(slot) {
     if (slot.type === 'dual') h += `<label class="f" style="grid-column:span 2">방어 티어 비중 (/ 구분, 빈칸=균등)<input class="in" data-sp="${sid}" data-k="defW" data-txt="1" value="${esc(p.defW || '')}"></label>`;
     return h + '</div></div>';
   }
-  const ma = p.modeMethod === 'ma', mo = p.modeMethod === 'mom', pc = ma || mo;
-  h += `<div class="pg"><label class="f">모드 판정<select class="in" data-sp="${sid}" data-k="modeMethod" data-txt="1"><option value="rsi" ${!pc && p.modeMethod !== 'srsi' ? 'selected' : ''}>RSI (QQQ 주간)</option><option value="srsi" ${p.modeMethod === 'srsi' ? 'selected' : ''}>RSI (SOXX 주간)</option><option value="ma" ${ma ? 'selected' : ''}>이평선 이격</option><option value="mom" ${mo ? 'selected' : ''}>모멘텀 (QQQ N일 전 대비)</option></select></label>
-    ${pc ? `<label class="f">${mo ? '모멘텀 일수' : '이평 일수'}${numInput({ v: p.maN, step: 1, attrs: `data-sp="${sid}" data-k="maN"` })}</label>` : ''}
-    <label class="f">${mo ? '바닥 미만%' : ma ? '바닥 이격%' : 'RSI 바닥'}${numInput({ v: p.rsiMin, step: pc ? 0.25 : 1, neg: pc, attrs: `data-sp="${sid}" data-k="rsiMin"` })}</label>
-    <label class="f">${mo ? '천장 초과%' : ma ? '천장 이격%' : 'RSI 천장'}${numInput({ v: p.rsiMax, step: pc ? 0.25 : 1, neg: pc, attrs: `data-sp="${sid}" data-k="rsiMax"` })}</label>
+  const ma = p.modeMethod === 'ma', mo = p.modeMethod === 'mom', ct = p.modeMethod === 'ctr', pc = ma || mo || ct;
+  h += `<div class="pg"><label class="f">모드 판정<select class="in" data-sp="${sid}" data-k="modeMethod" data-txt="1"><option value="rsi" ${!pc && p.modeMethod !== 'srsi' ? 'selected' : ''}>RSI (QQQ 주간)</option><option value="srsi" ${p.modeMethod === 'srsi' ? 'selected' : ''}>RSI (SOXX 주간)</option><option value="ma" ${ma ? 'selected' : ''}>이평선 이격</option><option value="ctr" ${ct ? 'selected' : ''}>중심주가 이격</option><option value="mom" ${mo ? 'selected' : ''}>모멘텀 (QQQ N일 전 대비)</option></select></label>
+    ${pc && !ct ? `<label class="f">${mo ? '모멘텀 일수' : '이평 일수'}${numInput({ v: p.maN, step: 1, attrs: `data-sp="${sid}" data-k="maN"` })}</label>` : ''}
+    <label class="f">${mo ? '바닥 미만%' : ma || ct ? '바닥 이격%' : 'RSI 바닥'}${numInput({ v: p.rsiMin, step: pc ? 0.25 : 1, neg: pc, attrs: `data-sp="${sid}" data-k="rsiMin"` })}</label>
+    <label class="f">${mo ? '천장 초과%' : ma || ct ? '천장 이격%' : 'RSI 천장'}${numInput({ v: p.rsiMax, step: pc ? 0.25 : 1, neg: pc, attrs: `data-sp="${sid}" data-k="rsiMax"` })}</label>
     <label class="f">복리 반영%${numInput({ v: p.comp, step: 1, attrs: `data-sp="${sid}" data-k="comp"` })}</label><label class="f">손실 반영%${numInput({ v: p.loss, step: 1, attrs: `data-sp="${sid}" data-k="loss"` })}</label><label class="f" title="이 거래일 수마다 그동안 실현손익 합에 복리/손실 반영% 적용 (시트의 투자금 갱신 주기, 1 = 매일)">갱신 주기(일)${numInput({ v: p.cyc || 1, step: 1, attrs: `data-sp="${sid}" data-k="cyc"` })}</label><label class="f" title="0 = 끔. 예 -20: 주문가 아래 -20% 범위까지 추가 LOC 주문 (시트의 추가 매수 범위, 정량매수 해제와 같음). 마지막 티어는 추가 주문 없음">추가주문 범위%${numInput({ v: p.xr || 0, step: 1, neg: true, attrs: `data-sp="${sid}" data-k="xr"` })}</label><label class="f" title="기본 주문 포함 주문 건수 (시트의 추가 주문 건수 고정)">추가주문 건수${numInput({ v: p.xn || 4, step: 1, attrs: `data-sp="${sid}" data-k="xn"` })}</label></div>`;
   h += '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:5px">';
   for (const m of ['SF', 'Middle', 'AG']) { const t = p[m]; const n = +t.n; const ws = t.weight.slice(0, n).reduce((a, b) => a + +b, 0);
@@ -1672,7 +1681,7 @@ function applyParamInput(el) { // 입력값 → slot.p
   const f = findSlot(el.dataset.sp); if (!f) return false; const s = f.slot, k = el.dataset.k;
   let v; if (el.type === 'checkbox') v = el.checked; else if (el.dataset.txt) v = el.value; else { v = parseNum(el.value); if (!isFinite(v)) { el.classList.add('bad'); return false; } el.classList.remove('bad'); }
   const parts = k.split('.');
-  if (parts.length === 1) { if (k === 'modeMethod' && s.p.modeMethod !== v) { s.p.rsiMin = v === 'ma' ? -1.25 : v === 'mom' ? 1.1 : 36; s.p.rsiMax = v === 'ma' ? 5.75 : v === 'mom' ? 9 : 60; s.p.maN = v === 'mom' ? 80 : (s.p.maN || 120); } s.p[k] = v; }
+  if (parts.length === 1) { if (k === 'modeMethod' && s.p.modeMethod !== v) { s.p.rsiMin = v === 'ctr' ? -10 : v === 'ma' ? -1.25 : v === 'mom' ? 1.1 : 36; s.p.rsiMax = v === 'ctr' ? 15 : v === 'ma' ? 5.75 : v === 'mom' ? 9 : 60; s.p.maN = v === 'mom' ? 80 : (s.p.maN || 120); } s.p[k] = v; }
   else if (parts.length === 2) { const t = s.p[parts[0]]; const n = Math.max(1, Math.min(20, Math.round(v))); const o = t.n; t.n = n;
     ['buy', 'sell', 'hold', 'weight'].forEach(fk => { while (t[fk].length < n) t[fk].push(fk === 'weight' ? 0 : t[fk][t[fk].length - 1] ?? (fk === 'hold' ? 1 : 0)); t[fk] = t[fk].slice(0, n); });
     if (n !== o && t.weight.every(x => x === 0 || x === t.weight[0])) t.weight = Array(n).fill(+(100 / n).toFixed(2)); }
