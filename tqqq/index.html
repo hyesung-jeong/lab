@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>try{localStorage.setItem('lab_tk','TQQQ')}catch(e){}</script>
-<title>트레이딩 랩 TQQQ v11.5</title>
+<title>트레이딩 랩 TQQQ v11.6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -118,7 +118,7 @@ tr.clk:hover td{background:var(--p3)}tr.clk.on td{background:var(--acb)}
 .rshelp{width:100%;margin-top:2px}.rshelp summary{cursor:pointer;color:var(--ac2);font-size:11px;list-style:none;display:inline}.rshelp summary::-webkit-details-marker{display:none}.rshelp[open]{background:var(--p2);border:1px solid var(--ln);border-radius:6px;padding:4px 8px}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v11.5</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v11.6</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1480,7 +1480,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v11.5';
+const APP_VER = 'v11.6';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -3242,6 +3242,10 @@ const REN7 = {"최소M25 · 최소학습 13년 흔들기강건 MDD25 (26) · 추
 const CODE7 = {"선택 RSI MDD25·최저20 · 강건 · 추천": "최소M25", "선택 이평+RSI MDD30·최저20 · 강건": "최소M30", "선택 RSI MDD35·최저20 · 강건": "최소M35", "선택 혼합 MDD25·최저20 · 강건": "혼합M25", "선택 혼합 MDD30·최저20 · 강건 · 추천": "혼합M30", "선택 혼합 MDD35·최저20 · 강건": "혼합M35", "선택 RSI 칼마2·MDD40 · 강건": "C2", "선택 RSI +30%·도달전MDD15 · 강건 · 추천": "T30", "선택 RSI +40%·도달전MDD20 · 강건": "T40", "선택 혼합 +40%·도달전MDD17 · 강건": "혼합T40", "전연도 RSI MDD30 · 강건 · 추천": "전W30", "전연도 RSI MDD35 · 강건": "전W35", "전연도 RSI MDD25 · 최대": "전N25", "전연도 RSI MDD30 · 최대": "전N30", "검증 RSI MDD30 · 패턴강건 · 추천": "강건P30", "검증 RSI MDD35 · 패턴강건 · 추천": "강건P35", "검증 RSI MDD40 · 패턴강건": "강건P40", "검증 RSI MDD30 · 단조강건": "강건L30", "검증 RSI MDD35 · 단조강건": "강건L35", "검증 RSI MDD40 · 단조강건": "강건L40", "검증 RSI +40%·MDD25 · 자유": "F25", "검증 RSI +40%·MDD30 · 자유": "F30", "검증 RSI +40%·MDD40 · 자유": "F40", "검증 RSI +40%·MDD25 · 기존": "S25", "검증 RSI +40%·MDD35 · 패턴": "P35", "전연도 RSI MDD20·최저10 · 강건 · 추천": "TQ W20b", "전연도 이평+RSI MDD20·최저20 · 강건": "TQ W20", "전연도 RSI MDD25 · 강건": "TQ W25", "전연도 RSI MDD30 · 강건": "TQ W30", "전연도 RSI MDD20·매년40 · 최대": "TQ N20", "전연도 RSI MDD25·매년40 · 최대": "TQ N25", "전연도 RSI MDD30·매년40 · 최대": "TQ N30"}; // 새 이름 → 설명 코드
 function ren7() { const g = btGroup('bt7'); let ch = false; (g && g.sets || []).forEach(s => { if (REN7[s.name]) { s.name = REN7[s.name]; ch = true; } });
   ((ST.live && ST.live.tabs) || []).forEach(t => { if (REN7[t.from]) { t.from = REN7[t.from]; ch = true; } }); if (ch) { BT.R = null; saveLocal(); } }
+function mvLime() { // v11.6: TQQQ판 라임9T는 백테스트1로 (매번 확인)
+  if (TK !== 'TQQQ') return; const g7 = btGroup('bt7'), g1 = btGroup('bt'); if (!g7 || !g7.sets || !g1 || !g1.sets) return; const mv = g7.sets.filter(s => /^라임9T/.test(s.name)); if (!mv.length) return;
+  g7.sets = g7.sets.filter(s => !/^라임9T/.test(s.name)); if (!g7.sets.some(x => x.id === g7.cur)) g7.cur = g7.sets.length ? g7.sets[0].id : null;
+  mv.forEach(s => { if (!g1.sets.some(x => x.name === s.name)) g1.sets.unshift(s); }); BT.R = null; saveLocal(); }
 function mv8() { // v11.0: 동일비중 3슬롯 세트는 백테스트8로 (매번 확인)
   if (TK !== 'SOXL') return; if (!ST.bt8) ST.bt8 = { cur: null, sets: [] }; const g7 = btGroup('bt7'), g8 = btGroup('bt8'); if (!g7 || !g8 || !g7.sets) return; const mv = g7.sets.filter(s => /동일비중/.test(s.name)); if (!mv.length) return;
   g7.sets = g7.sets.filter(s => !/동일비중/.test(s.name)); if (!g7.sets.some(x => x.id === g7.cur)) g7.cur = g7.sets.length ? g7.sets[0].id : null;
@@ -3322,13 +3326,13 @@ function memoInfo() { const t = ST.memoAt ? new Date(ST.memoAt) : null; return (
 function renderMemo() { return `<div class="sec memo"><h3>메모장<span class="sp"></span><span class="dim" id="memo-info">${esc(memoInfo())}</span></h3>
   <textarea id="memo-ta" class="memo-ta" spellcheck="false" placeholder="이력·정리할 내용을 자유롭게 적으세요. 입력하면 바로 저장되고, ☁ 전체 저장을 누르면 다른 기기에서도 보여요.">${esc(ST.memo || '')}</textarea></div>`; }
 async function boot() {
-  initInputs(); ST = loadState(); if (fixSlotIds()) saveLocal(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedTk2(); seedTk3(); seedFr1(); seedLw(); seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); seedCap1(); seedRen26(); seedRen27(); seedBt5(); seedB11b(); seedNb1(); seedRen28(); seedFull1(); seedFull2(); seedT40(); seedBt6(); seedBt6b(); seedBt6c(); seedZz(); seedFull3(); seedRen29(); seedN40(); seedS12n(); seedS12m(); seedJt(); seedJa(); seedAl(); purgeSx(); seedQ(); seedTqa(); seedTqb(); ren7(); mv8(); btSwapTo(ST.page); buildData(ST.manual); render();
-  setSync('☁ 확인 중…'); const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); seedCap1(); seedRen26(); seedRen27(); seedBt5(); seedB11b(); seedNb1(); seedRen28(); seedFull1(); seedFull2(); seedT40(); seedBt6(); seedBt6b(); seedBt6c(); seedZz(); seedFull3(); seedRen29(); seedN40(); seedS12n(); seedS12m(); seedJt(); seedJa(); seedAl(); purgeSx(); seedQ(); seedTqa(); seedTqb(); ren7(); mv8(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); }
+  initInputs(); ST = loadState(); if (fixSlotIds()) saveLocal(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedTk2(); seedTk3(); seedFr1(); seedLw(); seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); seedCap1(); seedRen26(); seedRen27(); seedBt5(); seedB11b(); seedNb1(); seedRen28(); seedFull1(); seedFull2(); seedT40(); seedBt6(); seedBt6b(); seedBt6c(); seedZz(); seedFull3(); seedRen29(); seedN40(); seedS12n(); seedS12m(); seedJt(); seedJa(); seedAl(); purgeSx(); seedQ(); seedTqa(); seedTqb(); ren7(); mv8(); mvLime(); btSwapTo(ST.page); buildData(ST.manual); render();
+  setSync('☁ 확인 중…'); const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); seedCap1(); seedRen26(); seedRen27(); seedBt5(); seedB11b(); seedNb1(); seedRen28(); seedFull1(); seedFull2(); seedT40(); seedBt6(); seedBt6b(); seedBt6c(); seedZz(); seedFull3(); seedRen29(); seedN40(); seedS12n(); seedS12m(); seedJt(); seedJa(); seedAl(); purgeSx(); seedQ(); seedTqa(); seedTqb(); ren7(); mv8(); mvLime(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); }
   window.addEventListener('beforeunload', () => { if (!lsNewer()) saveNow(); });
   window.addEventListener('storage', e => { if (e.key === LS_KEY && e.newValue) adoptLocal(); });
   let _visBusy = false; document.addEventListener('visibilitychange', async () => { // 앱으로 돌아오면 클라우드 최신본·주가 다시 확인
     if (document.visibilityState !== 'visible' || _visBusy) return; _visBusy = true; adoptLocal();
-    try { const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); seedCap1(); seedRen26(); seedRen27(); seedBt5(); seedB11b(); seedNb1(); seedRen28(); seedFull1(); seedFull2(); seedT40(); seedBt6(); seedBt6b(); seedBt6c(); seedZz(); seedFull3(); seedRen29(); seedN40(); seedS12n(); seedS12m(); seedJt(); seedJa(); seedAl(); purgeSx(); seedQ(); seedTqa(); seedTqb(); ren7(); mv8(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); if (a) toast('다른 기기에서 저장한 최신본을 불러왔어요'); } } finally { _visBusy = false; } });
+    try { const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); seedCap1(); seedRen26(); seedRen27(); seedBt5(); seedB11b(); seedNb1(); seedRen28(); seedFull1(); seedFull2(); seedT40(); seedBt6(); seedBt6b(); seedBt6c(); seedZz(); seedFull3(); seedRen29(); seedN40(); seedS12n(); seedS12m(); seedJt(); seedJa(); seedAl(); purgeSx(); seedQ(); seedTqa(); seedTqb(); ren7(); mv8(); mvLime(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); if (a) toast('다른 기기에서 저장한 최신본을 불러왔어요'); } } finally { _visBusy = false; } });
   try { const ck = await idbGet('ckpt', 'run'); if (ck && ck.running && ck.cfg) { window._resume = ck; if (ST.page === 'opt') render(); } } catch (e) { }
   let lw = window.innerWidth; window.addEventListener('resize', () => debounce('rs', () => { if (Math.abs(window.innerWidth - lw) < 40) return; lw = window.innerWidth; const a = document.activeElement; if (!a || !a.matches || !a.matches('input')) render(); }, 300));
 }
