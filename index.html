@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>(function(){try{var h=location.hash.toLowerCase();if(h==='#tqqq')localStorage.setItem('lab_tk','TQQQ');else if(h==='#soxl')localStorage.setItem('lab_tk','SOXL');if(localStorage.getItem('lab_tk')==='TQQQ')location.replace('tqqq/');}catch(e){}})();</script>
-<title>트레이딩 랩 v12.4</title>
+<title>트레이딩 랩 v12.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -118,7 +118,7 @@ tr.clk:hover td{background:var(--p3)}tr.clk.on td{background:var(--acb)}
 .rshelp{width:100%;margin-top:2px}.rshelp summary{cursor:pointer;color:var(--ac2);font-size:11px;list-style:none;display:inline}.rshelp summary::-webkit-details-marker{display:none}.rshelp[open]{background:var(--p2);border:1px solid var(--ln);border-radius:6px;padding:4px 8px}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v12.4</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v12.5</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1611,7 +1611,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v12.4';
+const APP_VER = 'v12.5';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -3372,6 +3372,10 @@ function seedDpk8() { // v12.4: 동파 티어비중 6세트를 백테스트5에 
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; };
   DW_SETS.forEach(([nm, sl]) => { if (!g5.sets.some(x => x.name === nm)) g5.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }); });
   BT.R = null; saveLocal(); }
+function seedDpk9() { // v12.5: 6분할 v1 프리셋 세트를 백테스트5(동파)에 추가 (1회)
+  if (TK !== 'SOXL' || ST.seeded.includes('dpk9')) return; ST.seeded.push('dpk9'); const g5 = btGroup('bt5'), b = BUILTIN.find(x => x.id === 'b_dp1'), nm = '동파 6분할 v1'; if (!g5 || !b) return;
+  if (!g5.sets.some(x => x.name === nm)) g5.sets.push({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: [{ id: uid('s'), type: b.type, presetId: b.id, w: 100, p: clone(b.p) }] });
+  BT.R = null; saveLocal(); }
 function seedBt5() { // v6.3: 동파 세트를 백테스트1·1-1에서 백테스트5(동파)로 옮김 (SOXL, 1회)
   if (TK !== 'SOXL') return; if (!ST.bt5) ST.bt5 = { cur: null, sets: [] }; if (ST.seeded.includes('bt5a')) return; ST.seeded.push('bt5a');
   const g5 = btGroup('bt5'); const isDp = s => /^동파/.test(s.name) && (s.slots || []).every(z => z.type === 'dongpa' || z.type === 'cash');
@@ -3546,7 +3550,7 @@ function memoInfo() { const t = ST.memoAt ? new Date(ST.memoAt) : null; return (
 function renderMemo() { return `<div class="sec memo"><h3>메모장<span class="sp"></span><span class="dim" id="memo-info">${esc(memoInfo())}</span></h3>
   <textarea id="memo-ta" class="memo-ta" spellcheck="false" placeholder="이력·정리할 내용을 자유롭게 적으세요. 입력하면 바로 저장되고, ☁ 전체 저장을 누르면 다른 기기에서도 보여요.">${esc(ST.memo || '')}</textarea></div>`; }
 async function boot() {
-  initInputs(); ST = loadState(); if (fixSlotIds()) saveLocal(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedTk2(); seedTk3(); seedFr1(); seedLw(); seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); seedCap1(); seedRen26(); seedRen27(); seedBt5(); seedDpk8(); seedB11b(); seedNb1(); seedRen28(); seedFull1(); seedFull2(); seedT40(); seedBt6(); seedBt6b(); seedBt6c(); seedZz(); seedFull3(); seedRen29(); seedN40(); seedS12n(); seedS12m(); seedJt(); seedJa(); seedAl(); purgeSx(); seedQ(); seedTqa(); seedTqb(); ren7(); mv8(); mv9(); rm120(); up121(); ren8(); mvLime(); btSwapTo(ST.page); buildData(ST.manual); render();
+  initInputs(); ST = loadState(); if (fixSlotIds()) saveLocal(); seedSets(); seedCal(); seedRen2(); seedCg(); seedUpd(); seedFree(); seedHold(); seedOne(); seedOne2(); seedRec(); seedRen3(); seedDpk(); seedDpk2(); seedDpk3(); seedDpk4(); seedDpk5(); seedDpk6(); seedDpk7(); seedSx1(); seedCy1(); seedTk2(); seedTk3(); seedFr1(); seedLw(); seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); seedCap1(); seedRen26(); seedRen27(); seedBt5(); seedDpk8(); seedDpk9(); seedB11b(); seedNb1(); seedRen28(); seedFull1(); seedFull2(); seedT40(); seedBt6(); seedBt6b(); seedBt6c(); seedZz(); seedFull3(); seedRen29(); seedN40(); seedS12n(); seedS12m(); seedJt(); seedJa(); seedAl(); purgeSx(); seedQ(); seedTqa(); seedTqb(); ren7(); mv8(); mv9(); rm120(); up121(); ren8(); mvLime(); btSwapTo(ST.page); buildData(ST.manual); render();
   setSync('☁ 확인 중…'); const [a, b] = await Promise.all([cloudInit(), priceInit()]); if (a || b) { seedBt2(); seedBt0(); seedNh1(); seedM15(); seedB11(); seedBt4(); seedBe1(); seedCap1(); seedRen26(); seedRen27(); seedBt5(); seedB11b(); seedNb1(); seedRen28(); seedFull1(); seedFull2(); seedT40(); seedBt6(); seedBt6b(); seedBt6c(); seedZz(); seedFull3(); seedRen29(); seedN40(); seedS12n(); seedS12m(); seedJt(); seedJa(); seedAl(); purgeSx(); seedQ(); seedTqa(); seedTqb(); ren7(); mv8(); mv9(); rm120(); up121(); ren8(); mvLime(); btSwapTo(ST.page); buildData(ST.manual); invalidate(); render(); }
   window.addEventListener('beforeunload', () => { if (!lsNewer()) saveNow(); });
   window.addEventListener('storage', e => { if (e.key === LS_KEY && e.newValue) adoptLocal(); });
