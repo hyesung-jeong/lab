@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>try{localStorage.setItem('lab_tk','TQQQ')}catch(e){}</script>
-<title>트레이딩 랩 TQQQ v13.0</title>
+<title>트레이딩 랩 TQQQ v13.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -118,7 +118,7 @@ tr.clk:hover td{background:var(--p3)}tr.clk.on td{background:var(--acb)}
 .rshelp{width:100%;margin-top:2px}.rshelp summary{cursor:pointer;color:var(--ac2);font-size:11px;list-style:none;display:inline}.rshelp summary::-webkit-details-marker{display:none}.rshelp[open]{background:var(--p2);border:1px solid var(--ln);border-radius:6px;padding:4px 8px}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v13.0</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v13.1</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1623,7 +1623,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v13.0';
+const APP_VER = 'v13.1';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -2587,7 +2587,14 @@ function m2Set(k, v) { const c = m2Cfg(); if (k === 'start' || k === 'mode') c[k
 //   매도: 이격도가 매도 하한 이상 → 미만으로 하향 이탈 · 또는 매도 상한을 넘는 첫날
 // 방어모드: 홀딩이 아닌 동안 듀얼스나이퍼 방어모드(종가 LOC)를 TQQQ에 적용
 const HM_DEF = { start: '2026-11-09', cap: 100000, held: 0, addon: 1, buyLo: 1, buyHi: 8, sellLo: -1, sellHi: 50, loo: 10, nDef: 5, defHold: 8, defBuy1: -1.5, defBuy2: 5.5, defSell: 1.5, maN: 3, defW: '6/13/20/27/34' };
-function hmCfg() { if (!ST.hm) ST.hm = {}; for (const k in HM_DEF) if (ST.hm[k] == null) ST.hm[k] = HM_DEF[k]; return ST.hm; }
+function hmTabs() { // 실전 여러 개 저장 (v13.1) — 예전 단일 설정(ST.hm)은 첫 실전으로 옮김
+  if (!ST.hmT || !ST.hmT.tabs || !ST.hmT.tabs.length) { ST.hmT = { cur: null, tabs: [{ id: uid('hm'), name: '실전 1', c: Object.assign({}, ST.hm || {}) }] }; ST.hmT.cur = ST.hmT.tabs[0].id; }
+  return ST.hmT; }
+function hmCur() { const T = hmTabs(); return T.tabs.find(t => t.id === T.cur) || T.tabs[0]; }
+function hmCfg() { const c = hmCur().c; for (const k in HM_DEF) if (c[k] == null) c[k] = HM_DEF[k]; return c; }
+function hmTabBar(S, fee) { const T = hmTabs(), cur = hmCur(), i1 = S.n - 1;
+  const one = t => { const c = Object.assign({}, HM_DEF, t.c), s6 = String(c.start).replace(/-/g, '').slice(2), i0 = S.D.findIndex(d => d >= s6); if (i0 < 0) return '<span class="mono small muted">시작 전</span>'; const R = hmSim(S, c, i0, i1, c.cap, fee, c.held, false); return `<span class="mono small">${money(R.last)} ${pct((R.last / c.cap - 1) * 100)}</span>`; };
+  return `<div class="row" style="margin-bottom:5px"><div class="tabs">${T.tabs.map(t => `<button class="tab ${t === cur ? 'on' : ''}" data-act="hm-pick" data-id="${t.id}">${esc(t.name)} ${one(t)}</button>`).join('')}<button class="tab" data-act="hm-add">+ 새 실전</button></div><span style="margin-left:auto"></span><button class="btn sm" data-act="hm-ren">이름</button>${T.tabs.length > 1 ? '<button class="btn sm warn" data-act="hm-del">삭제</button>' : ''}<span class="small muted">바꾼 값은 자동 저장 · 다른 기기는 ☁ 전체 저장 후 새로고침</span></div>`; }
 function hmSeries() { // TQQQ 종가·시가 + 200MA·이격도·기울기·5일 이평
   const R = PRICES.filter(r => r[5] != null), n = R.length, D = R.map(r => r[0]), C = R.map(r => r[5]), O = R.map(r => r[15] != null ? r[15] : null);
   const ma = new Array(n).fill(null); let s = 0; for (let i = 0; i < n; i++) { s += C[i]; if (i >= 200) s -= C[i - 200]; if (i >= 199) ma[i] = s / 200; }
@@ -2679,6 +2686,7 @@ function renderHm() {
   const yr = B.rows;
   return `<div class="sec"><h3>200일 홀딩 + 방어 <span class="small muted">강프로 TQQQ · TQQQ 자체 200일선 · 기준일 ${ymdFmt(S.D[i1])}</span></h3>
     <div class="small dim" style="margin-bottom:5px">200일선 위에서 오르는 구간은 몰빵 보유(시가 매매), 그 밖에는 듀얼 방어모드로 5분할 단타(종가 LOC). 종가로 판단하고 다음 거래일에 주문합니다.</div>
+    ${hmTabBar(S, fee)}
     <div class="row" style="gap:6px;align-items:end;flex-wrap:wrap"><label class="f">시작일<input class="in" type="date" data-hm="start" value="${c.start}"></label><label class="f">원금 ($)${numInput({ v: c.cap, step: 1000, attrs: 'data-hm="cap"', w: '96px' })}</label>
       <label class="f">시작 상태<select class="in" data-hm="held"><option value="0" ${!c.held ? 'selected' : ''}>현금 (방어모드로 시작)</option><option value="1" ${c.held ? 'selected' : ''}>홀딩 보유 중 (시작일 종가)</option></select></label>
       <label class="f">방어모드<select class="in" data-hm="addon"><option value="1" ${c.addon ? 'selected' : ''}>사용</option><option value="0" ${!c.addon ? 'selected' : ''}>끔 (순수 200일선)</option></select></label></div>
@@ -3219,6 +3227,10 @@ document.addEventListener('click', async e => {
     case 'ym-close': closeYearModal(); return;
     case 'live-sec': ST.liveSec = b.dataset.p; saveLocal(); render(); return;
     case 'live-pick': ST.live.cur = id; saveLocal(); render(); return;
+    case 'hm-pick': hmTabs().cur = id; _hmBt = null; saveLocal(); render(); return;
+    case 'hm-add': { const T = hmTabs(), nm = prompt('새 실전 이름 (지금 설정을 복사해서 만듭니다)', '실전 ' + (T.tabs.length + 1)); if (!nm) return; const t = { id: uid('hm'), name: nm, c: Object.assign({}, hmCfg()) }; T.tabs.push(t); T.cur = t.id; _hmBt = null; saveLocal(); render(); return; }
+    case 'hm-ren': { const t = hmCur(), nm = prompt('실전 이름', t.name); if (!nm) return; t.name = nm; saveLocal(); render(); return; }
+    case 'hm-del': { const T = hmTabs(), t = hmCur(); if (T.tabs.length < 2 || !confirm(`'${t.name}' 실전을 삭제할까요?`)) return; T.tabs = T.tabs.filter(x => x !== t); T.cur = T.tabs[0].id; _hmBt = null; saveLocal(); render(); return; }
     case 'go-live': ST.live.cur = id; ST.page = 'live'; saveLocal(); render(); return;
     case 'live-add': { const nm = prompt('새 실전 이름', '실전 ' + (ST.live.tabs.length + 1)); if (!nm) return; newLiveTab(nm); render(); return; }
     case 'live-ren': { const t = curLive(); const nm = prompt('실전 이름', t.name); if (!nm) return; t.name = nm; saveLocal(); render(); return; }
