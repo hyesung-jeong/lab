@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>try{localStorage.setItem('lab_tk','TQQQ')}catch(e){}</script>
-<title>트레이딩 랩 TQQQ v13.2</title>
+<title>트레이딩 랩 TQQQ v13.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -118,7 +118,7 @@ tr.clk:hover td{background:var(--p3)}tr.clk.on td{background:var(--acb)}
 .rshelp{width:100%;margin-top:2px}.rshelp summary{cursor:pointer;color:var(--ac2);font-size:11px;list-style:none;display:inline}.rshelp summary::-webkit-details-marker{display:none}.rshelp[open]{background:var(--p2);border:1px solid var(--ln);border-radius:6px;padding:4px 8px}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v13.2</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v13.3</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1623,7 +1623,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v13.2';
+const APP_VER = 'v13.3';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -2586,14 +2586,15 @@ function m2Set(k, v) { const c = m2Cfg(); if (k === 'start' || k === 'mode') c[k
 //   매수: 200MA 기울기((오늘MA − 5거래일 전 MA)/5) > 0 · 이격도 하한 초과 상한 미만
 //   매도: 이격도가 매도 하한 이상 → 미만으로 하향 이탈 · 또는 매도 상한을 넘는 첫날
 // 방어모드: 홀딩이 아닌 동안 듀얼스나이퍼 방어모드(종가 LOC)를 TQQQ에 적용
-const HM_DEF = { start: '2026-11-09', cap: 100000, held: 0, addon: 1, buyLo: 1, buyHi: 8, sellLo: -1, sellHi: 50, loo: 10, nDef: 5, defHold: 8, defBuy1: -1.5, defBuy2: 5.5, defSell: 1.5, maN: 3, defW: '6/13/20/27/34' };
+const HM_DEF = { start: '2026-11-09', cap: 100000, held: 2, addon: 1, buyLo: 1, buyHi: 8, sellLo: -1, sellHi: 50, loo: 10, nDef: 5, defHold: 8, defBuy1: -1.5, defBuy2: 5.5, defSell: 1.9, maN: 3, defW: '6/13/20/27/34' };
 function hmTabs() { // 실전 여러 개 저장 (v13.1) — 예전 단일 설정(ST.hm)은 첫 실전으로 옮김
   if (!ST.hmT || !ST.hmT.tabs || !ST.hmT.tabs.length) { ST.hmT = { cur: null, tabs: [{ id: uid('hm'), name: '실전 1', c: Object.assign({}, ST.hm || {}) }] }; ST.hmT.cur = ST.hmT.tabs[0].id; }
+  if (!ST.hmT.v19) { ST.hmT.v19 = 1; ST.hmT.tabs.forEach(t => { if (t.c.defSell === 1.5) t.c.defSell = 1.9; if (!t.c.held) t.c.held = 2; }); }
   return ST.hmT; }
 function hmCur() { const T = hmTabs(); return T.tabs.find(t => t.id === T.cur) || T.tabs[0]; }
 function hmCfg() { const c = hmCur().c; for (const k in HM_DEF) if (c[k] == null) c[k] = HM_DEF[k]; return c; }
 function hmTabBar(S, fee) { const T = hmTabs(), cur = hmCur(), i1 = S.n - 1;
-  const one = t => { const c = Object.assign({}, HM_DEF, t.c), s6 = String(c.start).replace(/-/g, '').slice(2), i0 = S.D.findIndex(d => d >= s6); if (i0 < 0) return '<span class="mono small muted">시작 전</span>'; const R = hmSim(S, c, i0, i1, c.cap, fee, c.held, false); return `<span class="mono small">${money(R.last)} ${pct((R.last / c.cap - 1) * 100)}</span>`; };
+  const one = t => { const c = Object.assign({}, HM_DEF, t.c), s6 = String(c.start).replace(/-/g, '').slice(2), i0 = S.D.findIndex(d => d >= s6); if (i0 < 0) return '<span class="mono small muted">시작 전</span>'; const R = hmSim(S, c, i0, i1, c.cap, fee, hmHeld(S, c, i0, fee), false); return `<span class="mono small">${money(R.last)} ${pct((R.last / c.cap - 1) * 100)}</span>`; };
   return `<div class="row" style="margin-bottom:5px"><div class="tabs">${T.tabs.map(t => `<button class="tab ${t === cur ? 'on' : ''}" data-act="hm-pick" data-id="${t.id}">${esc(t.name)} ${one(t)}</button>`).join('')}<button class="tab" data-act="hm-add">+ 새 실전</button></div><span style="margin-left:auto"></span><button class="btn sm" data-act="hm-ren">이름</button>${T.tabs.length > 1 ? '<button class="btn sm warn" data-act="hm-del">삭제</button>' : ''}<span class="small muted">바꾼 값은 자동 저장 · 다른 기기는 ☁ 전체 저장 후 새로고침</span></div>`; }
 function hmSeries() { // TQQQ 종가·시가 + 200MA·이격도·기울기·5일 이평
   const R = PRICES.filter(r => r[5] != null), n = R.length, D = R.map(r => r[0]), C = R.map(r => r[5]), O = R.map(r => r[15] != null ? r[15] : null);
@@ -2605,17 +2606,18 @@ function hmSeries() { // TQQQ 종가·시가 + 200MA·이격도·기울기·5일
 function hmW(c) { const a = String(c.defW).split(/[\/,\s]+/).map(Number).filter(x => isFinite(x) && x > 0); const n = Math.max(1, Math.round(c.nDef)); while (a.length < n) a.push(a.length ? a[a.length - 1] : 1); return a.slice(0, n); }
 function hmSim(S, c, i0, i1, cap, fee, held, keepLog) {
   const nD = Math.max(1, Math.round(c.nDef)), W = hmW(c), maN = Math.max(2, Math.round(c.maN)), bF = 1 + c.defBuy1 / 100, sF = 1 + c.defSell / 100;
-  let cash = cap, sh = 0, pos = false, pend = null, prevCash = cap, pk = cap, mdd = 0, ent = null, nTr = 0;
+  let cash = cap, sh = 0, pos = false, pend = null, prevCash = cap, pk = cap, mdd = 0, ent = null, nTr = 0, vh = held === 2; const ps = [];
+  // held: 0 현금(조건 맞으면 바로 홀딩) · 1 홀딩 보유 중 · 2 홀딩 구간에서 시작(방어로 시작, 그 홀딩이 끝나는 신호 뒤부터 새 홀딩)
   let docc = Array(nD).fill(false), dsh = Array(nD).fill(0), dd = Array(nD).fill(0), dbp = Array(nD).fill(0);
   const log = [], eq = []; const L = o => { if (keepLog) log.push(o); };
-  if (held) { sh = Math.floor(cap / (S.C[i0] * (1 + fee))); cash = cap - sh * S.C[i0] * (1 + fee); pos = sh > 0; ent = S.C[i0]; L({ d: S.D[i0], side: '보유 시작', m: '홀딩', px: S.C[i0], sh, why: '시작일 종가로 보유 가정' }); }
+  if (held === 1 || held === true) { sh = Math.floor(cap / (S.C[i0] * (1 + fee))); cash = cap - sh * S.C[i0] * (1 + fee); pos = sh > 0; ent = S.C[i0]; L({ d: S.D[i0], side: '보유 시작', m: '홀딩', px: S.C[i0], sh, why: '시작일 종가로 보유 가정' }); }
   for (let i = i0; i <= i1; i++) {
     const close = S.C[i], open = S.O[i] != null ? S.O[i] : close, est = S.O[i] == null;
     // 1) 전일 신호 → 시가 체결
     if (i > i0 && pend) {
       if (pend.side === 'B' && !pos) { const lim = S.C[i - 1] * (1 + c.loo / 100);
-        if (open <= lim) { for (let k = 0; k < nD; k++) if (docc[k]) { cash += dsh[k] * open * (1 - fee); L({ d: S.D[i], side: '매도', m: '방어', t: k + 1, px: open, sh: dsh[k], why: '홀딩 진입으로 시가 정리', est }); docc[k] = false; }
-          const q = Math.floor(cash / (lim * (1 + fee))); if (q > 0) { cash -= q * open * (1 + fee); sh = q; pos = true; ent = open; nTr++; L({ d: S.D[i], side: '매수', m: '홀딩', px: open, sh: q, why: pend.why, est }); } }
+        if (open <= lim) { let conv = 0; for (let k = 0; k < nD; k++) if (docc[k]) { conv += dsh[k]; docc[k] = false; } // 방어 보유분은 팔지 않고 홀딩으로 전환
+          const q = Math.floor(cash / (lim * (1 + fee))); if (q + conv > 0) { cash -= q * open * (1 + fee); sh = q + conv; pos = true; ent = open; nTr++; L({ d: S.D[i], side: '매수', m: '홀딩', px: open, sh: q, why: pend.why + (conv ? ` · 방어 ${conv}주 전환` : ''), est }); } }
         else L({ d: S.D[i], side: '미체결', m: '홀딩', px: open, sh: 0, why: `시가가 지정가 ${nfmt(lim)} 초과`, est }); }
       else if (pend.side === 'S' && pos) { cash += sh * open * (1 - fee); L({ d: S.D[i], side: '매도', m: '홀딩', px: open, sh, why: pend.why + ` (${pct((open / ent - 1) * 100, 1)})`, est }); sh = 0; pos = false; prevCash = cash; }
     }
@@ -2635,20 +2637,21 @@ function hmSim(S, c, i0, i1, cap, fee, held, keepLog) {
     // 3) 종가 신호 → 다음 거래일 시가
     const d = S.dev[i], dp = S.dev[i - 1];
     if (d != null && dp != null) {
-      if (!pos) { if (S.slope[i] > 0 && d > c.buyLo && d < c.buyHi) pend = { side: 'B', why: `이격도 ${d.toFixed(1)}% · 200일선 상승` }; }
+      if (!pos && vh) { if ((dp >= c.sellLo && d < c.sellLo) || (d > c.sellHi && dp <= c.sellHi)) vh = false; }
+      else if (!pos) { if (S.slope[i] > 0 && d > c.buyLo && d < c.buyHi) pend = { side: 'B', why: `이격도 ${d.toFixed(1)}% · 200일선 상승` }; }
       else if (dp >= c.sellLo && d < c.sellLo) pend = { side: 'S', why: `이격도 ${d.toFixed(1)}% → ${c.sellLo}% 이탈` };
       else if (d > c.sellHi && dp <= c.sellHi) pend = { side: 'S', why: `이격도 ${d.toFixed(1)}% → 과열 ${c.sellHi}%` };
     }
-    let v = cash + sh * close; for (let k = 0; k < nD; k++) if (docc[k]) v += dsh[k] * close; pk = Math.max(pk, v); mdd = Math.min(mdd, v / pk - 1); eq.push(v);
+    let v = cash + sh * close; for (let k = 0; k < nD; k++) if (docc[k]) v += dsh[k] * close; pk = Math.max(pk, v); mdd = Math.min(mdd, v / pk - 1); eq.push(v); ps.push(pos || vh);
   }
-  return { cash, sh, pos, pend, docc, dsh, dd, dbp, prevCash, eq, log, mdd: mdd * 100, ent, nTr, last: eq[eq.length - 1] };
+  return { vh, ps, cash, sh, pos, pend, docc, dsh, dd, dbp, prevCash, eq, log, mdd: mdd * 100, ent, nTr, last: eq[eq.length - 1] };
 }
 function hmOrders(S, c, R, i1, fee) { // 다음 거래일 주문
   const o = { open: [], close: [], note: '' }, nD = R.docc.length, W = hmW(c), maN = Math.max(2, Math.round(c.maN)), C = S.C[i1];
   let defV = 0; for (let k = 0; k < nD; k++) if (R.docc[k]) defV += R.dsh[k] * C;
   if (R.pend && R.pend.side === 'S') { o.open.push({ side: '매도', type: 'MOO (시초가)', px: null, sh: R.sh, why: R.pend.why }); o.note = '매도 체결 뒤 같은 날 종가부터 방어모드가 시작됩니다 (아래 종가 주문은 매도 후 현금 기준 추정).'; }
-  if (R.pend && R.pend.side === 'B') { const lim = C * (1 + c.loo / 100); for (let k = 0; k < nD; k++) if (R.docc[k]) o.open.push({ side: '매도', type: 'MOO (시초가)', px: null, sh: R.dsh[k], why: `방어 T${k + 1} 정리 (홀딩 진입)` });
-    o.open.push({ side: '매수', type: `LOO 지정가 (전일 종가 +${c.loo}%)`, px: lim, sh: Math.floor((R.cash + defV * (1 - fee)) / (lim * (1 + fee))), why: R.pend.why }); o.note = '시가가 지정가보다 높으면 미체결입니다. 미체결이면 방어 포지션은 그대로 두고 아래 종가 주문을 냅니다.'; }
+  if (R.pend && R.pend.side === 'B') { const lim = C * (1 + c.loo / 100); let conv = 0; for (let k = 0; k < nD; k++) if (R.docc[k]) conv += R.dsh[k];
+    o.open.push({ side: '매수', type: `LOO 지정가 (전일 종가 +${c.loo}%)`, px: lim, sh: Math.floor(R.cash / (lim * (1 + fee))), why: R.pend.why + (conv ? ` · 방어 보유 ${conv}주는 팔지 않고 홀딩으로 전환` : '') }); o.note = '시가가 지정가보다 높으면 미체결입니다. 미체결이면 방어 포지션은 그대로 두고 아래 종가 주문을 냅니다. 체결되면 아래 종가 주문은 내지 않습니다.'; }
   if (c.addon && !(R.pos && !(R.pend && R.pend.side === 'S'))) { // 내일 종가에 방어모드가 도는 경우
     const cashT = R.pend && R.pend.side === 'S' ? R.cash + R.sh * C * (1 - fee) : R.cash, prevCashT = R.pend && R.pend.side === 'S' ? cashT : R.prevCash;
     let sumPrev = 0; for (let k = i1 - maN + 2; k <= i1; k++) sumPrev += S.C[k]; const bF = 1 + c.defBuy1 / 100, sF = 1 + c.defSell / 100;
@@ -2662,12 +2665,16 @@ function hmOrders(S, c, R, i1, fee) { // 다음 거래일 주문
   }
   return o;
 }
-let _hmBt = null;
+let _hmBt = null, _hmPre = {};
+function hmPre(S, c, i0, fee) { // 시작일 전날 기준, 계속 운용했다면 홀딩 중이었는지
+  const i00 = S.dev.findIndex(v => v != null) + 6; if (i0 <= i00 + 1) return false; const key = JSON.stringify([c.buyLo, c.buyHi, c.sellLo, c.sellHi, c.loo, i0, S.n, S.C[S.n - 1]]); if (key in _hmPre) return _hmPre[key];
+  const R = hmSim(S, Object.assign({}, c, { addon: 0 }), i00, i0 - 1, 100000, fee, 0, false); return _hmPre[key] = !!R.pos; }
+function hmHeld(S, c, i0, fee) { return +c.held === 2 ? (hmPre(S, c, i0, fee) ? 2 : 0) : +c.held; }
 function hmBacktest(S, c, fee) { const key = JSON.stringify([c.addon, c.buyLo, c.buyHi, c.sellLo, c.sellHi, c.loo, c.nDef, c.defHold, c.defBuy1, c.defBuy2, c.defSell, c.maN, c.defW, fee, S.n, S.C[S.n - 1]]); if (_hmBt && _hmBt.key === key) return _hmBt;
   const yi = {}; S.D.forEach((d, i) => { const y = 2000 + +d.slice(0, 2); if (!yi[y]) yi[y] = [i, i]; yi[y][1] = i; }); const ly = 2000 + +S.D[S.n - 1].slice(0, 2), ys = []; for (let y = 2011; y <= ly; y++) if (yi[y]) ys.push(y);
   const R = hmSim(S, c, yi[ys[0]][0], S.n - 1, 100000, fee, 0, false); const rows = []; let prev = 100000, off = yi[ys[0]][0];
   ys.forEach(y => { const [a, b] = yi[y]; let pk = prev, m = 0; for (let i = a; i <= b; i++) { const v = R.eq[i - off]; pk = Math.max(pk, v); m = Math.min(m, v / pk - 1); } const e = R.eq[b - off];
-    const I = hmSim(S, c, a, b, 100000, fee, 0, false); let bp = S.C[a - 1], bm = 0; for (let i = a; i <= b; i++) { bp = Math.max(bp, S.C[i]); bm = Math.min(bm, S.C[i] / bp - 1); }
+    const I = hmSim(S, c, a, b, 100000, fee, a > off && R.ps[a - 1 - off] ? 2 : 0, false); let bp = S.C[a - 1], bm = 0; for (let i = a; i <= b; i++) { bp = Math.max(bp, S.C[i]); bm = Math.min(bm, S.C[i] / bp - 1); }
     rows.push({ y, part: y === ly, cr: (e / prev - 1) * 100, cm: m * 100, ir: (I.last / 1e5 - 1) * 100, im: I.mdd, br: (S.C[b] / S.C[a - 1] - 1) * 100, bm: bm * 100 }); prev = e; });
   const full = rows.filter(r => !r.part), g = k => (Math.pow(full.reduce((p, r) => p * (1 + r[k] / 100), 1), 1 / full.length) - 1) * 100;
   let bpk = 0, bdd = 0; for (let i = off; i < S.n; i++) { bpk = Math.max(bpk, S.C[i]); bdd = Math.min(bdd, S.C[i] / bpk - 1); }
@@ -2676,11 +2683,11 @@ function hmBacktest(S, c, fee) { const key = JSON.stringify([c.addon, c.buyLo, c
 function renderHm() {
   if (TK !== 'TQQQ') return '<div class="sec">TQQQ판에서만 쓰는 화면입니다.</div>';
   const c = hmCfg(), S = hmSeries(), i1 = S.n - 1, fee = (ST.fee || 0) / 100; const s6 = c.start.replace(/-/g, '').slice(2); let i0 = S.D.findIndex(d => d >= s6); const notYet = i0 < 0; if (notYet) i0 = i1;
-  const R = hmSim(S, c, i0, i1, c.cap, fee, c.held, true), d = S.dev[i1], B = hmBacktest(S, c, fee), nd = nextTradingDay(S.D[i1]);
+  const heldA = hmHeld(S, c, i0, fee), R = hmSim(S, c, i0, i1, c.cap, fee, heldA, true), d = S.dev[i1], B = hmBacktest(S, c, fee), nd = nextTradingDay(S.D[i1]);
   const O = notYet ? { open: [], close: [], note: '' } : hmOrders(S, c, R, i1, fee);
   const inp = (k, st, neg, w) => numInput({ v: c[k], step: st, neg, attrs: `data-hm="${k}"`, w: w || (neg ? '92px' : '64px') });
   let defV = 0; const tiers = []; for (let k = 0; k < R.docc.length; k++) if (R.docc[k]) { defV += R.dsh[k] * S.C[i1]; tiers.push(`T${k + 1} ${R.dsh[k].toLocaleString()}주 @${nfmt(R.dbp[k])} (${R.dd[k]}일)`); }
-  const mode = R.pos ? '홀딩' : c.addon ? '방어' : '현금 대기';
+  const mode = R.pos ? '홀딩' : (c.addon ? '방어' : '현금 대기') + (R.vh ? ' · 홀딩 구간 대기' : '');
   const ordRow = (o, when) => `<tr><td class="l">${when}</td><td class="${o.side === '매수' ? 'pos' : o.side === '매도' ? 'neg' : 'muted'}"><b>${o.side}</b></td><td class="l">${o.type}</td><td>${o.px != null ? nfmt(o.px) : '—'}</td><td>${o.sh.toLocaleString()}</td><td class="l small">${esc(o.why)}</td></tr>`;
   const ords = O.open.map(o => ordRow(o, '장 시작')).concat(O.close.map(o => ordRow(o, '장 마감'))).join('');
   const yr = B.rows;
@@ -2688,7 +2695,7 @@ function renderHm() {
     <div class="small dim" style="margin-bottom:5px">200일선 위에서 오르는 구간은 몰빵 보유(시가 매매), 그 밖에는 듀얼 방어모드로 5분할 단타(종가 LOC). 종가로 판단하고 다음 거래일에 주문합니다.</div>
     ${hmTabBar(S, fee)}
     <div class="row" style="gap:6px;align-items:end;flex-wrap:wrap"><label class="f">시작일<input class="in" type="date" data-hm="start" value="${c.start}"></label><label class="f">원금 ($)${numInput({ v: c.cap, step: 1000, attrs: 'data-hm="cap"', w: '96px' })}</label>
-      <label class="f">시작 상태<select class="in" data-hm="held"><option value="0" ${!c.held ? 'selected' : ''}>현금 (방어모드로 시작)</option><option value="1" ${c.held ? 'selected' : ''}>홀딩 보유 중 (시작일 종가)</option></select></label>
+      <label class="f">시작 상태<select class="in" data-hm="held"><option value="2" ${+c.held === 2 ? 'selected' : ''}>자동 (원본 방식${+c.held === 2 ? heldA === 2 ? ' · 지금은 홀딩 구간 → 방어로 시작' : ' · 현금 시작' : ''})</option><option value="0" ${!+c.held ? 'selected' : ''}>현금 (조건 맞으면 바로 홀딩)</option><option value="1" ${+c.held === 1 ? 'selected' : ''}>홀딩 보유 중 (시작일 종가)</option></select></label>
       <label class="f">방어모드<select class="in" data-hm="addon"><option value="1" ${c.addon ? 'selected' : ''}>사용</option><option value="0" ${!c.addon ? 'selected' : ''}>끔 (순수 200일선)</option></select></label></div>
     <div class="row" style="gap:6px;align-items:end;flex-wrap:wrap;margin-top:4px"><span class="small" style="color:#F59E0B;font-weight:700;align-self:center">홀딩</span>
       <label class="f">매수 이격 하한%${inp('buyLo', 0.5, true)}</label><label class="f">매수 이격 상한%${inp('buyHi', 0.5, true)}</label><label class="f">매도 이격 하한%${inp('sellLo', 0.5, true)}</label><label class="f">매도 이격 상한%${inp('sellHi', 1, true)}</label><label class="f">LOO 지정가 +%${inp('loo', 1)}</label></div>
