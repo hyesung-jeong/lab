@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>(function(){try{var h=location.hash.toLowerCase();if(h==='#tqqq')localStorage.setItem('lab_tk','TQQQ');else if(h==='#soxl')localStorage.setItem('lab_tk','SOXL');if(localStorage.getItem('lab_tk')==='TQQQ')location.replace('tqqq/');}catch(e){}})();</script>
-<title>트레이딩 랩 v13.5</title>
+<title>트레이딩 랩 v13.6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -118,7 +118,7 @@ tr.clk:hover td{background:var(--p3)}tr.clk.on td{background:var(--acb)}
 .rshelp{width:100%;margin-top:2px}.rshelp summary{cursor:pointer;color:var(--ac2);font-size:11px;list-style:none;display:inline}.rshelp summary::-webkit-details-marker{display:none}.rshelp[open]{background:var(--p2);border:1px solid var(--ln);border-radius:6px;padding:4px 8px}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v13.5</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v13.6</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -359,7 +359,7 @@ function backtestYear(items,P,tlog,prevYearClose){
       for(const t in positions){ if(toRemove.indexOf(t)>=0) continue; const p=positions[t];
         const holdDays=dayNum-p.bd; const profitPct=(atPrice-p.bp)/p.bp*100;
         let shouldSell=false;
-        if(p.bm===0) shouldSell=(profitPct>=P.safeProfit)||(holdDays>=P.safeHold);
+        if(P.liq&&P.liq[items[day].r[0]]) shouldSell=true; /* Bear 휴식 첫날 전량 매도 */ else if(p.bm===0) shouldSell=(profitPct>=P.safeProfit)||(holdDays>=P.safeHold);
         else shouldSell=(profitPct>=P.aggProfit)||(holdDays>=P.aggHold);
         if(shouldSell){ const sellAmt=p.sh*atPrice*(1-fee); const pnl=sellAmt-p.inv;
           cash+=sellAmt; periodPnl+=pnl; soldToday=true; toRemove.push(t);
@@ -370,7 +370,7 @@ function backtestYear(items,P,tlog,prevYearClose){
     _trySell(price, false);                  // ② 종가 판정
     toRemove.forEach(t=>delete positions[t]);
     if(!(posBeforeSell===P.nPos && soldToday)){
-      const canBuy=Object.keys(positions).length<P.nPos && cash>0 && !(P.tierMode==='count' && posBeforeSell>=P.nPos);
+      const canBuy=!(P.blk&&P.blk[items[day].r[0]]) && Object.keys(positions).length<P.nPos && cash>0 && !(P.tierMode==='count' && posBeforeSell>=P.nPos);
       if(canBuy){ let buyOk=false;
         if(mode===0 && dret<P.safeBuy) buyOk=true;
         else if(mode===1 && dret<P.aggBuy) buyOk=true;
@@ -844,8 +844,9 @@ function ordersDongpa(P, cap, nm) {
   const pos = e.positions, tiers = Object.keys(pos).map(Number).sort((a, b) => a - b);
   const sells = tiers.map(t => { const p = pos[t], rate = p.bm === 0 ? P.safeProfit : P.aggProfit, lim = p.bm === 0 ? P.safeHold : P.aggHold;
     const moc = nd - p.bd >= lim; return { tier: 'T' + t, qty: p.sh, bp: p.bp, type: moc ? 'MOC' : 'LOC', price: moc ? null : ceilC(p.bp * (1 + rate / 100)), note: (p.bm === 0 ? '안전' : '공세') + ' ' + (nd - p.bd - 1) + '/' + lim + '일' }; });
+  if (P.liqNext) sells.forEach(x => { x.type = 'MOC'; x.price = null; x.note += ' · Bear 휴식 전량 매도'; });
   const buys = [];
-  if (tiers.length < P.nPos && e.cash > 0) { let tier = -1; for (let t = 1; t <= P.nPos; t++) if (!(t in pos)) { tier = t; break; }
+  if (!P.blkNext && tiers.length < P.nPos && e.cash > 0) { let tier = -1; for (let t = 1; t <= P.nPos; t++) if (!(t in pos)) { tier = t; break; }
     const rate = nm === 0 ? P.safeBuy : P.aggBuy, mbp = lc * (1 + rate / 100); let cur = 0; tiers.forEach(t => cur += pos[t].inv);
     const wi = P.tierMode === 'count' ? tiers.length : tier - 1; const tb = (P.tierW && P.tierW[wi] != null) ? ib * (P.tierW[wi] / 100) : ps; const amt = Math.min(ib - cur, tb, e.cash / (1 + (P.fee || 0))), q = Math.floor(amt / mbp);
     const fee = P.fee || 0; let lim = belowC(mbp); if (q > 0) lim = Math.min(lim, floorC(Math.min(amt, e.cash) / (q * (1 + fee))));
@@ -1410,8 +1411,14 @@ const BUILTIN = [
 const TK_SETS = [["TQQQ 3모드 MDD20·최저10 (11~25)", [["b_q7", 57], ["b_q8", 19.5], ["b_q9", 23.5]]], ["TQQQ 3모드 MDD20·최저10 (11~26)", [["b_q10", 61.5], ["b_q11", 15.5], ["b_q12", 23]]], ["TQQQ 3모드 MDD30·최저10 (11~25)", [["b_q13", 55], ["b_q14", 30], ["b_q15", 15]]], ["TQQQ 3모드 MDD30·최저10 (11~26)", [["b_q16", 56.5], ["b_q17", 26.5], ["b_q18", 17]]], ["페라리 (시트)", [["b_fr1", 100]]]];
 // 슬롯 파라미터 → 엔진 P
 function parseTierW(v, n) { if (v == null || v === '') return null; const a = (Array.isArray(v) ? v : String(v).split(/[\/,\s]+/)).map(Number).filter(x => isFinite(x) && x > 0); return a.length >= n ? a.slice(0, n) : null; } // 동파 티어 비중(%): 분할수만큼 있어야 적용, 아니면 균등
+let _dpBear = {};
+function dpBear(p) { // 고점 경고(RSI 252 Bear) 확정 다음 날부터 N거래일 매수 중단 (v13.6)
+  const mode = p.bearMode === 'buy' || p.bearMode === 'liq' ? p.bearMode : '', N = +p.bearN || 20; if (!mode) return {};
+  const X = bearCompute(), key = X.key + '|' + mode + '|' + N; if (_dpBear.key === key) return _dpBear.v;
+  const blk = {}, liq = {}, n = X.n; let blkNext = false, liqNext = false; X.sig.forEach(s => { if (s.c >= n) return; for (let k = 1; k <= N; k++) if (s.c + k < n) blk[X.D[s.c + k]] = 1; if (mode === 'liq' && s.c + 1 < n) liq[X.D[s.c + 1]] = 1; if (n - 1 - s.c < N) blkNext = true; if (mode === 'liq' && s.c === n - 1) liqNext = true; });
+  const v = { blk, blkNext, bearN: N }; if (mode === 'liq') { v.liq = liq; v.liqNext = liqNext; } _dpBear = { key, v }; return v; }
 function engineP(type, p, cap, fee) {
-  if (type === 'dongpa') return { nPos: +p.nPos, cycle: +p.cycle, safeBuy: +p.safeBuy, safeProfit: +p.safeProfit, safeHold: +p.safeHold, aggBuy: +p.aggBuy, aggProfit: +p.aggProfit, aggHold: +p.aggHold, initCap: cap, fee, dblSell: !!p.dblSell, tierW: parseTierW(p.tierW, +p.nPos), tierMode: p.tierMode === 'count' ? 'count' : 'min' };
+  if (type === 'dongpa') return { nPos: +p.nPos, cycle: +p.cycle, safeBuy: +p.safeBuy, safeProfit: +p.safeProfit, safeHold: +p.safeHold, aggBuy: +p.aggBuy, aggProfit: +p.aggProfit, aggHold: +p.aggHold, initCap: cap, fee, dblSell: !!p.dblSell, tierW: parseTierW(p.tierW, +p.nPos), tierMode: p.tierMode === 'count' ? 'count' : 'min', ...dpBear(p) };
   if (type === 'dual') return { nAtk: +p.nAtk, holdA: +p.holdA, atkBuy: +p.atkBuy, atkBuyNeg: +(p.atkBuyNeg ?? -0.1), sellA: +p.sellA, nDef: +p.nDef, defHold: +p.defHold, defBuy1: +p.defBuy1, defBuy2: +p.defBuy2, defSell: +p.defSell, maN: +p.maN, atkW: p.atkW || '', defW: p.defW || '', initCap: cap, fee };
   const st = {}; ['SF', 'Middle', 'AG'].forEach(m => { const t = p[m], n = +t.n; const ext = (a, d) => { const r = []; for (let i = 0; i < n; i++) r.push(+(a[i] ?? a[a.length - 1] ?? d)); return r; };
     st[m] = { buy: ext(t.buy, 0).map(v => v / 100), sell: ext(t.sell, 0).map(v => v / 100), hold: ext(t.hold, 1), weight: ext(t.weight, 0).map(v => v / 100), comp_rate: p.comp / 100, loss_rate: p.loss / 100, fix: !!t.fix }; });
@@ -1420,7 +1427,7 @@ function engineP(type, p, cap, fee) {
 function runEngine(type, P, rows) { rows = rows || DATA; return type === 'dongpa' ? runDongpa(rows, P) : type === 'dual' ? runDual(rows, P) : runThree(rows, P); }
 function presetSummary(type, p) {
   if (type === 'cash') return '현금';
-  if (type === 'dongpa') return p.nPos + '분할·' + p.cycle + ' / 안전 ' + p.safeBuy + '·' + p.safeProfit + '·' + p.safeHold + ' / 공세 ' + p.aggBuy + '·' + p.aggProfit + '·' + p.aggHold + (p.tierW ? ' / 비중 ' + p.tierW + (p.tierMode === 'count' ? ' (보유순)' : '') : '');
+  if (type === 'dongpa') return p.nPos + '분할·' + p.cycle + ' / 안전 ' + p.safeBuy + '·' + p.safeProfit + '·' + p.safeHold + ' / 공세 ' + p.aggBuy + '·' + p.aggProfit + '·' + p.aggHold + (p.tierW ? ' / 비중 ' + p.tierW + (p.tierMode === 'count' ? ' (보유순)' : '') : '') + (p.bearMode === 'buy' || p.bearMode === 'liq' ? ' / Bear 후 ' + (+p.bearN || 20) + '일 ' + (p.bearMode === 'liq' ? '전량 매도·휴식' : '매수 중단') : '');
   if (type === 'dual') return '공격 ' + p.nAtk + '·a' + p.holdA + '·' + p.atkBuy + '·a' + p.sellA + ' / 방어 ' + p.nDef + '·' + p.defHold + '일·' + p.defBuy1 + '·' + p.defBuy2 + '·' + p.defSell + (p.defW ? ' · ' + p.defW : '');
   const f = m => { const t = p[m]; return t.n + '티'; };
   return (p.modeMethod === 'ctr' ? '중심주가 ' : p.modeMethod === 'ma' ? '이격 ' : p.modeMethod === 'mom' ? '모멘텀' + (p.maN || 80) + ' ' : p.modeMethod === 'srsi' ? 'SOXX RSI ' : 'RSI ') + p.rsiMin + '/' + p.rsiMax + ' · 복리' + p.comp + '/손실' + p.loss + (+p.cyc > 1 ? ' · 갱신' + p.cyc + '일' : '') + ' · ' + f('SF') + '/' + f('Middle') + '/' + f('AG');
@@ -1626,7 +1633,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v13.5';
+const APP_VER = 'v13.6';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -1874,6 +1881,7 @@ function paramPanel(slot) {
     if (slot.type === 'dongpa') h += `<label class="f" style="justify-content:flex-end"><span class="row" style="gap:4px;height:26px"><input type="checkbox" data-sp="${sid}" data-k="dblSell" ${p.dblSell ? 'checked' : ''}>시가+종가 이중매도</span></label>`;
     if (slot.type === 'dongpa') h += `<label class="f" style="grid-column:span 2">티어 비중% (/ 구분, 분할수만큼 · 빈칸=균등)<input class="in" data-sp="${sid}" data-k="tierW" data-txt="1" value="${esc(p.tierW || '')}"></label>`;
     if (slot.type === 'dongpa') h += `<label class="f" style="grid-column:span 2" title="비중이 균등이면 두 방식 결과가 같습니다">비중 적용 순서<select class="in" data-sp="${sid}" data-k="tierMode" data-txt="1"><option value="min" ${p.tierMode !== 'count' ? 'selected' : ''}>최소 — 비어 있는 가장 낮은 티어</option><option value="count" ${p.tierMode === 'count' ? 'selected' : ''}>보유 — 보유 수 + 1번째 (만능시트 '보유')</option></select></label>`;
+    if (slot.type === 'dongpa') h += `<label class="f" style="grid-column:span 2" title="폭락신호 탭의 고점 경고(${TK} RSI 252 약세 다이버전스)가 확정된 다음 날부터 적용. 매매시트에는 없는 규칙입니다">Bear 고점 경고 뒤 휴식<select class="in" data-sp="${sid}" data-k="bearMode" data-txt="1"><option value="" ${!p.bearMode ? 'selected' : ''}>끔</option><option value="buy" ${p.bearMode === 'buy' ? 'selected' : ''}>매수 중단</option><option value="liq" ${p.bearMode === 'liq' ? 'selected' : ''}>전량 매도 후 매수 중단</option></select></label><label class="f">휴식 거래일<select class="in" data-sp="${sid}" data-k="bearN" data-txt="1">${[5, 10, 15, 20, 25, 30, 40, 60].map(v => `<option value="${v}" ${(+p.bearN || 20) === v ? 'selected' : ''}>${v}일</option>`).join('')}</select></label>`;
     if (slot.type === 'dual') h += `<label class="f" style="grid-column:span 2">방어 티어 비중 (/ 구분, 빈칸=균등)<input class="in" data-sp="${sid}" data-k="defW" data-txt="1" value="${esc(p.defW || '')}"></label>`;
     return h + '</div></div>';
   }
@@ -2269,7 +2277,7 @@ function sigYearHtml(y, all) { // 그 해 신호일: SOXX 신호 → SOXL 종가
   const f = v => v == null ? '—' : nfmt(v);
   return `<table class="t" style="margin:2px 0 6px;font-size:11.5px"><tr><th class="l">날짜</th><th class="l">신호</th><th>SOXL <span class="dim">(SOXX)</span></th><th>TQQQ <span class="dim">(QQQ)</span></th><th>QLD <span class="dim">(QQQ)</span></th></tr>${ds.map(d => { const r = pm[d] || [], hs = all[d].includes('SOXX'), hq = all[d].includes('QQQ');
     return `<tr><td class="l">${ymdFmt(d)}</td><td class="l">${all[d].map(t => `<span class="chip" style="background:${t === 'SOXX' ? '#2A1F4A' : '#12333A'};color:${t === 'SOXX' ? '#C4B5FD' : '#7EE8DF'};min-height:16px">${t}</span>`).join(' ')}</td><td>${hs ? f(r[2]) : '<span class="dim">—</span>'}</td><td>${hq ? f(r[5]) : '<span class="dim">—</span>'}</td><td>${hq ? f(r[12]) : '<span class="dim">—</span>'}</td></tr>`; }).join('')}</table>`; }
-// ===== 고점 경고: RSI(252) 약세 다이버전스 — 트레이딩뷰 기본 RSI의 'Bear' (v13.5) =====
+// ===== 고점 경고: RSI(252) 약세 다이버전스 — 트레이딩뷰 기본 RSI의 'Bear' (v13.6) =====
 let _bear = null;
 function bearCompute() {
   const key = TK + '|' + PRICES.length + '|' + lastYmd(); if (_bear && _bear.key === key) return _bear;
