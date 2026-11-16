@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>try{localStorage.setItem('lab_tk','TQQQ')}catch(e){}</script>
-<title>트레이딩 랩 TQQQ v13.4</title>
+<title>트레이딩 랩 TQQQ v13.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -118,7 +118,7 @@ tr.clk:hover td{background:var(--p3)}tr.clk.on td{background:var(--acb)}
 .rshelp{width:100%;margin-top:2px}.rshelp summary{cursor:pointer;color:var(--ac2);font-size:11px;list-style:none;display:inline}.rshelp summary::-webkit-details-marker{display:none}.rshelp[open]{background:var(--p2);border:1px solid var(--ln);border-radius:6px;padding:4px 8px}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v13.4</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver" style="background:#1f6f43">TQQQ</span> <span class="ver">v13.5</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1626,7 +1626,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v13.4';
+const APP_VER = 'v13.5';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -1750,7 +1750,8 @@ function lineChart(o) { // o:{w,h,series:[{pts:[[x,y]],color,dash,fill}],ymin,ym
     if (s.fill) g += `<path d="${d}L${X(s.pts[s.pts.length - 1][0])} ${Y(Math.max(ymin, Math.min(ymax, s.base == null ? 0 : s.base)))}L${X(s.pts[0][0])} ${Y(Math.max(ymin, Math.min(ymax, s.base == null ? 0 : s.base)))}Z" fill="${s.fill}" stroke="none"/>`;
     g += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.wd || 1.4}" ${s.dash ? `stroke-dasharray="${s.dash}"` : ''} vector-effect="non-scaling-stroke"/>`; });
   (o.vlines || []).forEach(v => { g += `<line x1="${X(v.x)}" x2="${X(v.x)}" y1="${T}" y2="${H - B}" stroke="${v.color}" stroke-opacity="0.35" stroke-dasharray="2 2"/>`; });
-  (o.marks || []).forEach(m => { if (m.tri) { const x = X(m.x), y = Y(m.y) + (m.off || 6); g += `<path d="M${x.toFixed(1)} ${y.toFixed(1)}l-5 9h10z" fill="${m.color}" stroke="#0A1428" stroke-width="0.8"><title>${esc(m.title || '')}</title></path>`; return; }
+  (o.marks || []).forEach(m => { if (m.dn) { const x = X(m.x), y = Y(m.y) - (m.off || 6); g += `<path d="M${x.toFixed(1)} ${y.toFixed(1)}l-5 -9h10z" fill="${m.color}" stroke="#0A1428" stroke-width="0.8"><title>${esc(m.title || '')}</title></path>`; return; }
+    if (m.tri) { const x = X(m.x), y = Y(m.y) + (m.off || 6); g += `<path d="M${x.toFixed(1)} ${y.toFixed(1)}l-5 9h10z" fill="${m.color}" stroke="#0A1428" stroke-width="0.8"><title>${esc(m.title || '')}</title></path>`; return; }
     g += `<circle cx="${X(m.x)}" cy="${Y(m.y)}" r="3" fill="${m.color}"/><text x="${X(m.x) + 4}" y="${Y(m.y) + (m.dy || -4)}" style="fill:${m.color}">${esc(m.t)}</text>`; });
   return g + '</svg>';
 }
@@ -2268,6 +2269,33 @@ function sigYearHtml(y, all) { // 그 해 신호일: SOXX 신호 → SOXL 종가
   const f = v => v == null ? '—' : nfmt(v);
   return `<table class="t" style="margin:2px 0 6px;font-size:11.5px"><tr><th class="l">날짜</th><th class="l">신호</th><th>SOXL <span class="dim">(SOXX)</span></th><th>TQQQ <span class="dim">(QQQ)</span></th><th>QLD <span class="dim">(QQQ)</span></th></tr>${ds.map(d => { const r = pm[d] || [], hs = all[d].includes('SOXX'), hq = all[d].includes('QQQ');
     return `<tr><td class="l">${ymdFmt(d)}</td><td class="l">${all[d].map(t => `<span class="chip" style="background:${t === 'SOXX' ? '#2A1F4A' : '#12333A'};color:${t === 'SOXX' ? '#C4B5FD' : '#7EE8DF'};min-height:16px">${t}</span>`).join(' ')}</td><td>${hs ? f(r[2]) : '<span class="dim">—</span>'}</td><td>${hq ? f(r[5]) : '<span class="dim">—</span>'}</td><td>${hq ? f(r[12]) : '<span class="dim">—</span>'}</td></tr>`; }).join('')}</table>`; }
+// ===== 고점 경고: RSI(252) 약세 다이버전스 — 트레이딩뷰 기본 RSI의 'Bear' (v13.5) =====
+let _bear = null;
+function bearCompute() {
+  const key = TK + '|' + PRICES.length + '|' + lastYmd(); if (_bear && _bear.key === key) return _bear;
+  const cc = TK === 'TQQQ' ? 5 : 2, hc = TK === 'TQQQ' ? 7 : 4, R = PRICES.filter(r => r[cc] != null), n = R.length, D = R.map(r => r[0]), C = R.map(r => r[cc]), H = R.map(r => r[hc] != null ? r[hc] : r[cc]);
+  const P = 252, B = 5, LO = 5, UP = 60, rsi = new Array(n).fill(null);
+  if (n > P + 20) { let g = 0, l = 0; for (let i = 1; i <= P; i++) { const c = C[i] - C[i - 1]; if (c > 0) g += c; else l -= c; } let ag = g / P, al = l / P; rsi[P] = al ? 100 - 100 / (1 + ag / al) : 100; for (let i = P + 1; i < n; i++) { const c = C[i] - C[i - 1]; ag = (ag * (P - 1) + (c > 0 ? c : 0)) / P; al = (al * (P - 1) + (c < 0 ? -c : 0)) / P; rsi[i] = al ? 100 - 100 / (1 + ag / al) : 100; } }
+  const isPv = (i, right) => { if (i - B < 0 || rsi[i - B] == null) return false; for (let k = i - B; k <= Math.min(n - 1, i + right); k++) if (k !== i && rsi[k] > rsi[i]) return false; return true; };
+  const sig = []; let prev = null; for (let i = P + B; i < n - B; i++) { if (!isPv(i, B)) continue; if (prev != null && i - prev >= LO && i - prev <= UP && H[i] > H[prev] && rsi[i] < rsi[prev]) sig.push({ i, c: i + B, prev }); prev = i; }
+  // 잠정: 최근 5거래일 안의 고점 후보 (뒤 5일이 다 지나야 확정)
+  let cand = null; for (let i = Math.max(P + B, n - B); i < n; i++) { if (!isPv(i, B)) continue; if (prev != null && i - prev >= LO && i - prev <= UP && H[i] > H[prev] && rsi[i] < rsi[prev]) cand = { i, left: i + B - (n - 1) }; }
+  const fwd = (i, k) => i + k < n ? (C[i + k] / C[i] - 1) * 100 : null, low = (i, k) => { let m = C[i]; for (let j = i; j <= Math.min(n - 1, i + k); j++) if (C[j] < m) m = C[j]; return (m / C[i] - 1) * 100; };
+  return _bear = { key, D, C, rsi, sig, cand, fwd, low, n };
+}
+function bearHtml() {
+  const X = bearCompute(), n = X.n; if (!X.sig.length && !X.cand) return ''; const last = X.sig[X.sig.length - 1], ago = last ? n - 1 - last.c : null, fresh = ago != null && ago <= 5;
+  const c = v => v == null ? '<span class="dim">—</span>' : `<span class="${cls(v)}">${pc0(v)}</span>`;
+  const st = X.cand ? `<span class="orc">잠정 후보 · 고점 ${ymdFmt(X.D[X.cand.i])} (확정까지 ${X.cand.left}거래일)</span>` : fresh ? `<span class="neg">새 신호 · ${ymdFmt(X.D[last.c])} 확정</span>` : '신호 없음';
+  const rows = X.sig.slice().reverse().map(s => `<tr><td class="l">${ymdFmt(X.D[s.i])}</td><td class="l">${ymdFmt(X.D[s.c])}</td><td>${X.rsi[s.i].toFixed(1)}</td><td>${nfmt(X.C[s.i])}</td><td>${nfmt(X.C[s.c])} <span class="small ${cls(X.C[s.c] / X.C[s.i] - 1)}">${pc0((X.C[s.c] / X.C[s.i] - 1) * 100)}</span></td><td>${c(X.fwd(s.c, 20))}</td><td>${c(X.fwd(s.c, 60))}</td><td>${c(X.fwd(s.c, 120))}</td><td>${c(X.low(s.c, 120))}</td></tr>`).join('');
+  const done = X.sig.filter(s => s.c + 60 < n), neg = done.filter(s => X.fwd(s.c, 60) < 0).length, deep = X.sig.filter(s => X.low(s.c, 120) <= -30).length;
+  return `<div class="sec"><h3>🔻 고점 경고 — ${TK} RSI(252) 약세 다이버전스 <span class="small muted">트레이딩뷰 기본 RSI의 Bear · 주가 고가는 직전 RSI 고점 때보다 높은데 RSI는 낮을 때 · 고점은 앞뒤 5거래일 기준이라 5거래일 뒤 확정</span></h3>
+    <div class="kpis"><div class="kpi" style="${X.cand || fresh ? 'border-color:#E5484D;background:#3A1A1F' : ''}"><div class="k">지금 상태</div><div class="v" style="font-size:14px">${st}</div><div class="s">RSI(252) <b class="mono" style="color:var(--tx)">${X.rsi[n - 1] == null ? '—' : X.rsi[n - 1].toFixed(1)}</b></div></div>
+    <div class="kpi"><div class="k">마지막 Bear</div><div class="v" style="font-size:14px">${last ? ymdFmt(X.D[last.i]) + ' 고점' : '—'}</div><div class="s">${last ? `확정 ${ymdFmt(X.D[last.c])} (${ago}거래일 전) · 확정 뒤 ${pc0((X.C[n - 1] / X.C[last.c] - 1) * 100)}` : ''}</div></div>
+    <div class="kpi"><div class="k">지금까지 ${X.sig.length}번</div><div class="v" style="font-size:14px">60일 뒤 하락 ${neg}/${done.length}</div><div class="s">확정 뒤 120일 안에 −30% 이상 하락 ${deep}/${X.sig.length}</div></div></div>
+    <div class="tw" style="margin-top:6px;max-height:300px;overflow-y:auto"><table class="t"><tr><th class="l">고점일</th><th class="l">확정일</th><th>RSI(252)</th><th>고점 종가</th><th>확정일 종가</th><th>확정 후 20일</th><th>60일</th><th>120일</th><th>120일 내 최저</th></tr>${rows}</table></div>
+    <div class="small dim">차트에는 고점 자리에 <span style="color:#F87171">▼</span>로 표시됩니다(실제로 알 수 있는 날은 확정일). 저점용 Bull 신호는 이후 추가 하락이 잦아 넣지 않았습니다.</div></div>`;
+}
 function renderSig() {
   const c = sigCfg(), R = sigCompute(), S = R.S, Q = R.Q; const ss = sigStatus(S, c.soxxThr), qs = sigStatus(Q, c.qqqThr); const n = R.sk.length - 1, K = R.sk[n], D = R.sd[n], Kp = R.sk[n - 1], Dp = R.sd[n - 1];
   const qrd = Q.rsi[Q.rsi.length - 1]; const lastY = lastYmd();
@@ -2286,15 +2314,17 @@ function renderSig() {
   const xs = DATA.slice(d0).map(r => r[0]); const px = xs.map((y, i) => [i, Math.log10(soxlAt(y))]);
   const xl = []; let pm = ''; xs.forEach((y, i) => { const m = c.range === '6M' || c.range === '1Y' ? y.slice(0, 4) : y.slice(0, 2); if (m !== pm) { xl.push([i, c.range === '6M' || c.range === '1Y' ? +y.slice(2, 4) + '월' : '20' + y.slice(0, 2)]); pm = m; } }); const step = Math.max(1, Math.ceil(xl.length / 12)); const xl2 = xl.filter((_, i) => i % step === 0);
   const marks = [], vl = []; xs.forEach((y, i) => { const both = S.set.has(y) && Q.set.has(y); if (S.set.has(y)) { marks.push({ x: i, y: Math.log10(soxlAt(y)), color: '#A78BFA', tri: 1, off: 6, title: ymdFmt(y) + ' SOXX 바닥잡기' }); vl.push({ x: i, color: '#A78BFA' }); } if (Q.set.has(y)) { marks.push({ x: i, y: Math.log10(soxlAt(y)), color: '#4FD1C5', tri: 1, off: both ? 17 : 6, title: ymdFmt(y) + ' QQQ 바닥잡기' }); vl.push({ x: i, color: '#4FD1C5' }); } });
+  { const BX = bearCompute(), xi = {}; xs.forEach((y, i) => xi[y] = i); BX.sig.forEach(s => { const i = xi[BX.D[s.i]]; if (i != null) marks.push({ x: i, y: Math.log10(soxlAt(BX.D[s.i])), color: '#F87171', dn: 1, off: 7, title: ymdFmt(BX.D[s.i]) + ' Bear (RSI252 다이버전스 · 확정 ' + ymdFmt(BX.D[s.c]) + ')' }); const j = xi[BX.D[s.c]]; if (j != null) vl.push({ x: j, color: '#F87171' }); }); }
   const rs = (X) => xs.map((y, i) => [i, X.idx[y] != null ? X.rsi[X.idx[y]] : null]).filter(p => p[1] != null), ma = (X) => xs.map((y, i) => [i, X.idx[y] != null ? X.a1[X.idx[y]] : null]).filter(p => p[1] != null);
   const qi = Object.fromEntries(R.qd.map((y, i) => [y, i])); const kk = xs.map((y, i) => [i, R.sk[qi[y]]]).filter(p => p[1] != null), dd = xs.map((y, i) => [i, R.sd[qi[y]]]).filter(p => p[1] != null);
   const thrLine = (v) => [[0, v], [xs.length - 1, v]];
-  h += `<div class="sec"><h3>${TK} 주가와 신호 <span class="small"><span style="color:#A78BFA">▲ SOXX 바닥잡기</span> · <span style="color:#4FD1C5">▲ QQQ 바닥잡기</span></span><span class="sp"></span>${['6M', '1Y', '3Y', 'ALL'].map(r => `<button class="tab ${c.range === r ? 'on' : ''}" data-act="sig-range" data-v="${r}">${r === 'ALL' ? '전체' : r}</button>`).join('')}</h3>
+  h += `<div class="sec"><h3>${TK} 주가와 신호 <span class="small"><span style="color:#A78BFA">▲ SOXX 바닥잡기</span> · <span style="color:#4FD1C5">▲ QQQ 바닥잡기</span> · <span style="color:#F87171">▼ Bear 고점 경고</span></span><span class="sp"></span>${['6M', '1Y', '3Y', 'ALL'].map(r => `<button class="tab ${c.range === r ? 'on' : ''}" data-act="sig-range" data-v="${r}">${r === 'ALL' ? '전체' : r}</button>`).join('')}</h3>
     ${lineChart({ h: 180, series: [{ pts: px, color: '#5AA9FF' }], xlab: xl2, ylab: v => Math.pow(10, v).toFixed(v < 1 ? 1 : 0), marks, vlines: vl })}
     <div class="small muted">RSI (${c.rsiP}) · 점선 = ${c.rsiP}일 RSI의 ${c.maQ}일 이평 · 가로선 = 기준 ${c.soxxThr}</div>
     ${lineChart({ h: 95, series: [{ pts: thrLine(c.soxxThr), color: '#5E7299', dash: '3 3', wd: 1 }, { pts: rs(S), color: '#A78BFA' }, { pts: ma(S), color: '#A78BFA', dash: '4 3', wd: 1 }, { pts: rs(Q), color: '#4FD1C5' }, { pts: ma(Q), color: '#4FD1C5', dash: '4 3', wd: 1 }], ymin: 15, ymax: 85, xlab: xl2, ylab: v => v.toFixed(0), vlines: vl })}
     <div class="small muted">QQQ 슬로우 스토캐스틱 (${c.stK},${c.stS},${c.stD}) · ━ %K ┅ %D · 20/80</div>
     ${lineChart({ h: 80, series: [{ pts: thrLine(20), color: '#5E7299', dash: '3 3', wd: 1 }, { pts: thrLine(80), color: '#5E7299', dash: '3 3', wd: 1 }, { pts: kk, color: '#F2A24A' }, { pts: dd, color: '#F2A24A', dash: '4 3', wd: 1 }], ymin: 0, ymax: 100, xlab: xl2, ylab: v => v.toFixed(0), vlines: vl })}</div>`;
+  h += bearHtml();
   // 신호 표
   const all = {}; S.sig.forEach(y => (all[y] = all[y] || []).push('SOXX')); Q.sig.forEach(y => (all[y] = all[y] || []).push('QQQ'));
   const list = Object.keys(all).sort().reverse(); const byY = {}; list.forEach(y => { const k = '20' + y.slice(0, 2); byY[k] = byY[k] || { s: 0, q: 0 }; all[y].forEach(t => t === 'SOXX' ? byY[k].s++ : byY[k].q++); });
