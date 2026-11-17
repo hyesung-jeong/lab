@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>(function(){try{var h=location.hash.toLowerCase();if(h==='#tqqq')localStorage.setItem('lab_tk','TQQQ');else if(h==='#soxl')localStorage.setItem('lab_tk','SOXL');if(localStorage.getItem('lab_tk')==='TQQQ')location.replace('tqqq/');}catch(e){}})();</script>
-<title>트레이딩 랩 v14.0</title>
+<title>트레이딩 랩 v14.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>:root{--bg:#0A1428;--p1:#0E1A33;--p2:#13223F;--p3:#16264A;--ln:#24365C;--ln2:#1A2A4A;--bd:#2F4675;--tx:#E8EEF8;--t2:#B7C4DC;--t3:#9AABC9;--t4:#5E7299;--ac:#5AA9FF;--ac2:#7CC4FF;--acb:#1B3A70;--or:#F2A24A;--gr:#7FD69A;--rd:#FF8A7A;--rd2:#E0645A;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -118,7 +118,7 @@ tr.clk:hover td{background:var(--p3)}tr.clk.on td{background:var(--acb)}
 .rshelp{width:100%;margin-top:2px}.rshelp summary{cursor:pointer;color:var(--ac2);font-size:11px;list-style:none;display:inline}.rshelp summary::-webkit-details-marker{display:none}.rshelp[open]{background:var(--p2);border:1px solid var(--ln);border-radius:6px;padding:4px 8px}
 </style></head>
 <body>
-<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v14.0</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
+<header><div class="brand"><i></i>트레이딩 랩 <span class="ver">v14.1</span></div><div class="tksw" id="tksw"></div><nav id="nav"></nav>
 <div class="hdr-r"><span id="datadate" class="mono"></span><span id="sync">☁</span><button class="btn sm" data-act="cloud" title="이 기기의 설정·프리셋·실전·최적화 기록을 클라우드에 올려요. 다른 기기는 새로고침하면 받아요">☁ 전체 저장</button></div></header>
 <main id="app"></main>
 <script type="text/plain" id="fast-src">// ===== 최적화용 경량 엔진 (Web Worker) — 사이트 엔진과 연도별 수익률·MDD 동일 =====
@@ -1466,7 +1466,7 @@ const TK_SETS = [["TQQQ 3모드 MDD20·최저10 (11~25)", [["b_q7", 57], ["b_q8"
 // 슬롯 파라미터 → 엔진 P
 function parseTierW(v, n) { if (v == null || v === '') return null; const a = (Array.isArray(v) ? v : String(v).split(/[\/,\s]+/)).map(Number).filter(x => isFinite(x) && x > 0); return a.length >= n ? a.slice(0, n) : null; } // 동파 티어 비중(%): 분할수만큼 있어야 적용, 아니면 균등
 let _dpBear = {};
-function dpBear(p) { // 고점 경고(RSI 252 Bear) 확정 다음 날부터 N거래일 매수 중단 (v14.0)
+function dpBear(p) { // 고점 경고(RSI 252 Bear) 확정 다음 날부터 N거래일 매수 중단 (v14.1)
   const mode = p.bearMode === 'buy' || p.bearMode === 'liq' ? p.bearMode : '', N = +p.bearN || 20; if (!mode) return {};
   const X = bearCompute(), key = X.key + '|' + mode + '|' + N; if (_dpBear.key === key) return _dpBear.v;
   const blk = {}, liq = {}, n = X.n; let blkNext = false, liqNext = false; X.sig.forEach(s => { if (s.c >= n) return; for (let k = 1; k <= N; k++) if (s.c + k < n) blk[X.D[s.c + k]] = 1; if (mode === 'liq' && s.c + 1 < n) liq[X.D[s.c + 1]] = 1; if (n - 1 - s.c < N) blkNext = true; if (mode === 'liq' && s.c === n - 1) liqNext = true; });
@@ -1687,7 +1687,7 @@ function fastOnMessage(msg) {
 }
 
 // ===== 앱 공통: 상태·저장·입력·유틸 =====
-const APP_VER = 'v14.0';
+const APP_VER = 'v14.1';
 const LS_KEY = TK === 'SOXL' ? 'tlab_state_v1' : 'tlab_' + TK.toLowerCase() + '_state_v1';
 const SUPABASE_URL = 'https://geknetdxopjpyuhpmyyp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdla25ldGR4b3BqcHl1aHBteXlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMzEsImV4cCI6MjA5ODYwNDMzMX0.bii7QeV2iVqr4FDVv3caLcz6a5Qob4hly5OHtb6Lccc';
@@ -2245,8 +2245,14 @@ function liveDaily(t, L) {
 }
 function liveJournal(L) {
   const rows = []; L.per.forEach((p, i) => p.tl.forEach(e => rows.push(Object.assign({ who: slotName(p.x.slot), ci: i }, e))));
-  rows.sort((a, b) => b.ymd.localeCompare(a.ymd) || (a.act === '매도' ? -1 : 1)); const show = rows.slice(0, 80);
-  return `<div class="sec"><h3>매매 기록 <span class="small muted">최근 ${show.length}건 / 전체 ${rows.length}건 (엔진 계산 기준)</span></h3><div class="tw" style="max-height:300px;overflow-y:auto"><table class="t"><tr><th class="l">날짜</th><th class="l">매매법</th><th class="l">구분</th><th class="l">티어</th><th class="l">모드</th><th class="l">사유</th><th>수량</th><th>가격</th><th>금액</th></tr>
+  rows.sort((a, b) => b.ymd.localeCompare(a.ymd) || (a.act === '매도' ? -1 : 1));
+  const J = ST.jr || { m: 'recent', a: '', b: '' }, y6 = v => v ? String(v).replace(/-/g, '').slice(2) : ''; let show = rows, lab;
+  if (J.m === 'all') lab = `전체 ${rows.length}건`;
+  else if (J.m === 'range') { const a = y6(J.a), b = y6(J.b); show = rows.filter(e => (!a || e.ymd >= a) && (!b || e.ymd <= b)); lab = `기간 ${show.length}건 / 전체 ${rows.length}건`; }
+  else { show = rows.slice(0, 80); lab = `최근 ${show.length}건 / 전체 ${rows.length}건`; }
+  const nb = show.filter(e => e.act === '매수'), ns = show.filter(e => e.act !== '매수'), sm = a => a.reduce((t, e) => t + (+e.amt || 0), 0);
+  const ctl = `<select class="in" data-jr="m" style="width:auto;min-height:24px;padding:1px 4px">${[['recent', '최근 80건'], ['all', '전체 기간'], ['range', '기간 선택']].map(([v, t]) => `<option value="${v}" ${J.m === v ? 'selected' : ''}>${t}</option>`).join('')}</select>${J.m === 'range' ? ` <input class="in mono" type="date" data-jr="a" value="${esc(J.a || '')}" style="width:auto;min-height:24px;padding:1px 4px"> ~ <input class="in mono" type="date" data-jr="b" value="${esc(J.b || '')}" style="width:auto;min-height:24px;padding:1px 4px"> <span class="dim">(비우면 처음·끝)</span>` : ''}`;
+  return `<div class="sec"><h3>매매 기록 <span class="small muted">${lab} (엔진 계산 기준) · 매수 ${nb.length}건 ${money(sm(nb))} · 매도 ${ns.length}건 ${money(sm(ns))}</span><span class="sp"></span>${ctl}</h3><div class="tw" style="max-height:${J.m === 'recent' ? 300 : 520}px;overflow-y:auto"><table class="t"><tr><th class="l">날짜</th><th class="l">매매법</th><th class="l">구분</th><th class="l">티어</th><th class="l">모드</th><th class="l">사유</th><th>수량</th><th>가격</th><th>금액</th></tr>
     ${show.map(e => `<tr><td class="l">${ymdFmt(e.ymd, true)}</td><td class="l tx" style="color:${COLORS[e.ci % COLORS.length]}">${esc(e.who)}</td><td class="l ${e.act === '매수' ? 'tbuy' : 'tsell'}">${e.act}</td><td class="l">${e.tier}</td><td class="l tx">${e.mode || ''}</td><td class="l tx muted">${e.reason || ''}</td><td>${e.qty}</td><td>${nfmt(e.price)}</td><td>${money(e.amt)}</td></tr>`).join('')}</table></div></div>`;
 }
 
@@ -2333,7 +2339,7 @@ function sigYearHtml(y, all) { // 그 해 신호일: SOXX 신호 → SOXL 종가
   const f = v => v == null ? '—' : nfmt(v);
   return `<table class="t" style="margin:2px 0 6px;font-size:11.5px"><tr><th class="l">날짜</th><th class="l">신호</th><th>SOXL <span class="dim">(SOXX)</span></th><th>TQQQ <span class="dim">(QQQ)</span></th><th>QLD <span class="dim">(QQQ)</span></th></tr>${ds.map(d => { const r = pm[d] || [], hs = all[d].includes('SOXX'), hq = all[d].includes('QQQ');
     return `<tr><td class="l">${ymdFmt(d)}</td><td class="l">${all[d].map(t => `<span class="chip" style="background:${t === 'SOXX' ? '#2A1F4A' : '#12333A'};color:${t === 'SOXX' ? '#C4B5FD' : '#7EE8DF'};min-height:16px">${t}</span>`).join(' ')}</td><td>${hs ? f(r[2]) : '<span class="dim">—</span>'}</td><td>${hq ? f(r[5]) : '<span class="dim">—</span>'}</td><td>${hq ? f(r[12]) : '<span class="dim">—</span>'}</td></tr>`; }).join('')}</table>`; }
-// ===== 고점 경고: RSI(252) 약세 다이버전스 — 트레이딩뷰 기본 RSI의 'Bear' (v14.0) =====
+// ===== 고점 경고: RSI(252) 약세 다이버전스 — 트레이딩뷰 기본 RSI의 'Bear' (v14.1) =====
 let _bear = null;
 function bearCompute() {
   const key = TK + '|' + PRICES.length + '|' + lastYmd(); if (_bear && _bear.key === key) return _bear;
@@ -3419,6 +3425,7 @@ function updOptCounts() { const sp = optSpace(oKey()); sp.P.forEach(({ d, v }) =
   const te = $('#o-total'); if (te) te.textContent = big(sp.total); }
 function optSettingsChanged(key) { if (RUN && RUN.done && RUN.k === oKey() && ['mdd', 'floor', 'y0', 'y1', 'oosOn', 'oosN'].includes(key)) { RUN.set = clone(optCfg(oKey()).set); RUN.setupYears(); RUN.recs.forEach(r => r.m = RUN.metric(r.y)); renderOptRes(); } }
 document.addEventListener('change', e => {
+  if (e.target.dataset && e.target.dataset.jr) { ST.jr = Object.assign({ m: 'recent', a: '', b: '' }, ST.jr || {}); ST.jr[e.target.dataset.jr] = e.target.value; saveLocal(); const el = document.getElementById('lv-res'); if (el) el.innerHTML = liveResHtml(curLive()); else render(); return; }
   if (e.target.matches && e.target.matches('[data-act="live-day"]')) { LIVE.daySel = e.target.value; const el = document.getElementById('lv-res'); if (el) el.innerHTML = liveResHtml(curLive()); return; }
   const t = e.target, d = t.dataset || {};
   if (d.pen && t.type === 'date') { penSet(d.pen, t.value); saveLocal(); render(); return; }
@@ -3774,16 +3781,16 @@ function mv8() { // v11.0: 동일비중 3슬롯 세트는 백테스트8로 (매�
   mv.forEach(s => { if (!g8.sets.some(x => x.name === s.name)) g8.sets.push(s); }); if (!g8.cur) g8.cur = g8.sets[0].id; BT.R = null; saveLocal(); }
 const U10_SETS = [["혼합 동일비중 얼서≤4 (26) · 추천", [["b_ul1", 33.4], ["b_ul2", 33.3], ["b_ul3", 33.3]], ""], ["혼합 동일비중 얼서≤5 (26)", [["b_ul4", 33.4], ["b_ul5", 33.3], ["b_ul6", 33.3]], ""], ["혼합 동일비중 얼서≤6 (26)", [["b_ul7", 33.4], ["b_ul8", 33.3], ["b_ul9", 33.3]], ""], ["혼합 동일비중 +40%·얼서≤4 (26)", [["b_ul13", 33.4], ["b_ul14", 33.3], ["b_ul15", 33.3]], ""], ["혼합 동일비중 +40%·얼서≤5 (26)", [["b_ul16", 33.4], ["b_ul17", 33.3], ["b_ul18", 33.3]], ""], ["혼합 동일비중 +40%·얼서≤6 (26)", [["b_ul19", 33.4], ["b_ul20", 33.3], ["b_ul21", 33.3]], ""], ["RSI 동일비중 얼서≤4 (26)", [["b_ul25", 33.4], ["b_ul26", 33.3], ["b_ul27", 33.3]], ""], ["RSI 동일비중 얼서≤5 (26)", [["b_ul28", 33.4], ["b_ul29", 33.3], ["b_ul30", 33.3]], ""], ["RSI 동일비중 얼서≤6 (26)", [["b_ul31", 33.4], ["b_ul32", 33.3], ["b_ul33", 33.3]], ""], ["RSI 동일비중 +40%·얼서≤4 (26)", [["b_ul37", 33.4], ["b_ul38", 33.3], ["b_ul39", 33.3]], ""], ["RSI 동일비중 +40%·얼서≤5 (26) · 추천", [["b_ul40", 33.4], ["b_ul41", 33.3], ["b_ul42", 33.3]], ""], ["RSI 동일비중 +40%·얼서≤6 (26)", [["b_ul43", 33.4], ["b_ul44", 33.3], ["b_ul45", 33.3]], ""]];
 const B12_SETS = [["혼합 동일비중 블랙스완MDD40·얼서≤6 (26)", [["b_bs1", 33.4], ["b_bs2", 33.3], ["b_bs3", 33.3]]], ["혼합 동일비중 블랙스완MDD50·얼서≤6 (26) · 추천", [["b_bs4", 33.4], ["b_bs5", 33.3], ["b_bs6", 33.3]]], ["혼합 동일비중 블랙스완MDD60·얼서≤6 (26)", [["b_bs7", 33.4], ["b_bs8", 33.3], ["b_bs9", 33.3]]], ["RSI 동일비중 블랙스완MDD40·얼서≤6 (26)", [["b_bs10", 33.4], ["b_bs11", 33.3], ["b_bs12", 33.3]]], ["RSI 동일비중 블랙스완MDD50·얼서≤6 (26)", [["b_bs13", 33.4], ["b_bs14", 33.3], ["b_bs15", 33.3]]], ["RSI 동일비중 블랙스완MDD60·얼서≤6 (26)", [["b_bs16", 33.4], ["b_bs17", 33.3], ["b_bs18", 33.3]]]];
-function seedRec2() { // v14.0: 백테스트10·11 추천 세트 표시 (1회)
+function seedRec2() { // v14.1: 백테스트10·11 추천 세트 표시 (1회)
   if (ST.seeded.includes('rec2')) return; ST.seeded.push('rec2'); const R = {"혼합 동일비중 얼서≤4 (26)": "혼합 동일비중 얼서≤4 (26) · 추천", "RSI 동일비중 +40%·얼서≤5 (26)": "RSI 동일비중 +40%·얼서≤5 (26) · 추천", "혼합 동일비중 블랙스완MDD50·얼서≤6 (26)": "혼합 동일비중 블랙스완MDD50·얼서≤6 (26) · 추천"};
   ['bt10', 'bt12'].forEach(k => { const g = btGroup(k); (g && g.sets || []).forEach(s => { if (R[s.name]) s.name = R[s.name]; }); });
   (ST.live && ST.live.tabs || []).forEach(t => { if (R[t.from]) t.from = R[t.from]; }); BT.R = null; saveLocal(); }
-function seedB12() { // v14.0: 블랙스완 조건 3모드 세트 → 백테스트11 (블랙스완) (1회)
+function seedB12() { // v14.1: 블랙스완 조건 3모드 세트 → 백테스트11 (블랙스완) (1회)
   if (TK !== 'SOXL' || ST.seeded.includes('b12a')) return; ST.seeded.push('b12a'); if (!ST.bt12) ST.bt12 = { cur: null, sets: [] };
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; }; const g = btGroup('bt12');
   const add = B12_SETS.filter(([nm]) => !g.sets.some(x => x.name === nm)).map(([nm, sl]) => ({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }));
   g.sets.push(...add); if (add.length && !g.cur) g.cur = add[0].id; BT.R = null; saveLocal(); }
-function seedU10() { // v14.0: 3모드 얼서 최적화 세트 → 백테스트10 (얼서) (1회)
+function seedU10() { // v14.1: 3모드 얼서 최적화 세트 → 백테스트10 (얼서) (1회)
   if (TK !== 'SOXL' || ST.seeded.includes('u10a')) return; ST.seeded.push('u10a'); if (!ST.bt10) ST.bt10 = { cur: null, sets: [] };
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; }; const g = btGroup('bt10');
   const add = U10_SETS.filter(([nm]) => !g.sets.some(x => x.name === nm)).map(([nm, sl]) => ({ id: uid('bt'), name: nm, cap: 100000, sm: 1, y0: 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }));
