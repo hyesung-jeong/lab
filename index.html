@@ -4120,13 +4120,13 @@ let DZ_SETS = [["26 12월 RSI3 CAGR최대@MDD15 · 1월·12월 공통 · 3만", 
 function seedDz(flag) { // 12월 최적화 세트 → 백테스트13 (12월). 새 세트만 추가
   if (TK !== 'SOXL' || ST.seeded.includes(flag)) return; ST.seeded.push(flag); if (!ST.bt15) ST.bt15 = { cur: null, sets: [] };
   const mk = (pid, w) => { const b = BUILTIN.find(x => x.id === pid); return { id: uid('s'), type: b.type, presetId: pid, w, p: clone(b.p) }; }; const g = btGroup('bt15'); if (!g.sets) g.sets = [];
-  const add = DZ_SETS.filter(([nm]) => !g.sets.some(x => x.name === nm)).map(([nm, sl, sm]) => ({ id: uid('bt'), name: nm, cap: 30000, sm: sm || 1, y0: sm === 12 ? 2010 : 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }));
+  const add = DZ_SETS.filter(([nm]) => !g.sets.some(x => x.name === nm)).map(([nm, sl, sm]) => ({ id: uid('bt'), dz: 1, name: nm, cap: 30000, sm: sm || 1, y0: sm === 12 ? 2010 : 2011, y1: 2026, opts: null, slots: sl.map(([p, w]) => mk(p, w)) }));
   g.sets.push(...add); if (add.length && !g.cur) g.cur = add[0].id; BT.R = null; saveLocal(); }
 function seedDy157() { // v18.8: 12월 최적화 v2(3만 달러·보유≤15)로 교체 — 이전 4개(10만·블랙스완 단계) 삭제
   if (TK !== 'SOXL' || ST.seeded.includes('dy157')) return; ST.seeded.push('dy157'); const g = btGroup('bt15'); if (g.sets) { g.sets = g.sets.filter(x => !(/^26 12월 /.test(x.name) && /블랙스완/.test(x.name))); if (!g.sets.some(x => x.id === g.cur)) g.cur = g.sets.length ? g.sets[0].id : null; }
   ST.seeded = ST.seeded.filter(x => x !== 'dz156'); seedDz('dz156'); }
 function seedDzRe(flag) { // 12월 최적화 세트 전체 교체 (이전 '26 12월' 세트 삭제 후 새로)
-  if (TK !== 'SOXL' || ST.seeded.includes(flag)) return; ST.seeded.push(flag); const g = btGroup('bt15'); if (g.sets) { g.sets = g.sets.filter(x => !/^26 12월 /.test(x.name)); if (!g.sets.some(x => x.id === g.cur)) g.cur = null; }
+  if (TK !== 'SOXL' || ST.seeded.includes(flag)) return; ST.seeded.push(flag); const g = btGroup('bt15'); if (g.sets) { g.sets = g.sets.filter(x => !(x.dz || /^26 12월 /.test(x.name))); if (!g.sets.some(x => x.id === g.cur)) g.cur = null; }
   ST.seeded = ST.seeded.filter(x => x !== 'dz156'); seedDz('dz156'); }
 function clean160() { // v18.8: SOXL — 3모드 이전 세트·프리셋 정리 (동파·듀얼·12월 최적화·쪼꼬프렌·2티 프리셋만 유지). 매 로드마다 이전 탭의 3모드 세트 제거
   if (TK !== 'SOXL') return; let ch = false;
